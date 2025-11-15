@@ -28,7 +28,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
         key={pathname}
         initial={isFirstMount.current ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={isFirstMount.current ? false : { opacity: 0, y: -12 }}
+        {...(isFirstMount.current ? {} : { exit: { opacity: 0, y: -12 } })}
         transition={{ duration: 0.2, ease: "easeInOut" }}
         className="flex-1"
       >
