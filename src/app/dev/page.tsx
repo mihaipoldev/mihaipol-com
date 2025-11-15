@@ -14,6 +14,8 @@ import AlbumCard from '@/components/features/AlbumCard'
 import UpdatesCarousel from '@/components/features/UpdatesCarousel'
 import ShowMoreButton from '@/components/features/ShowMoreButton'
 
+export const dynamic = 'force-dynamic'
+
 // Mock hero slides data
 const heroSlides = [
   {

@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import { getAlbumWithLinksBySlug } from '@/features/albums/data'
 
+export const dynamic = 'force-dynamic'
+
 interface AlbumDetailPageProps {
   params: Promise<{
     slug: string

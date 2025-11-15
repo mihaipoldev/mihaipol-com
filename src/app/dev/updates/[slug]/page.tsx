@@ -5,6 +5,8 @@ import { getUpdateBySlug } from '@/features/updates/data'
 import { formatDetailDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
+export const dynamic = 'force-dynamic'
+
 interface UpdateDetailPageProps {
   params: Promise<{
     slug: string

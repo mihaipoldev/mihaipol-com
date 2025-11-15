@@ -1,6 +1,8 @@
 import { getAllAlbums } from '@/features/albums/data'
 import AlbumCard from '@/components/features/AlbumCard'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AlbumsPage() {
   const albums = await getAllAlbums()
 

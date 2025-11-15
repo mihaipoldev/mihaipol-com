@@ -1,6 +1,8 @@
 import { getAllUpdates } from '@/features/updates/data'
 import UpdateCard from '@/components/features/UpdateCard'
 
+export const dynamic = 'force-dynamic'
+
 export default async function UpdatesPage() {
   const updates = await getAllUpdates()
 
