@@ -67,7 +67,7 @@ export default async function UpdateDetailPage({ params }: UpdateDetailPageProps
         {update.description && (
           <div className="prose prose-lg dark:prose-invert max-w-none mb-12">
             <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-              {update.description.split('\n\n').map((paragraph, index) => (
+              {update.description.split('\n\n').map((paragraph: string, index: number) => (
                 <p key={index} className="mb-6 last:mb-0">
                   {paragraph}
                 </p>
