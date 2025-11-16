@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { SettingsSidebar } from "@/components/admin/settings/SettingsSidebar"
 import { SettingsContent } from "@/components/admin/settings/SettingsContent"
@@ -23,7 +23,7 @@ const URL_SECTION_MAP: Record<string, SettingsSection> = {
 
 const VALID_SECTIONS: SettingsSection[] = ["account", "appearance", "preferences"]
 
-export default function SettingsPage() {
+function SettingsPageInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [activeSection, setActiveSection] = useState<SettingsSection>(() => {
@@ -84,6 +84,14 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={null}>
+      <SettingsPageInner />
+    </Suspense>
   )
 }
 
