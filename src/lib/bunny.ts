@@ -51,13 +51,19 @@ export async function uploadToBunny(
   
   const url = `${config.BUNNY_STORAGE_BASE_URL}/${path}`
   
+  // Convert Node Buffer to a Web-compatible BodyInit (ArrayBuffer)
+  const bodyArrayBuffer = fileBuffer.buffer.slice(
+    fileBuffer.byteOffset,
+    fileBuffer.byteOffset + fileBuffer.byteLength
+  )
+
   const response = await fetch(url, {
     method: "PUT",
     headers: {
       AccessKey: config.BUNNY_STORAGE_PASSWORD,
       "Content-Type": "application/octet-stream",
     },
-    body: fileBuffer,
+    body: bodyArrayBuffer,
   })
 
   if (!response.ok) {
