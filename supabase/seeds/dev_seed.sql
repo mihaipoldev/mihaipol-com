@@ -63,76 +63,47 @@ INSERT INTO public.albums (id, title, slug, catalog_number, album_type, descript
    '2024-11-01', 'b0000000-0000-0000-0000-000000000003', 'published');
 
 -- ========================================
--- 5. TRACKS
--- ========================================
-
--- Midnight Sessions EP tracks
-INSERT INTO public.tracks (album_id, position, title, mix_name, duration_seconds, is_bonus) VALUES
-  ('d0000000-0000-0000-0000-000000000001', 1, 'Into the Night', 'Original Mix', 420, false),
-  ('d0000000-0000-0000-0000-000000000001', 2, 'Deep Resonance', 'Original Mix', 485, false),
-  ('d0000000-0000-0000-0000-000000000001', 3, 'Midnight Pulse', 'Original Mix', 452, false),
-  ('d0000000-0000-0000-0000-000000000001', 4, 'Dawn Breaking', 'Original Mix', 398, false);
-
--- Echoes of Tomorrow LP tracks
-INSERT INTO public.tracks (album_id, position, title, mix_name, duration_seconds, is_bonus) VALUES
-  ('d0000000-0000-0000-0000-000000000002', 1, 'First Light', 'Original Mix', 512, false),
-  ('d0000000-0000-0000-0000-000000000002', 2, 'Echoes of Tomorrow', 'Original Mix', 498, false),
-  ('d0000000-0000-0000-0000-000000000002', 3, 'Distant Horizon', 'Original Mix', 456, false),
-  ('d0000000-0000-0000-0000-000000000002', 4, 'Parallel Worlds', 'Original Mix', 534, false),
-  ('d0000000-0000-0000-0000-000000000002', 5, 'Future Memories', 'Original Mix', 487, false);
-
--- Urban Dreams EP tracks
-INSERT INTO public.tracks (album_id, position, title, mix_name, duration_seconds, is_bonus) VALUES
-  ('d0000000-0000-0000-0000-000000000003', 1, 'Urban Dreams', 'Original Mix', 445, false),
-  ('d0000000-0000-0000-0000-000000000003', 2, 'Concrete Jungle', 'Original Mix', 512, false),
-  ('d0000000-0000-0000-0000-000000000003', 3, 'Neon Nights', 'Original Mix', 478, false);
-
--- Sunset Drive Single
-INSERT INTO public.tracks (album_id, position, title, mix_name, duration_seconds, is_bonus) VALUES
-  ('d0000000-0000-0000-0000-000000000004', 1, 'Sunset Drive', 'Original Mix', 523, false);
-
--- ========================================
--- 6. EVENTS
+-- 5. EVENTS
 -- ========================================
 
 -- Upcoming events
-INSERT INTO public.events (id, title, slug, description, venue, city, country, starts_at, ends_at, tickets_url, ticket_label, event_status, publish_status) VALUES
+INSERT INTO public.events (id, title, slug, description, venue, city, country, date, tickets_url, ticket_label, event_status, publish_status) VALUES
   ('e0000000-0000-0000-0000-000000000001', 'Techno Nights Festival', 'techno-nights-festival', 
    'Annual techno festival featuring the best underground artists from around Europe.', 
    'Warehouse District', 'Berlin', 'Germany', 
-   '2025-06-15 22:00:00+00', '2025-06-16 06:00:00+00', 
+   '2025-06-15', 
    'https://tickets.example.com/techno-nights', 'Get Tickets', 'upcoming', 'published'),
   ('e0000000-0000-0000-0000-000000000002', 'Deep Space Sessions', 'deep-space-sessions', 
    'Monthly underground techno night showcasing deep and progressive sounds.', 
    'The Basement Club', 'Amsterdam', 'Netherlands', 
-   '2025-02-10 23:00:00+00', '2025-02-11 05:00:00+00', 
+   '2025-02-10', 
    'https://tickets.example.com/deep-space', 'Buy Tickets', 'upcoming', 'published'),
   ('e0000000-0000-0000-0000-000000000003', 'Midnight Grooves Showcase', 'midnight-grooves-showcase', 
    'Exclusive showcase event featuring label artists and special guests.', 
    'Club Resonance', 'Bucharest', 'Romania', 
-   '2025-03-20 21:00:00+00', '2025-03-21 03:00:00+00', 
+   '2025-03-20', 
    'https://tickets.example.com/midnight-grooves', 'Reserve', 'upcoming', 'published'),
   ('e0000000-0000-0000-0000-000000000004', 'Summer Festival 2025', 'summer-festival-2025', 
    'Outdoor electronic music festival with multiple stages and international DJs.', 
    'Parque Central', 'Lisbon', 'Portugal', 
-   '2025-07-25 18:00:00+00', '2025-07-26 06:00:00+00', 
+   '2025-07-25', 
    'https://tickets.example.com/summer-fest', 'Early Bird Tickets', 'upcoming', 'published');
 
 -- Past events
-INSERT INTO public.events (id, title, slug, description, venue, city, country, starts_at, ends_at, event_status, publish_status) VALUES
+INSERT INTO public.events (id, title, slug, description, venue, city, country, date, event_status, publish_status) VALUES
   ('e0000000-0000-0000-0000-000000000005', 'New Year''s Eve Special', 'new-years-eve-special', 
    'Celebrating the new year with a special extended set and midnight countdown.', 
    'The Warehouse', 'Berlin', 'Germany', 
-   '2024-12-31 23:00:00+00', '2025-01-01 07:00:00+00', 
+   '2024-12-31', 
    'past', 'published'),
   ('e0000000-0000-0000-0000-000000000006', 'Album Launch Party', 'album-launch-party', 
    'Launch party for "Echoes of Tomorrow" album with live performance and DJ sets.', 
    'Studio Club', 'Bucharest', 'Romania', 
-   '2024-06-20 20:00:00+00', '2024-06-21 02:00:00+00', 
+   '2024-06-20', 
    'past', 'published');
 
 -- ========================================
--- 7. UPDATES (News Posts)
+-- 6. UPDATES (News Posts)
 -- ========================================
 
 INSERT INTO public.updates (id, title, slug, subtitle, description, date, publish_status, read_more_url) VALUES
@@ -154,7 +125,7 @@ INSERT INTO public.updates (id, title, slug, subtitle, description, date, publis
    '2024-10-15 09:00:00+00', 'published', 'https://presave.example.com/sunset-drive');
 
 -- ========================================
--- 8. ALBUM_ARTISTS (linking albums to artists)
+-- 7. ALBUM_ARTISTS (linking albums to artists)
 -- ========================================
 
 INSERT INTO public.album_artists (album_id, artist_id, role, sort_order) VALUES
@@ -170,7 +141,7 @@ INSERT INTO public.album_artists (album_id, artist_id, role, sort_order) VALUES
   ('d0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000001', 'primary', 1);
 
 -- ========================================
--- 9. ALBUM_LINKS (external links for albums)
+-- 8. ALBUM_LINKS (external links for albums)
 -- ========================================
 
 -- Midnight Sessions links
@@ -199,7 +170,7 @@ INSERT INTO public.album_links (album_id, platform_id, url, cta_label, link_type
   ('d0000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000003', 'https://mihai-pol.bandcamp.com/track/sunset-drive', 'Buy on Bandcamp', 'buy', 3);
 
 -- ========================================
--- 10. EVENT_ARTISTS (lineups for events)
+-- 9. EVENT_ARTISTS (lineups for events)
 -- ========================================
 
 -- Techno Nights Festival lineup

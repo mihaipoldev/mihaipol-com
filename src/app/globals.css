@@ -39,6 +39,12 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --radius-subtle: calc(var(--radius) - 4px);
+    --radius-regular: calc(var(--radius) - 2px);
+    --radius-large: calc(var(--radius) + 2px);
+    --radius-xl: calc(var(--radius) + 6px);
+    --radius-2xl: calc(var(--radius) + 10px);
+    --radius-full: 9999px;
     --sidebar-background:
     0 0% 98%;
     --sidebar-foreground:
@@ -112,4 +118,325 @@ body {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  
+  .font-sans {
+    font-family: var(--font-family-primary);
+  }
+}
+
+/* ============================================
+   FONT PAIRING SELECTOR
+   ============================================
+   To switch fonts, change BOTH lines in the "Active font family" section below:
+   
+   Pairing 1: Roboto + Open Sans
+     --font-family-primary: var(--font-body-pairing-1);
+     --font-family-heading: var(--font-heading-pairing-1);
+   
+   Pairing 2: Montserrat + EB Garamond
+     --font-family-primary: var(--font-body-pairing-2);
+     --font-family-heading: var(--font-heading-pairing-2);
+   
+   Pairing 3: Source Code Pro + Space Grotesk
+     --font-family-primary: var(--font-body-pairing-3);
+     --font-family-heading: var(--font-heading-pairing-3);
+   
+   Pairing 4: Josefin Sans + Lato
+     --font-family-primary: var(--font-body-pairing-4);
+     --font-family-heading: var(--font-heading-pairing-4);
+   ============================================ */
+
+/* Admin Panel Balanced Color Preset */
+.preset-balanced {
+  /* Brand channels (used everywhere) */
+  /* ---brand-h: 10;
+  --brand-s: 97%;
+  --brand-l: 65%; */
+
+  /* Brand channels (used everywhere) */
+  /* --brand-h: 214; 
+  --brand-s: 90%;
+  --brand-l: 52%; */
+
+  /* Brand channels (used everywhere) */
+  /*--brand-h: 223; 
+  --brand-s: 70%;
+  --brand-l: 67%; */
+
+  /* Brand channels (used everywhere) */
+   --brand-h: 147; 
+  --brand-s: 72%;
+  --brand-l: 40%;
+
+  /* Typography Controls */
+  /* Font Pairing 1: Roboto + Open Sans (Default) */
+  --font-heading-pairing-1: var(--font-roboto), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body-pairing-1: var(--font-open-sans), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  /* Font Pairing 2: Montserrat + EB Garamond */
+  --font-heading-pairing-2: var(--font-montserrat), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body-pairing-2: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
+  
+  /* Font Pairing 3: Source Code Pro + Space Grotesk */
+  --font-heading-pairing-3: var(--font-source-code-pro), "Courier New", Courier, monospace;
+  --font-body-pairing-3: var(--font-space-grotesk), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  /* Font Pairing 4: Josefin Sans + Lato */
+  --font-heading-pairing-4: var(--font-josefin-sans), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body-pairing-4: var(--font-lato), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  /* Active font family - CHANGE THESE LINES to switch fonts */
+  --font-family-primary: var(--font-body-pairing-4); /* Change pairing-1 to pairing-2, pairing-3, or pairing-4 */
+  --font-family-heading: var(--font-heading-pairing-4); /* Heading font - change pairing-1 to match body font pairing */
+  --font-size-base: 16px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-base: 1.5;
+  --letter-spacing-base: 0;
+
+  /* Roundness Controls */
+  --radius: 10px;
+  --radius-subtle: 6px;
+  --radius-regular: 8px;
+  --radius-large: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
+
+  /* Spacing Controls */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 32px;
+
+  /* Shadow Controls */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* ── LIGHT ───────────────────────────────────────── */
+  /* Balanced approach: moderate contrast, comfortable ratios */
+  --background: var(--brand-h) 0% 100%;        /* slightly warmer than pure white */
+  --foreground: 255 0% 18%;
+
+  --card: var(--brand-h) 5% 97%;                 /* subtle brand tint */
+  --card-foreground: var(--brand-h) 15% 25%; 
+
+  --popover: var(--brand-h) 12% 97%;
+  --popover-foreground: var(--brand-h) 15% 25%;
+
+  /* Primary from brand */
+  --primary: var(--brand-h) var(--brand-s) var(--brand-l);
+  --primary-foreground: 0 0% 100%;
+
+  /* Balanced brand-tinted surfaces */
+  --accent: var(--brand-h) 5% 95%;
+  --accent-foreground: var(--brand-h) 20% 15%;
+
+  --muted: var(--brand-h) 5% 96%;
+  --muted-foreground: var(--brand-h) 8% 43%;
+
+  --secondary: var(--brand-h) 20% 90%;
+  --secondary-foreground: var(--brand-h) 35% 15%;
+
+  /* Borders with moderate brand presence */
+  --border: var(--brand-h) 5% 92%;
+  --input: var(--border);
+  --ring: var(--primary);
+
+  /* Destructive colors */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  /* Sidebar: balanced contrast */
+  --sidebar-background: var(--brand-h) 2% 97.5%;
+  --sidebar-foreground: var(--brand-h) 50% 15%;
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: var(--brand-h) 6% 92%;
+  --sidebar-accent-foreground: var(--brand-h) 50% 15%;
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --sidebar-muted: var(--muted);
+  --sidebar-muted-foreground: var(--muted-foreground);
+
+  /* App background */
+  --app-bg: hsl(var(--background));
+}
+
+.dark .preset-balanced {
+  /* ── DARK ────────────────────────────────────────── */
+  /* Balanced dark mode with moderate contrast */
+  --background: var(--brand-h) 1% 10%;     /* warmer dark background */
+  --foreground: 240 40% 95%;
+
+  --card: var(--brand-h) 2% 16%;
+  --card-foreground: var(--brand-h) 15% 85%;
+
+  --popover: var(--brand-h) 0% 14%;
+  --popover-foreground: var(--brand-h) 0% 85%;
+
+  /* Primary keeps brand hue */
+  --primary: var(--brand-h) var(--brand-s) var(--brand-l);
+  --primary-foreground: 0 0% 100%;
+
+  /* Balanced dark surfaces */
+  --accent: var(--brand-h) 2% 15%;
+  --accent-foreground: var(--brand-h) 30% 98%;
+
+  --muted: var(--brand-h) 2% 22%;
+  --muted-foreground: var(--brand-h) 0% 85%;
+
+  --secondary: var(--brand-h) 25% 22%;
+  --secondary-foreground: var(--brand-h) 45% 95%;
+
+  --border: var(--brand-h) 0% 30%;
+  --input: var(--border);
+  --ring: var(--primary);
+
+  /* Destructive colors */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  /* Sidebar: balanced dark contrast */
+  --sidebar-background: var(--brand-h) 1% 15.5%;
+  --sidebar-foreground: var(--brand-h) 10% 92%;
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: var(--brand-h) 1% 10%;
+  --sidebar-accent-foreground: var(--brand-h) 10% 94%;
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --sidebar-muted: var(--muted);
+  --sidebar-muted-foreground: var(--muted-foreground);
+
+  /* App background */
+  --app-bg: hsl(var(--background));
+}
+
+/* Brand Color Overrides - Higher specificity to override .preset-balanced defaults */
+body.preset-balanced[data-brand="emerald"],
+html[data-brand="emerald"],
+body[data-brand="emerald"] { --brand-h: 152; --brand-s: 76%; --brand-l: 40%; }
+body.preset-balanced[data-brand="violet"],
+html[data-brand="violet"],
+body[data-brand="violet"] { --brand-h: 262; --brand-s: 83%; --brand-l: 58%; }
+body.preset-balanced[data-brand="blue"],
+html[data-brand="blue"],
+body[data-brand="blue"] { --brand-h: 217; --brand-s: 91%; --brand-l: 60%; }
+body.preset-balanced[data-brand="rose"],
+html[data-brand="rose"],
+body[data-brand="rose"] { --brand-h: 346; --brand-s: 77%; --brand-l: 49%; }
+body.preset-balanced[data-brand="orange"],
+html[data-brand="orange"],
+body[data-brand="orange"] { --brand-h: 24; --brand-s: 94%; --brand-l: 50%; }
+body.preset-balanced[data-brand="teal"],
+html[data-brand="teal"],
+body[data-brand="teal"] { --brand-h: 173; --brand-s: 80%; --brand-l: 40%; }
+body.preset-balanced[data-brand="indigo"],
+html[data-brand="indigo"],
+body[data-brand="indigo"] { --brand-h: 239; --brand-s: 84%; --brand-l: 67%; }
+body.preset-balanced[data-brand="cyan"],
+html[data-brand="cyan"],
+body[data-brand="cyan"] { --brand-h: 188; --brand-s: 94%; --brand-l: 42%; }
+body.preset-balanced[data-brand="pink"],
+html[data-brand="pink"],
+body[data-brand="pink"] { --brand-h: 330; --brand-s: 81%; --brand-l: 60%; }
+body.preset-balanced[data-brand="lime"],
+html[data-brand="lime"],
+body[data-brand="lime"] { --brand-h: 84; --brand-s: 81%; --brand-l: 44%; }
+body.preset-balanced[data-brand="amber"],
+html[data-brand="amber"],
+body[data-brand="amber"] { --brand-h: 45; --brand-s: 100%; --brand-l: 51%; }
+body.preset-balanced[data-brand="red"],
+html[data-brand="red"],
+body[data-brand="red"] { --brand-h: 0; --brand-s: 84%; --brand-l: 60%; }
+body.preset-balanced[data-brand="slate"],
+html[data-brand="slate"],
+body[data-brand="slate"] { --brand-h: 215; --brand-s: 20%; --brand-l: 45%; }
+body.preset-balanced[data-brand="zinc"],
+html[data-brand="zinc"],
+body[data-brand="zinc"] { --brand-h: 240; --brand-s: 5%; --brand-l: 34%; }
+body.preset-balanced[data-brand="neutral"],
+html[data-brand="neutral"],
+body[data-brand="neutral"] { --brand-h: 0; --brand-s: 0%; --brand-l: 50%; }
+body.preset-balanced[data-brand="stone"],
+html[data-brand="stone"],
+body[data-brand="stone"] { --brand-h: 20; --brand-s: 6%; --brand-l: 90%; }
+body.preset-balanced[data-brand="purple"],
+html[data-brand="purple"],
+body[data-brand="purple"] { --brand-h: 271; --brand-s: 81%; --brand-l: 56%; }
+body.preset-balanced[data-brand="green"],
+html[data-brand="green"],
+body[data-brand="green"] { --brand-h: 142; --brand-s: 76%; --brand-l: 36%; }
+body.preset-balanced[data-brand="yellow"],
+html[data-brand="yellow"],
+body[data-brand="yellow"] { --brand-h: 48; --brand-s: 96%; --brand-l: 53%; }
+body.preset-balanced[data-brand="brown"],
+html[data-brand="brown"],
+body[data-brand="brown"] { --brand-h: 25; --brand-s: 95%; --brand-l: 47%; }
+body.preset-balanced[data-brand="mint"],
+html[data-brand="mint"],
+body[data-brand="mint"] { --brand-h: 160; --brand-s: 84%; --brand-l: 39%; }
+body.preset-balanced[data-brand="coral"],
+html[data-brand="coral"],
+body[data-brand="coral"] { --brand-h: 16; --brand-s: 100%; --brand-l: 66%; }
+body.preset-balanced[data-brand="lavender"],
+html[data-brand="lavender"],
+body[data-brand="lavender"] { --brand-h: 270; --brand-s: 75%; --brand-l: 71%; }
+body.preset-balanced[data-brand="gold"],
+html[data-brand="gold"],
+body[data-brand="gold"] { --brand-h: 36; --brand-s: 100%; --brand-l: 50%; }
+body.preset-balanced[data-brand="navy"],
+html[data-brand="navy"],
+body[data-brand="navy"] { --brand-h: 220; --brand-s: 100%; --brand-l: 25%; }
+body.preset-balanced[data-brand="olive"],
+html[data-brand="olive"],
+body[data-brand="olive"] { --brand-h: 60; --brand-s: 61%; --brand-l: 34%; }
+body.preset-balanced[data-brand="maroon"],
+html[data-brand="maroon"],
+body[data-brand="maroon"] { --brand-h: 0; --brand-s: 100%; --brand-l: 25%; }
+body.preset-balanced[data-brand="turquoise"],
+html[data-brand="turquoise"],
+body[data-brand="turquoise"] { --brand-h: 174; --brand-s: 77%; --brand-l: 40%; }
+body.preset-balanced[data-brand="magenta"],
+html[data-brand="magenta"],
+body[data-brand="magenta"] { --brand-h: 300; --brand-s: 100%; --brand-l: 50%; }
+body.preset-balanced[data-brand="copper"],
+html[data-brand="copper"],
+body[data-brand="copper"] { --brand-h: 30; --brand-s: 100%; --brand-l: 50%; }
+body.preset-balanced[data-brand="charcoal"],
+html[data-brand="charcoal"],
+body[data-brand="charcoal"] { --brand-h: 200; --brand-s: 25%; --brand-l: 20%; }
+
+/* Remove shadows from admin buttons */
+.no-shadow,
+.no-shadow:hover,
+.no-shadow:focus,
+.no-shadow:focus-visible,
+.no-shadow:active,
+.no-shadow[data-state="open"],
+button.no-shadow,
+button.no-shadow:hover,
+button.no-shadow:focus,
+button.no-shadow:focus-visible,
+button.no-shadow:active {
+  box-shadow: none !important;
+  --tw-shadow: 0 0 #0000 !important;
+  --tw-shadow-colored: 0 0 #0000 !important;
+}
+
+/* Force dropdown menu background to match page - specifically for admin preset-balanced */
+/* Now that preset-balanced is on body, variables are available globally */
+body.preset-balanced [role="menu"],
+body.preset-balanced [data-radix-dropdown-menu-content],
+body.preset-balanced div[role="menu"] {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
 }

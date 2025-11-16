@@ -106,7 +106,7 @@ export default async function DevHomePage() {
                   title={event.title}
                   city={event.city}
                   venue={event.venue}
-                  starts_at={event.starts_at}
+                  date={event.date}
                 />
               ))}
             </div>

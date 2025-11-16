@@ -1,5 +1,9 @@
 import { notFound } from 'next/navigation'
 import { getAlbumWithLinksBySlug } from '@/features/albums/data'
+import TrackView from '@/components/analytics/TrackView'
+import LinksLogger from '@/components/dev/LinksLogger'
+import TrackedLink from '@/components/dev/TrackedLink'
+import React from 'react'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,8 +26,11 @@ export default async function AlbumDetailPage({ params }: AlbumDetailPageProps) 
   // Get first letter of title for placeholder
   const titleInitial = album.title ? album.title.charAt(0).toUpperCase() : 'A'
 
+  const platformSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
   return (
     <div className="fixed inset-0 z-[100] overflow-y-auto bg-gradient-to-br from-blue-50 via-blue-100/50 to-slate-100 dark:from-slate-900 dark:via-blue-950/30 dark:to-slate-800">
+      <TrackView eventType="page_view" entityType="album" entityId={album.id} metadata={{ album_slug: album.slug, path: `/dev/albums/${album.slug}` }} />
+      <LinksLogger value={links} label="Album links" />
       {/* Full-screen gradient background */}
       <div className="min-h-screen">
         {/* Centered content container */}
@@ -75,23 +82,16 @@ export default async function AlbumDetailPage({ params }: AlbumDetailPageProps) 
               ) : (
                 <div className="divide-y divide-gray-100 dark:divide-gray-700">
                   {links.map((link, index) => (
-                    <a
+                    <TrackedLink
                       key={index}
                       href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      externalUrl={link.url}
+                      entityId={link.id}
+                      label={link.platformName}
+                      rightLabel={link.ctaLabel || 'Play'}
                       className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                    >
-                      {/* Left: Platform Name */}
-                      <span className="text-base font-medium text-gray-900 dark:text-gray-100">
-                        {link.platformName}
-                      </span>
-
-                      {/* Right: CTA Button */}
-                      <span className="rounded-full bg-gray-100 px-4 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
-                        {link.ctaLabel || 'Play'}
-                      </span>
-                    </a>
+                      debug={{ link }}
+                    />
                   ))}
                 </div>
               )}

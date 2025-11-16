@@ -23,7 +23,7 @@ export default async function UpdateDetailPage({ params }: UpdateDetailPageProps
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto w-full max-w-4xl px-10 md:px-16 lg:px-28 py-16">
+      <div className="mx-auto w-full max-w-4xl py-16">
         {/* Back Link */}
         <Link
           href="/dev/updates"

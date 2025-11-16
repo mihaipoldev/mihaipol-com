@@ -8,7 +8,7 @@ export type EventCardProps = {
   title: string
   city?: string | null
   venue?: string | null
-  starts_at: string
+  date: string
   className?: string
 }
 
@@ -18,7 +18,7 @@ export default function EventCard({
   title,
   city,
   venue,
-  starts_at,
+  date,
   className,
 }: EventCardProps) {
   const location = city && venue
@@ -40,7 +40,7 @@ export default function EventCard({
           </h3>
         </div>
         <div className="text-sm font-medium whitespace-nowrap text-muted-foreground group-hover:text-foreground transition-colors">
-          {formatEventDate(starts_at)}
+          {formatEventDate(date)}
         </div>
       </div>
     </Link>

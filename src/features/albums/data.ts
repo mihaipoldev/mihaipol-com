@@ -76,6 +76,7 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}) {
   }
 }
 
+// Public data fetching functions
 export async function getHomepageAlbums(limit = 6) {
   return fetchAlbums({ limit, order: 'desc', includeLabels: true })
 }
@@ -98,6 +99,96 @@ export async function getAlbumBySlug(slug: string) {
   } catch (error) {
     console.error('Error fetching album by slug:', error)
     return null
+  }
+}
+
+// Admin data fetching functions (returns all albums including unpublished)
+export async function getAllAlbumsWithLabels() {
+  try {
+    const { data, error } = await supabase
+      .from('albums')
+      .select(`
+        *,
+        labels (
+          id,
+          name
+        )
+      `)
+      .order('release_date', { ascending: false, nullsFirst: false })
+
+    if (error) throw error
+    return data || []
+  } catch (error) {
+    console.error('Error fetching all albums:', error)
+    return []
+  }
+}
+
+export async function getAlbumById(id: string) {
+  try {
+    const { data, error } = await supabase
+      .from('albums')
+      .select(`
+        *,
+        labels (
+          id,
+          name
+        )
+      `)
+      .eq('id', id)
+      .single()
+
+    if (error) throw error
+    return data || null
+  } catch (error) {
+    console.error('Error fetching album by id:', error)
+    return null
+  }
+}
+
+export async function getAlbumBySlugAdmin(slug: string) {
+  try {
+    const { data, error } = await supabase
+      .from('albums')
+      .select(`
+        *,
+        labels (
+          id,
+          name
+        )
+      `)
+      .eq('slug', slug)
+      .single()
+
+    if (error) throw error
+    return data || null
+  } catch (error) {
+    console.error('Error fetching album by slug (admin):', error)
+    return null
+  }
+}
+
+export async function getAlbumLinks(albumId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('album_links')
+      .select(`
+        *,
+        platforms (
+          id,
+          name,
+          display_name,
+          icon_url
+        )
+      `)
+      .eq('album_id', albumId)
+      .order('sort_order', { ascending: true })
+
+    if (error) throw error
+    return data || []
+  } catch (error) {
+    console.error('Error fetching album links:', error)
+    return []
   }
 }
 
@@ -157,6 +248,7 @@ export async function getAlbumWithLinksBySlug(slug: string) {
 
       if (!linksError && linksData) {
         links = linksData.map((link: any) => ({
+          id: link.id,
           platformName: link.platforms?.display_name || link.platforms?.name || '',
           platformIconUrl: link.platforms?.icon_url || null,
           ctaLabel: link.cta_label || 'Play',

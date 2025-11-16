@@ -43,36 +43,135 @@ DropdownMenuSubTrigger.displayName =
 const DropdownMenuSubContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
->(({ className, ...props }, ref) => (
-  <DropdownMenuPrimitive.SubContent
-    ref={ref}
-    className={cn(
-      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
-      className
-    )}
-    {...props}
-  />
-))
+>(({ className, ...props }, ref) => {
+  // Get the background color from the preset-balanced element if it exists
+  const [bgColor, setBgColor] = React.useState('hsl(var(--background))')
+  const [textColor, setTextColor] = React.useState('hsl(var(--foreground))')
+
+  React.useEffect(() => {
+    // Find the preset-balanced element to get its CSS variable values
+    const presetElement = document.querySelector('.preset-balanced')
+    if (presetElement) {
+      const computed = getComputedStyle(presetElement)
+      // Get CSS variable values
+      const bgVar = computed.getPropertyValue('--background').trim()
+      const fgVar = computed.getPropertyValue('--foreground').trim()
+      
+      // Construct HSL color strings from the variable values
+      // Variables are in format: "199 0% 100%" or "199 1% 10%"
+      if (bgVar) {
+        setBgColor(`hsl(${bgVar})`)
+      }
+      if (fgVar) {
+        setTextColor(`hsl(${fgVar})`)
+      }
+    } else {
+      // Fallback: try to get from body if preset-balanced doesn't exist
+      const bodyComputed = getComputedStyle(document.body)
+      const bgVar = bodyComputed.getPropertyValue('--background').trim()
+      const fgVar = bodyComputed.getPropertyValue('--foreground').trim()
+      if (bgVar) {
+        setBgColor(`hsl(${bgVar})`)
+      }
+      if (fgVar) {
+        setTextColor(`hsl(${fgVar})`)
+      }
+    }
+  }, [])
+
+  return (
+    <DropdownMenuPrimitive.SubContent
+      ref={ref}
+      style={{
+        backgroundColor: bgColor,
+        color: textColor,
+      }}
+      className={cn(
+        "z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 shadow-lg",
+        "!shadow-[0px_1px_1px_0px_rgba(16,17,26,0.08)] dark:!shadow-[0px_1px_1px_0px_rgba(255,255,255,0.08)]",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
+        className
+      )}
+      {...props}
+    />
+  )
+})
 DropdownMenuSubContent.displayName =
   DropdownMenuPrimitive.SubContent.displayName
 
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal>
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        "z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
-        className
-      )}
-      {...props}
-    />
-  </DropdownMenuPrimitive.Portal>
-))
+>(({ className, sideOffset = 4, ...props }, ref) => {
+  // Get the background color from the preset-balanced element if it exists
+  const [bgColor, setBgColor] = React.useState('hsl(var(--background))')
+  const [textColor, setTextColor] = React.useState('hsl(var(--foreground))')
+
+  React.useEffect(() => {
+    const updateColors = () => {
+      // Find the preset-balanced element to get its CSS variable values
+      const presetElement = document.querySelector('.preset-balanced')
+      if (presetElement) {
+        const computed = getComputedStyle(presetElement)
+        // Get CSS variable values
+        const bgVar = computed.getPropertyValue('--background').trim()
+        const fgVar = computed.getPropertyValue('--foreground').trim()
+        
+        // Construct HSL color strings from the variable values
+        // Variables are in format: "199 0% 100%" or "199 1% 10%"
+        if (bgVar) {
+          setBgColor(`hsl(${bgVar})`)
+        }
+        if (fgVar) {
+          setTextColor(`hsl(${fgVar})`)
+        }
+      } else {
+        // Fallback: try to get from body if preset-balanced doesn't exist
+        const bodyComputed = getComputedStyle(document.body)
+        const bgVar = bodyComputed.getPropertyValue('--background').trim()
+        const fgVar = bodyComputed.getPropertyValue('--foreground').trim()
+        if (bgVar) {
+          setBgColor(`hsl(${bgVar})`)
+        }
+        if (fgVar) {
+          setTextColor(`hsl(${fgVar})`)
+        }
+      }
+    }
+    
+    // Update immediately
+    updateColors()
+    
+    // Also update when dropdown opens (data-state changes)
+    const observer = new MutationObserver(updateColors)
+    const presetElement = document.querySelector('.preset-balanced')
+    if (presetElement) {
+      observer.observe(presetElement, { attributes: true, attributeFilter: ['class'] })
+    }
+    
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.Content
+        ref={ref}
+        sideOffset={sideOffset}
+        style={{
+          backgroundColor: bgColor,
+          color: textColor,
+        }}
+        className={cn(
+          "z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border p-1 shadow-md",
+          "!shadow-[0px_1px_1px_0px_rgba(16,17,26,0.08)] dark:!shadow-[0px_1px_1px_0px_rgba(255,255,255,0.08)]",
+          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
+          className
+        )}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
+  )
+})
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
 
 const DropdownMenuItem = React.forwardRef<

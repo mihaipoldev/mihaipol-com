@@ -1,5 +1,6 @@
 import { getAllAlbums } from '@/features/albums/data'
 import AlbumCard from '@/components/features/AlbumCard'
+import TrackView from '@/components/analytics/TrackView'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,6 +9,7 @@ export default async function AlbumsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <TrackView eventType="section_view" entityType="site_section" entityId="albums" />
       <div className="mx-auto w-full max-w-7xl py-16">
         {/* Page Header */}
         <div className="mb-12">

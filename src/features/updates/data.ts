@@ -64,3 +64,51 @@ export async function getUpdateBySlug(slug: string) {
   }
 }
 
+// Admin data fetching functions (returns all updates including unpublished)
+export async function getAllUpdatesUnfiltered() {
+  try {
+    const { data, error } = await supabase
+      .from('updates')
+      .select('*')
+      .order('date', { ascending: false, nullsFirst: false })
+
+    if (error) throw error
+    return data || []
+  } catch (error) {
+    console.error('Error fetching all updates:', error)
+    return []
+  }
+}
+
+export async function getUpdateById(id: string) {
+  try {
+    const { data, error } = await supabase
+      .from('updates')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (error) throw error
+    return data || null
+  } catch (error) {
+    console.error('Error fetching update by id:', error)
+    return null
+  }
+}
+
+export async function getUpdateBySlugAdmin(slug: string) {
+  try {
+    const { data, error } = await supabase
+      .from('updates')
+      .select('*')
+      .eq('slug', slug)
+      .single()
+
+    if (error) throw error
+    return data || null
+  } catch (error) {
+    console.error('Error fetching update by slug (admin):', error)
+    return null
+  }
+}
+

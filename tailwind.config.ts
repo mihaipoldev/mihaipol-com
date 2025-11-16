@@ -7,9 +7,14 @@ const config = {
   theme: {
   	extend: {
   		borderRadius: {
+  			none: '0',
+  			sm: 'var(--radius-subtle)',
+  			md: 'var(--radius-regular)',
   			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			xl: 'var(--radius-xl)',
+  			'2xl': 'var(--radius-2xl)',
+  			'3xl': 'calc(var(--radius-2xl) + 4px)',
+  			full: 'var(--radius-full)'
   		},
   		colors: {
   			background: 'hsl(var(--background))',
@@ -84,7 +89,16 @@ const config = {
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out'
-  		}
+  		},
+		boxShadow: {
+			'button': '0px 1px 1px 0px rgba(16, 17, 26, 0.08)',
+			'button-hover': '0px 1px 1px 0px rgba(16, 17, 26, 0.16)',
+			'button-subtle': '0px 1px 1px 0px rgba(16, 17, 26, 0.04)',
+			'card': '0 4px 16px 0 rgba(0, 0, 0, 0.04), 0 2px 8px 0 rgba(0, 0, 0, 0.02)',
+			'card-hover': '0 8px 24px 0 rgba(0, 0, 0, 0.06), 0 4px 12px 0 rgba(0, 0, 0, 0.03)',
+			'card-dark': '0 4px 16px 0 rgba(0, 0, 0, 0.15), 0 2px 8px 0 rgba(0, 0, 0, 0.1)',
+			'card-hover-dark': '0 8px 24px 0 rgba(0, 0, 0, 0.2), 0 4px 12px 0 rgba(0, 0, 0, 0.12)',
+		}
   	}
   },
   plugins: [animate],
