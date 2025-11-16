@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const value = (data as Record<string, unknown>)[nameField]
+    const value = (data as unknown as Record<string, unknown>)[nameField]
     return NextResponse.json({ name: (value as string) ?? null })
   } catch (error) {
     console.error(`Error fetching ${resource} name:`, error)
