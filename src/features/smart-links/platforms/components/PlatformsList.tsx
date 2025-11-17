@@ -1,3 +1,1 @@
-export { PlatformsList } from "@/features/platforms/components/PlatformsList"
-
-
+export { PlatformsList } from "@/features/platforms/components/PlatformsList";

@@ -1,96 +1,106 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { getSupabaseBrowser } from "@/lib/supabase-browser"
-import { PerformanceMonitor } from "@/components/dev/PerformanceMonitor"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { AdminPageTitle } from "@/components/admin/AdminPageTitle"
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
+import { PerformanceMonitor } from "@/components/dev/PerformanceMonitor";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
 
 export default function TestPerformancePage() {
   const [testResults, setTestResults] = useState<{
-    albums?: { duration: number; count: number }
-    events?: { duration: number; count: number }
-    updates?: { duration: number; count: number }
-  }>({})
+    albums?: { duration: number; count: number };
+    events?: { duration: number; count: number };
+    updates?: { duration: number; count: number };
+  }>({});
 
   const albumsQuery = useQuery({
     queryKey: ["albums", "all"],
     queryFn: async () => {
-      const supabase = getSupabaseBrowser()
-      const start = performance.now()
-      
+      const supabase = getSupabaseBrowser();
+      const start = performance.now();
+
       const { data, error } = await supabase
-        .from('albums')
-        .select(`
+        .from("albums")
+        .select(
+          `
           id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status,
           labels (
             id,
             name
           )
-        `)
-        .order('release_date', { ascending: false, nullsFirst: false })
+        `
+        )
+        .order("release_date", { ascending: false, nullsFirst: false });
 
-      const duration = performance.now() - start
-      
-      if (error) throw error
-      console.log(`🔍 [DB] albums query completed in ${duration.toFixed(0)}ms → ${data?.length || 0} records`)
-      
-      return { data: data || [], duration }
+      const duration = performance.now() - start;
+
+      if (error) throw error;
+      console.log(
+        `🔍 [DB] albums query completed in ${duration.toFixed(0)}ms → ${data?.length || 0} records`
+      );
+
+      return { data: data || [], duration };
     },
     enabled: false,
-  })
+  });
 
   const eventsQuery = useQuery({
     queryKey: ["events", "all"],
     queryFn: async () => {
-      const supabase = getSupabaseBrowser()
-      const start = performance.now()
-      
-      const { data, error } = await supabase
-        .from('events')
-        .select('id, title, slug, date, venue, location, event_status, publish_status, flyer_image_url, description')
-        .order('date', { ascending: false })
+      const supabase = getSupabaseBrowser();
+      const start = performance.now();
 
-      const duration = performance.now() - start
-      
-      if (error) throw error
-      console.log(`🔍 [DB] events query completed in ${duration.toFixed(0)}ms → ${data?.length || 0} records`)
-      
-      return { data: data || [], duration }
+      const { data, error } = await supabase
+        .from("events")
+        .select(
+          "id, title, slug, date, venue, location, event_status, publish_status, flyer_image_url, description"
+        )
+        .order("date", { ascending: false });
+
+      const duration = performance.now() - start;
+
+      if (error) throw error;
+      console.log(
+        `🔍 [DB] events query completed in ${duration.toFixed(0)}ms → ${data?.length || 0} records`
+      );
+
+      return { data: data || [], duration };
     },
     enabled: false,
-  })
+  });
 
   const updatesQuery = useQuery({
     queryKey: ["updates", "all"],
     queryFn: async () => {
-      const supabase = getSupabaseBrowser()
-      const start = performance.now()
-      
-      const { data, error } = await supabase
-        .from('updates')
-        .select('id, title, slug, date, publish_status, content, image_url')
-        .order('date', { ascending: false, nullsFirst: false })
+      const supabase = getSupabaseBrowser();
+      const start = performance.now();
 
-      const duration = performance.now() - start
-      
-      if (error) throw error
-      console.log(`🔍 [DB] updates query completed in ${duration.toFixed(0)}ms → ${data?.length || 0} records`)
-      
-      return { data: data || [], duration }
+      const { data, error } = await supabase
+        .from("updates")
+        .select("id, title, slug, date, publish_status, content, image_url")
+        .order("date", { ascending: false, nullsFirst: false });
+
+      const duration = performance.now() - start;
+
+      if (error) throw error;
+      console.log(
+        `🔍 [DB] updates query completed in ${duration.toFixed(0)}ms → ${data?.length || 0} records`
+      );
+
+      return { data: data || [], duration };
     },
     enabled: false,
-  })
+  });
 
   const runTest = async (type: "albums" | "events" | "updates") => {
-    let query
-    if (type === "albums") query = albumsQuery
-    else if (type === "events") query = eventsQuery
-    else query = updatesQuery
+    let query;
+    if (type === "albums") query = albumsQuery;
+    else if (type === "events") query = eventsQuery;
+    else query = updatesQuery;
 
-    await query.refetch()
+    await query.refetch();
 
     if (query.data) {
       setTestResults((prev) => ({
@@ -99,18 +109,14 @@ export default function TestPerformancePage() {
           duration: query.data.duration,
           count: query.data.data.length,
         },
-      }))
+      }));
     }
-  }
+  };
 
   const runAllTests = async () => {
-    setTestResults({})
-    await Promise.all([
-      runTest("albums"),
-      runTest("events"),
-      runTest("updates"),
-    ])
-  }
+    setTestResults({});
+    await Promise.all([runTest("albums"), runTest("events"), runTest("updates")]);
+  };
 
   return (
     <div className="w-full">
@@ -124,7 +130,8 @@ export default function TestPerformancePage() {
           <CardHeader>
             <CardTitle>Query Performance Tests</CardTitle>
             <CardDescription>
-              Test individual queries or run all tests. Results show query duration and record count.
+              Test individual queries or run all tests. Results show query duration and record
+              count.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -219,7 +226,10 @@ export default function TestPerformancePage() {
                 <p>• Very Slow: &gt; 1000ms (needs optimization)</p>
                 <p className="mt-4 pt-4 border-t">
                   <strong>Note:</strong> Make sure database indexes are applied. Check the migration
-                  file: <code className="bg-muted px-1 rounded">supabase/migrations/20250102120000_add_performance_indexes.sql</code>
+                  file:{" "}
+                  <code className="bg-muted px-1 rounded">
+                    supabase/migrations/20250102120000_add_performance_indexes.sql
+                  </code>
                 </p>
               </CardContent>
             </Card>
@@ -229,6 +239,5 @@ export default function TestPerformancePage() {
 
       <PerformanceMonitor />
     </div>
-  )
+  );
 }
-

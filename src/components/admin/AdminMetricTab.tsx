@@ -1,21 +1,24 @@
-'use client'
+"use client";
 
-import { TabsTrigger } from "@/components/ui/tabs"
-import { cn } from "@/lib/utils"
-import { getGradient } from "@/lib/gradient-presets"
+import { TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+import { getGradient } from "@/lib/gradient-presets";
 
 type AdminMetricTabProps = {
-  value: string
-  label: string
-  metric: number | string
-  subtitle?: string
-  className?: string
-}
+  value: string;
+  label: string;
+  metric: number | string;
+  subtitle?: string;
+  className?: string;
+};
 
 export function AdminMetricTab({ value, label, metric, subtitle, className }: AdminMetricTabProps) {
-  const subtleGradient = getGradient()
-  const beforeGradientClasses = subtleGradient.split(' ').map(cls => `before:${cls}`).join(' ')
-  
+  const subtleGradient = getGradient();
+  const beforeGradientClasses = subtleGradient
+    .split(" ")
+    .map((cls) => `before:${cls}`)
+    .join(" ");
+
   return (
     <TabsTrigger
       value={value}
@@ -28,13 +31,13 @@ export function AdminMetricTab({ value, label, metric, subtitle, className }: Ad
         className
       )}
     >
-      <span className="relative z-10 text-xs md:text-sm text-sidebar-foreground/70 data-[state=active]:text-foreground/70 transition-colors duration-300">{label}</span>
-      <span className="relative z-10 text-2xl md:text-3xl font-semibold leading-none tabular-nums transition-colors duration-300">{metric}</span>
-      {subtitle && (
-        <span className="relative z-10 text-xs text-emerald-500">{subtitle}</span>
-      )}
+      <span className="relative z-10 text-xs md:text-sm text-sidebar-foreground/70 data-[state=active]:text-foreground/70 transition-colors duration-300">
+        {label}
+      </span>
+      <span className="relative z-10 text-2xl md:text-3xl font-semibold leading-none tabular-nums transition-colors duration-300">
+        {metric}
+      </span>
+      {subtitle && <span className="relative z-10 text-xs text-emerald-500">{subtitle}</span>}
     </TabsTrigger>
-  )
+  );
 }
-
-

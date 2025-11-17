@@ -37,7 +37,7 @@ export function SettingsButton({ className, onClick }: SettingsButtonProps) {
               size="sm"
               onClick={handleClick}
               className="no-shadow !shadow-[0_0_0_0_transparent] hover:!shadow-[0_0_0_0_transparent] dark:!shadow-[0_0_0_0_transparent] dark:hover:!shadow-[0_0_0_0_transparent] rounded-full h-8 w-8 transition-all duration-200 max-md:hover:bg-transparent md:hover:!bg-primary/10 focus-visible:bg-transparent focus-visible:ring-0 p-0"
-              style={{ boxShadow: 'none' }}
+              style={{ boxShadow: "none" }}
             >
               <div className="h-8 w-8 rounded-full flex items-center justify-center leading-9">
                 <FontAwesomeIcon
@@ -56,4 +56,3 @@ export function SettingsButton({ className, onClick }: SettingsButtonProps) {
     </div>
   );
 }
-

@@ -1,59 +1,54 @@
-import { supabase } from '@/lib/supabase'
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
 
 export async function createUpdate(updateData: {
-  title: string
-  slug: string
-  subtitle?: string | null
-  description?: string | null
-  image_url?: string | null
-  date?: string | null
-  publish_status: "draft" | "scheduled" | "published" | "archived"
-  read_more_url?: string | null
+  title: string;
+  slug: string;
+  subtitle?: string | null;
+  description?: string | null;
+  image_url?: string | null;
+  date?: string | null;
+  publish_status: "draft" | "scheduled" | "published" | "archived";
+  read_more_url?: string | null;
 }) {
   try {
-    const { data, error } = await supabase
-      .from('updates')
-      .insert(updateData)
-      .select()
-      .single()
+    const supabase = getServiceSupabaseClient();
+    const { data, error } = await supabase.from("updates").insert(updateData).select().single();
 
-    if (error) throw error
-    return data
+    if (error) throw error;
+    return data;
   } catch (error) {
-    console.error('Error creating update:', error)
-    throw error
+    console.error("Error creating update:", error);
+    throw error;
   }
 }
 
 export async function updateUpdate(id: string, updates: any) {
   try {
+    const supabase = getServiceSupabaseClient();
     const { data, error } = await supabase
-      .from('updates')
+      .from("updates")
       .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
+      .eq("id", id)
       .select()
-      .single()
+      .single();
 
-    if (error) throw error
-    return data
+    if (error) throw error;
+    return data;
   } catch (error) {
-    console.error('Error updating update:', error)
-    throw error
+    console.error("Error updating update:", error);
+    throw error;
   }
 }
 
 export async function deleteUpdate(id: string) {
   try {
-    const { error } = await supabase
-      .from('updates')
-      .delete()
-      .eq('id', id)
+    const supabase = getServiceSupabaseClient();
+    const { error } = await supabase.from("updates").delete().eq("id", id);
 
-    if (error) throw error
-    return true
+    if (error) throw error;
+    return true;
   } catch (error) {
-    console.error('Error deleting update:', error)
-    throw error
+    console.error("Error deleting update:", error);
+    throw error;
   }
 }
-

@@ -14,11 +14,22 @@ export type SmartLink = {
 type SmartLinkItemProps = {
   link: SmartLink;
   className?: string;
+  style?: React.CSSProperties;
+  onMouseEnter?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  onMouseLeave?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   debug?: Record<string, unknown>;
   disableTracking?: boolean;
 };
 
-export default function SmartLinkItem({ link, className, debug, disableTracking }: SmartLinkItemProps) {
+export default function SmartLinkItem({
+  link,
+  className,
+  style,
+  onMouseEnter,
+  onMouseLeave,
+  debug,
+  disableTracking,
+}: SmartLinkItemProps) {
   return (
     <TrackedLink
       key={link.id}
@@ -28,10 +39,11 @@ export default function SmartLinkItem({ link, className, debug, disableTracking 
       label={link.platformName}
       rightLabel={link.ctaLabel || "Play"}
       className={className}
+      style={style}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       debug={{ link, ...(debug || {}) }}
       disableTracking={disableTracking}
     />
   );
 }
-
-

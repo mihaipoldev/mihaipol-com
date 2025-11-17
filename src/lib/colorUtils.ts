@@ -11,7 +11,7 @@
  * @returns Hex color string (e.g., "#FF5733")
  */
 export function rgbToHex(r: number, g: number, b: number): string {
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`.toUpperCase()
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`.toUpperCase();
 }
 
 /**
@@ -21,13 +21,13 @@ export function rgbToHex(r: number, g: number, b: number): string {
  */
 export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   // Remove # if present
-  hex = hex.replace('#', '')
-  
-  const r = parseInt(hex.substring(0, 2), 16)
-  const g = parseInt(hex.substring(2, 4), 16)
-  const b = parseInt(hex.substring(4, 6), 16)
-  
-  return { r, g, b }
+  hex = hex.replace("#", "");
+
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  return { r, g, b };
 }
 
 /**
@@ -37,35 +37,35 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
  */
 export function hexToHsl(hex: string): { h: number; s: number; l: number } | null {
   // Remove # if present
-  hex = hex.replace('#', '')
-  
-  // Parse hex
-  const r = parseInt(hex.substring(0, 2), 16) / 255
-  const g = parseInt(hex.substring(2, 4), 16) / 255
-  const b = parseInt(hex.substring(4, 6), 16) / 255
+  hex = hex.replace("#", "");
 
-  const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  let h = 0
-  let s = 0
-  const l = (max + min) / 2
+  // Parse hex
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
 
   if (max === min) {
-    h = s = 0 // achromatic
+    h = s = 0; // achromatic
   } else {
-    const d = max - min
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-    
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
     switch (max) {
       case r:
-        h = ((g - b) / d + (g < b ? 6 : 0)) / 6
-        break
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
       case g:
-        h = ((b - r) / d + 2) / 6
-        break
+        h = ((b - r) / d + 2) / 6;
+        break;
       case b:
-        h = ((r - g) / d + 4) / 6
-        break
+        h = ((r - g) / d + 4) / 6;
+        break;
     }
   }
 
@@ -73,7 +73,7 @@ export function hexToHsl(hex: string): { h: number; s: number; l: number } | nul
     h: Math.round(h * 360),
     s: Math.round(s * 100),
     l: Math.round(l * 100),
-  }
+  };
 }
 
 /**
@@ -84,31 +84,39 @@ export function hexToHsl(hex: string): { h: number; s: number; l: number } | nul
  * @returns Object with h (0-360), s (0-100), l (0-100)
  */
 export function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
-  r /= 255
-  g /= 255
-  b /= 255
-  
-  const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  let h = 0, s = 0, l = (max + min) / 2
+  r /= 255;
+  g /= 255;
+  b /= 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0,
+    s = 0,
+    l = (max + min) / 2;
 
   if (max !== min) {
-    const d = max - min
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-    
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
     switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break
-      case g: h = (b - r) / d + 2; break
-      case b: h = (r - g) / d + 4; break
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
     }
-    h /= 6
+    h /= 6;
   }
 
   return {
     h: Math.round(h * 360),
     s: Math.round(s * 100),
-    l: Math.round(l * 100)
-  }
+    l: Math.round(l * 100),
+  };
 }
 
 /**
@@ -119,14 +127,16 @@ export function rgbToHsl(r: number, g: number, b: number): { h: number; s: numbe
  * @returns Hex color string (e.g., "#FF5733")
  */
 export function hslToHex(h: number, s: number, l: number): string {
-  l /= 100
-  const a = s * Math.min(l, 1 - l) / 100
+  l /= 100;
+  const a = (s * Math.min(l, 1 - l)) / 100;
   const f = (n: number) => {
-    const k = (n + h / 30) % 12
-    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
-    return Math.round(255 * color).toString(16).padStart(2, '0')
-  }
-  return `#${f(0)}${f(8)}${f(4)}`.toUpperCase()
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
 }
 
 /**
@@ -137,18 +147,18 @@ export function hslToHex(h: number, s: number, l: number): string {
  * @returns Object with r, g, b values (0-255)
  */
 export function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: number } {
-  l /= 100
-  const a = s * Math.min(l, 1 - l) / 100
+  l /= 100;
+  const a = (s * Math.min(l, 1 - l)) / 100;
   const f = (n: number) => {
-    const k = (n + h / 30) % 12
-    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
-    return Math.round(255 * color)
-  }
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color);
+  };
   return {
     r: f(0),
     g: f(8),
-    b: f(4)
-  }
+    b: f(4),
+  };
 }
 
 /**
@@ -158,11 +168,11 @@ export function hslToRgb(h: number, s: number, l: number): { r: number; g: numbe
  * @returns true if the color is light (luminance > 0.8)
  */
 export function isLightColor(hexColor: string): boolean {
-  const { r, g, b } = hexToRgb(hexColor)
-  
+  const { r, g, b } = hexToRgb(hexColor);
+
   // Calculate luminance using the relative luminance formula
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  return luminance > 0.8
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.8;
 }
 
 /**
@@ -171,9 +181,9 @@ export function isLightColor(hexColor: string): boolean {
  * @returns true if the color is dark (luminance < 0.2)
  */
 export function isDarkColor(hexColor: string): boolean {
-  const { r, g, b } = hexToRgb(hexColor)
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  return luminance < 0.2
+  const { r, g, b } = hexToRgb(hexColor);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance < 0.2;
 }
 
 /**
@@ -182,14 +192,14 @@ export function isDarkColor(hexColor: string): boolean {
  * @returns Luminance value (0-1)
  */
 export function getLuminance(hexColor: string): number {
-  const { r, g, b } = hexToRgb(hexColor)
-  
-  const [rs, gs, bs] = [r, g, b].map(c => {
-    const val = c / 255
-    return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4)
-  })
-  
-  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs
+  const { r, g, b } = hexToRgb(hexColor);
+
+  const [rs, gs, bs] = [r, g, b].map((c) => {
+    const val = c / 255;
+    return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
+  });
+
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 }
 
 /**
@@ -199,10 +209,9 @@ export function getLuminance(hexColor: string): number {
  * @returns Contrast ratio (1-21)
  */
 export function getContrastRatio(color1: string, color2: string): number {
-  const lum1 = getLuminance(color1)
-  const lum2 = getLuminance(color2)
-  const lighter = Math.max(lum1, lum2)
-  const darker = Math.min(lum1, lum2)
-  return (lighter + 0.05) / (darker + 0.05)
+  const lum1 = getLuminance(color1);
+  const lum2 = getLuminance(color2);
+  const lighter = Math.max(lum1, lum2);
+  const darker = Math.min(lum1, lum2);
+  return (lighter + 0.05) / (darker + 0.05);
 }
-

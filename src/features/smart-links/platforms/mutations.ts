@@ -1,3 +1,1 @@
-export * from "@/features/platforms/mutations"
-
-
+export * from "@/features/platforms/mutations";

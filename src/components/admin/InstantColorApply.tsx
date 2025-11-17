@@ -1,9 +1,9 @@
-import Script from "next/script"
+import Script from "next/script";
 
 /**
  * Component that applies color from sessionStorage INSTANTLY before React loads
  * This prevents FOUC (Flash of Unstyled Content) by applying colors synchronously
- * 
+ *
  * Flow: Database → applyPrimaryColor() → sessionStorage → this script reads on next load
  * This gives us instant theme application while database remains source of truth ✅
  */
@@ -138,6 +138,5 @@ export function InstantColorApply() {
         `,
       }}
     />
-  )
+  );
 }
-

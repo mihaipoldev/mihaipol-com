@@ -1,77 +1,77 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import UpdateCard, { type UpdateCardProps } from './UpdateCard'
-import { cn } from '@/lib/utils'
+import { useState, useEffect, useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import UpdateCard, { type UpdateCardProps } from "./UpdateCard";
+import { cn } from "@/lib/utils";
 
 type UpdatesCarouselProps = {
-  updates: UpdateCardProps[]
-}
+  updates: UpdateCardProps[];
+};
 
 export default function UpdatesCarousel({ updates }: UpdatesCarouselProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [itemsPerView, setItemsPerView] = useState(3)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [itemsPerView, setItemsPerView] = useState(3);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Calculate items per view based on screen size
   useEffect(() => {
     const calculateItemsPerView = () => {
-      if (typeof window === 'undefined') return
+      if (typeof window === "undefined") return;
 
-      const width = window.innerWidth
+      const width = window.innerWidth;
       if (width >= 1280) {
         // xl screens: 5 items
-        setItemsPerView(5)
+        setItemsPerView(5);
       } else if (width >= 1024) {
         // lg screens: 4 items
-        setItemsPerView(4)
+        setItemsPerView(4);
       } else if (width >= 768) {
         // md screens: 3 items
-        setItemsPerView(3)
+        setItemsPerView(3);
       } else {
         // sm screens: 2 items (minimum)
-        setItemsPerView(2)
+        setItemsPerView(2);
       }
-    }
+    };
 
-    calculateItemsPerView()
-    window.addEventListener('resize', calculateItemsPerView)
-    return () => window.removeEventListener('resize', calculateItemsPerView)
-  }, [])
+    calculateItemsPerView();
+    window.addEventListener("resize", calculateItemsPerView);
+    return () => window.removeEventListener("resize", calculateItemsPerView);
+  }, []);
 
-  const maxIndex = Math.max(0, updates.length - itemsPerView)
-  const canScrollPrev = currentIndex > 0
-  const canScrollNext = currentIndex < maxIndex
+  const maxIndex = Math.max(0, updates.length - itemsPerView);
+  const canScrollPrev = currentIndex > 0;
+  const canScrollNext = currentIndex < maxIndex;
 
   const scrollPrev = () => {
     if (canScrollPrev) {
-      setCurrentIndex((prev) => Math.max(0, prev - itemsPerView))
+      setCurrentIndex((prev) => Math.max(0, prev - itemsPerView));
     }
-  }
+  };
 
   const scrollNext = () => {
     if (canScrollNext) {
-      setCurrentIndex((prev) => Math.min(maxIndex, prev + itemsPerView))
+      setCurrentIndex((prev) => Math.min(maxIndex, prev + itemsPerView));
     }
-  }
+  };
 
   // Scroll container to show current batch
   useEffect(() => {
     if (containerRef.current) {
-      const cardWidth = 320 // w-80 = 320px
-      const gap = 24 // gap-6 = 24px
-      const scrollPosition = currentIndex * (cardWidth + gap)
+      const cardWidth = 320; // w-80 = 320px
+      const gap = 24; // gap-6 = 24px
+      const scrollPosition = currentIndex * (cardWidth + gap);
       containerRef.current.scrollTo({
         left: scrollPosition,
-        behavior: 'smooth',
-      })
+        behavior: "smooth",
+      });
     }
-  }, [currentIndex, itemsPerView])
+  }, [currentIndex, itemsPerView]);
 
   if (updates.length === 0) {
-    return <p className="text-muted-foreground">No updates yet.</p>
+    return <p className="text-muted-foreground">No updates yet.</p>;
   }
 
   return (
@@ -80,25 +80,21 @@ export default function UpdatesCarousel({ updates }: UpdatesCarouselProps) {
         ref={containerRef}
         className="flex gap-6 overflow-x-auto scrollbar-hide"
         onWheel={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
+          e.preventDefault();
+          e.stopPropagation();
         }}
         onTouchMove={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
+          e.preventDefault();
+          e.stopPropagation();
         }}
-        style={{ 
-          scrollbarWidth: 'none', 
-          msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch'
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          WebkitOverflowScrolling: "touch",
         }}
       >
         {updates.map((update) => (
-          <UpdateCard
-            key={update.id}
-            {...update}
-            className="flex-shrink-0 w-80"
-          />
+          <UpdateCard key={update.id} {...update} className="flex-shrink-0 w-80" />
         ))}
       </div>
 
@@ -134,6 +130,5 @@ export default function UpdatesCarousel({ updates }: UpdatesCarouselProps) {
         </>
       )}
     </div>
-  )
+  );
 }
-

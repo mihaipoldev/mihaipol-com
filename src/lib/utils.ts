@@ -11,9 +11,9 @@ export function cn(...inputs: ClassValue[]) {
  * @returns Formatted date string or empty string if null
  */
 export function formatDate(dateString: string | null): string {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'long' })
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { day: "numeric", month: "long" });
 }
 
 /**
@@ -22,8 +22,8 @@ export function formatDate(dateString: string | null): string {
  * @returns Formatted date string
  */
 export function formatEventDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'long' })
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { day: "numeric", month: "long" });
 }
 
 /**
@@ -33,7 +33,7 @@ export function formatEventDate(dateString: string): string {
  * @returns Formatted date string or empty string if null
  */
 export function formatDetailDate(dateString: string | null): string {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
 }

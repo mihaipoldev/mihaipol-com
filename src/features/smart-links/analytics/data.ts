@@ -80,7 +80,12 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
 
   // For grouped stats, fetch a capped set and reduce in memory (MVP).
   const sinceISO = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const [{ data: albumPageViews = [] }, { data: linkClicks = [] }, { data: eventsForGeo = [] }, { data: recentEvents = [] }] = await Promise.all([
+  const [
+    { data: albumPageViews = [] },
+    { data: linkClicks = [] },
+    { data: eventsForGeo = [] },
+    { data: recentEvents = [] },
+  ] = await Promise.all([
     supabase
       .from("analytics_events")
       .select("entity_id")
@@ -121,7 +126,9 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   }, {});
 
   // We need to map album_link -> album_id & platform
-  const { data: albumLinks = [] } = await supabase.from("album_links").select("id, album_id, platform_id");
+  const { data: albumLinks = [] } = await supabase
+    .from("album_links")
+    .select("id, album_id, platform_id");
   const albumIdByLinkId = new Map<string, string>();
   const platformIdByLinkId = new Map<string, string | null>();
   for (const l of albumLinks as any[]) {
@@ -161,10 +168,13 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   }
   const visitsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
   const clicksByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
-  for (const ev of (recentEvents as any[])) {
+  for (const ev of recentEvents as any[]) {
     const key = toDayKey(ev.created_at);
     if (!(key in visitsByDay)) continue;
-    if (ev.event_type === "page_view" || (ev.event_type === "section_view" && ev.entity_type === "site_section")) {
+    if (
+      ev.event_type === "page_view" ||
+      (ev.event_type === "section_view" && ev.entity_type === "site_section")
+    ) {
       visitsByDay[key] += 1;
     } else if (ev.event_type === "link_click") {
       clicksByDay[key] += 1;
@@ -174,12 +184,22 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   const clicksSeries = dayKeys.map((k) => ({ date: k, count: clicksByDay[k] || 0 }));
 
   // Build per-album rows
-  const perAlbumRows = albumsSafe.map((a: any) => {
-    const pv = viewsByAlbumId[a.id] || 0;
-    const cl = clicksByAlbumId[a.id] || 0;
-    const ctr = pv > 0 ? (cl / pv) * 100 : 0;
-    return { id: a.id, title: a.title, slug: a.slug, coverImageUrl: a.cover_image_url, pageViews: pv, clicks: cl, ctr };
-  }).filter(row => row.pageViews > 0 || row.clicks > 0)
+  const perAlbumRows = albumsSafe
+    .map((a: any) => {
+      const pv = viewsByAlbumId[a.id] || 0;
+      const cl = clicksByAlbumId[a.id] || 0;
+      const ctr = pv > 0 ? (cl / pv) * 100 : 0;
+      return {
+        id: a.id,
+        title: a.title,
+        slug: a.slug,
+        coverImageUrl: a.cover_image_url,
+        pageViews: pv,
+        clicks: cl,
+        ctr,
+      };
+    })
+    .filter((row) => row.pageViews > 0 || row.clicks > 0)
     .sort((a, b) => b.pageViews - a.pageViews);
 
   // Build per-platform rows
@@ -198,4 +218,3 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     topCountries,
   };
 }
-

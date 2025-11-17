@@ -23,4 +23,3 @@ export default function TrackView({ eventType, entityType, entityId, metadata }:
 
   return null;
 }
-

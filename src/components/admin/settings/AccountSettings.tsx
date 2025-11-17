@@ -1,29 +1,29 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Camera, Crown, Save } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FormField } from "@/components/admin/forms/FormField"
-import { ShadowInput } from "@/components/admin/ShadowInput"
-import { ShadowButton } from "@/components/admin/ShadowButton"
-import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
+import { useState } from "react";
+import { Camera, Crown, Save } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormField } from "@/components/admin/forms/FormField";
+import { ShadowInput } from "@/components/admin/ShadowInput";
+import { ShadowButton } from "@/components/admin/ShadowButton";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function AccountSettings() {
-  const [displayName, setDisplayName] = useState("Mihai Pol")
-  const [email, setEmail] = useState("mihaipolbrasov@gmail.com")
-  const [phone, setPhone] = useState("+40773768874")
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
+  const [displayName, setDisplayName] = useState("Mihai Pol");
+  const [email, setEmail] = useState("mihaipolbrasov@gmail.com");
+  const [phone, setPhone] = useState("+40773768874");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSave = () => {
     // Placeholder - will be implemented when auth system is in place
-    toast.info("Account settings will be saved when authentication system is implemented")
-  }
+    toast.info("Account settings will be saved when authentication system is implemented");
+  };
 
   return (
     <div className="space-y-6">
@@ -36,9 +36,7 @@ export function AccountSettings() {
             <div className="relative">
               <Avatar className="h-20 w-20">
                 <AvatarImage src="" alt="Profile" />
-                <AvatarFallback className="text-lg bg-muted">
-                  MP
-                </AvatarFallback>
+                <AvatarFallback className="text-lg bg-muted">MP</AvatarFallback>
               </Avatar>
               <Button
                 variant="outline"
@@ -134,6 +132,5 @@ export function AccountSettings() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-

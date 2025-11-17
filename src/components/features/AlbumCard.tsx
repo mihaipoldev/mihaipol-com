@@ -1,15 +1,15 @@
-import Link from 'next/link'
-import { cn } from '@/lib/utils'
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export type AlbumCardProps = {
-  id: string
-  slug: string
-  title: string
-  cover_image_url?: string | null
-  labelName?: string | null
-  release_date?: string | null
-  className?: string
-}
+  id: string;
+  slug: string;
+  title: string;
+  cover_image_url?: string | null;
+  labelName?: string | null;
+  release_date?: string | null;
+  className?: string;
+};
 
 export default function AlbumCard({
   id,
@@ -21,10 +21,7 @@ export default function AlbumCard({
   className,
 }: AlbumCardProps) {
   return (
-    <Link
-      href={`/dev/albums/${slug}`}
-      className={cn('group', className)}
-    >
+    <Link href={`/dev/albums/${slug}`} className={cn("group", className)}>
       <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
         <div className="aspect-square bg-muted overflow-hidden rounded-lg">
           {cover_image_url ? (
@@ -44,14 +41,9 @@ export default function AlbumCard({
             <span className="relative z-10">{title}</span>
             <span className="absolute bottom-0 left-0 w-0 h-px bg-foreground group-hover:w-full transition-all duration-300 ease-out"></span>
           </h3>
-          {labelName && (
-            <p className="text-sm text-muted-foreground mb-1">
-              {labelName}
-            </p>
-          )}
+          {labelName && <p className="text-sm text-muted-foreground mb-1">{labelName}</p>}
         </div>
       </div>
     </Link>
-  )
+  );
 }
-

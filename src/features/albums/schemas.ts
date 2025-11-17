@@ -13,12 +13,12 @@ export const albumCreateSchema = z.object({
 });
 
 // More lenient UUID validation that accepts any UUID-like string
-const uuidLike = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, {
-  message: "Invalid UUID format"
-})
+const uuidLike = z
+  .string()
+  .regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, {
+    message: "Invalid UUID format",
+  });
 
 export const albumUpdateSchema = albumCreateSchema.partial().extend({
   id: uuidLike,
 });
-
-

@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
-import { Check, ChevronRight, Circle } from "lucide-react"
+import * as React from "react";
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import { Check, ChevronRight, Circle } from "lucide-react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-const DropdownMenu = DropdownMenuPrimitive.Root
+const DropdownMenu = DropdownMenuPrimitive.Root;
 
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 
-const DropdownMenuGroup = DropdownMenuPrimitive.Group
+const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 
-const DropdownMenuPortal = DropdownMenuPrimitive.Portal
+const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
 
-const DropdownMenuSub = DropdownMenuPrimitive.Sub
+const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 
-const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
+const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 
 const DropdownMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
-    inset?: boolean
+    inset?: boolean;
   }
 >(({ className, inset, children, ...props }, ref) => (
   <DropdownMenuPrimitive.SubTrigger
@@ -36,59 +36,58 @@ const DropdownMenuSubTrigger = React.forwardRef<
     {children}
     <ChevronRight className="ml-auto" />
   </DropdownMenuPrimitive.SubTrigger>
-))
-DropdownMenuSubTrigger.displayName =
-  DropdownMenuPrimitive.SubTrigger.displayName
+));
+DropdownMenuSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayName;
 
 const DropdownMenuSubContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
 >(({ className, ...props }, ref) => {
   // Get the background color from the preset-balanced element if it exists
-  const [bgColor, setBgColor] = React.useState('hsl(var(--background))')
-  const [textColor, setTextColor] = React.useState('hsl(var(--foreground))')
+  const [bgColor, setBgColor] = React.useState("hsl(var(--background))");
+  const [textColor, setTextColor] = React.useState("hsl(var(--foreground))");
 
   React.useEffect(() => {
     // Find the preset-balanced element to get its CSS variable values
-    const presetElement = document.querySelector('.preset-balanced')
+    const presetElement = document.querySelector(".preset-balanced");
     if (presetElement) {
-      const computed = getComputedStyle(presetElement)
+      const computed = getComputedStyle(presetElement);
       // Get CSS variable values
-      const bgVar = computed.getPropertyValue('--background').trim()
-      const fgVar = computed.getPropertyValue('--foreground').trim()
-      
+      const bgVar = computed.getPropertyValue("--background").trim();
+      const fgVar = computed.getPropertyValue("--foreground").trim();
+
       // Construct HSL color strings from the variable values
       // Variables are in format: "199 0% 100%" or "199 1% 10%"
       if (bgVar) {
-        setBgColor(`hsl(${bgVar})`)
+        setBgColor(`hsl(${bgVar})`);
       }
       if (fgVar) {
-        setTextColor(`hsl(${fgVar})`)
+        setTextColor(`hsl(${fgVar})`);
       }
     } else {
       // Fallback: try to get from body if preset-balanced doesn't exist
-      const bodyComputed = getComputedStyle(document.body)
-      const bgVar = bodyComputed.getPropertyValue('--background').trim()
-      const fgVar = bodyComputed.getPropertyValue('--foreground').trim()
+      const bodyComputed = getComputedStyle(document.body);
+      const bgVar = bodyComputed.getPropertyValue("--background").trim();
+      const fgVar = bodyComputed.getPropertyValue("--foreground").trim();
       if (bgVar) {
-        setBgColor(`hsl(${bgVar})`)
+        setBgColor(`hsl(${bgVar})`);
       }
       if (fgVar) {
-        setTextColor(`hsl(${fgVar})`)
+        setTextColor(`hsl(${fgVar})`);
       }
     }
-  }, [])
+  }, []);
 
   // Convert HSL color to HSLA with opacity for semi-transparent background
   const getBackgroundWithOpacity = (color: string) => {
-    if (color.includes('var(--')) {
+    if (color.includes("var(--")) {
       // For CSS variables, use the modern syntax: hsl(var(--background) / 0.85)
-      return color.replace('hsl(', 'hsl(').replace(')', ' / 0.85)')
+      return color.replace("hsl(", "hsl(").replace(")", " / 0.85)");
     } else {
       // For computed HSL values, convert to HSLA
-      return color.replace('hsl(', 'hsla(').replace(')', ' / 0.85)')
+      return color.replace("hsl(", "hsla(").replace(")", " / 0.85)");
     }
-  }
+  };
 
   return (
     <DropdownMenuPrimitive.SubContent
@@ -107,74 +106,73 @@ const DropdownMenuSubContent = React.forwardRef<
       )}
       {...props}
     />
-  )
-})
-DropdownMenuSubContent.displayName =
-  DropdownMenuPrimitive.SubContent.displayName
+  );
+});
+DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayName;
 
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
 >(({ className, sideOffset = 4, ...props }, ref) => {
   // Get the background color from the preset-balanced element if it exists
-  const [bgColor, setBgColor] = React.useState('hsl(var(--background))')
-  const [textColor, setTextColor] = React.useState('hsl(var(--foreground))')
+  const [bgColor, setBgColor] = React.useState("hsl(var(--background))");
+  const [textColor, setTextColor] = React.useState("hsl(var(--foreground))");
 
   React.useEffect(() => {
     const updateColors = () => {
       // Find the preset-balanced element to get its CSS variable values
-      const presetElement = document.querySelector('.preset-balanced')
+      const presetElement = document.querySelector(".preset-balanced");
       if (presetElement) {
-        const computed = getComputedStyle(presetElement)
+        const computed = getComputedStyle(presetElement);
         // Get CSS variable values
-        const bgVar = computed.getPropertyValue('--background').trim()
-        const fgVar = computed.getPropertyValue('--foreground').trim()
-        
+        const bgVar = computed.getPropertyValue("--background").trim();
+        const fgVar = computed.getPropertyValue("--foreground").trim();
+
         // Construct HSL color strings from the variable values
         // Variables are in format: "199 0% 100%" or "199 1% 10%"
         if (bgVar) {
-          setBgColor(`hsl(${bgVar})`)
+          setBgColor(`hsl(${bgVar})`);
         }
         if (fgVar) {
-          setTextColor(`hsl(${fgVar})`)
+          setTextColor(`hsl(${fgVar})`);
         }
       } else {
         // Fallback: try to get from body if preset-balanced doesn't exist
-        const bodyComputed = getComputedStyle(document.body)
-        const bgVar = bodyComputed.getPropertyValue('--background').trim()
-        const fgVar = bodyComputed.getPropertyValue('--foreground').trim()
+        const bodyComputed = getComputedStyle(document.body);
+        const bgVar = bodyComputed.getPropertyValue("--background").trim();
+        const fgVar = bodyComputed.getPropertyValue("--foreground").trim();
         if (bgVar) {
-          setBgColor(`hsl(${bgVar})`)
+          setBgColor(`hsl(${bgVar})`);
         }
         if (fgVar) {
-          setTextColor(`hsl(${fgVar})`)
+          setTextColor(`hsl(${fgVar})`);
         }
       }
-    }
-    
+    };
+
     // Update immediately
-    updateColors()
-    
+    updateColors();
+
     // Also update when dropdown opens (data-state changes)
-    const observer = new MutationObserver(updateColors)
-    const presetElement = document.querySelector('.preset-balanced')
+    const observer = new MutationObserver(updateColors);
+    const presetElement = document.querySelector(".preset-balanced");
     if (presetElement) {
-      observer.observe(presetElement, { attributes: true, attributeFilter: ['class'] })
+      observer.observe(presetElement, { attributes: true, attributeFilter: ["class"] });
     }
-    
-    return () => observer.disconnect()
-  }, [])
+
+    return () => observer.disconnect();
+  }, []);
 
   // Convert HSL color to HSLA with opacity for semi-transparent background
   const getBackgroundWithOpacity = (color: string) => {
-    if (color.includes('var(--')) {
+    if (color.includes("var(--")) {
       // For CSS variables, use the modern syntax: hsl(var(--background) / 0.85)
-      return color.replace('hsl(', 'hsl(').replace(')', ' / 0.85)')
+      return color.replace("hsl(", "hsl(").replace(")", " / 0.85)");
     } else {
       // For computed HSL values, convert to HSLA
-      return color.replace('hsl(', 'hsla(').replace(')', ' / 0.85)')
+      return color.replace("hsl(", "hsla(").replace(")", " / 0.85)");
     }
-  }
+  };
 
   return (
     <DropdownMenuPrimitive.Portal>
@@ -196,14 +194,14 @@ const DropdownMenuContent = React.forwardRef<
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
-  )
-})
-DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
+  );
+});
+DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
-    inset?: boolean
+    inset?: boolean;
   }
 >(({ className, inset, ...props }, ref) => (
   <DropdownMenuPrimitive.Item
@@ -215,8 +213,8 @@ const DropdownMenuItem = React.forwardRef<
     )}
     {...props}
   />
-))
-DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName
+));
+DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 
 const DropdownMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
@@ -238,9 +236,8 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     </span>
     {children}
   </DropdownMenuPrimitive.CheckboxItem>
-))
-DropdownMenuCheckboxItem.displayName =
-  DropdownMenuPrimitive.CheckboxItem.displayName
+));
+DropdownMenuCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName;
 
 const DropdownMenuRadioItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
@@ -261,26 +258,22 @@ const DropdownMenuRadioItem = React.forwardRef<
     </span>
     {children}
   </DropdownMenuPrimitive.RadioItem>
-))
-DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName
+));
+DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName;
 
 const DropdownMenuLabel = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Label>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> & {
-    inset?: boolean
+    inset?: boolean;
   }
 >(({ className, inset, ...props }, ref) => (
   <DropdownMenuPrimitive.Label
     ref={ref}
-    className={cn(
-      "px-2 py-1.5 text-sm font-semibold",
-      inset && "pl-8",
-      className
-    )}
+    className={cn("px-2 py-1.5 text-sm font-semibold", inset && "pl-8", className)}
     {...props}
   />
-))
-DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName
+));
+DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName;
 
 const DropdownMenuSeparator = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
@@ -291,21 +284,15 @@ const DropdownMenuSeparator = React.forwardRef<
     className={cn("-mx-1 my-1 h-px bg-muted", className)}
     {...props}
   />
-))
-DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName
+));
+DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName;
 
-const DropdownMenuShortcut = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLSpanElement>) => {
+const DropdownMenuShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
-    <span
-      className={cn("ml-auto text-xs tracking-widest opacity-60", className)}
-      {...props}
-    />
-  )
-}
-DropdownMenuShortcut.displayName = "DropdownMenuShortcut"
+    <span className={cn("ml-auto text-xs tracking-widest opacity-60", className)} {...props} />
+  );
+};
+DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
 
 export {
   DropdownMenu,
@@ -323,4 +310,4 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
-}
+};

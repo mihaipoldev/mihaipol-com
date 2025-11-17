@@ -1,3 +1,1 @@
-export { EditPlatformForm } from "@/features/platforms/components/EditPlatformForm"
-
-
+export { EditPlatformForm } from "@/features/platforms/components/EditPlatformForm";

@@ -1,29 +1,22 @@
-import { redirect } from "next/navigation"
-import { getPlatformBySlug } from "@/features/smart-links/platforms/data"
-import { EditPlatformForm } from "@/features/smart-links/platforms/components/EditPlatformForm"
+import { redirect } from "next/navigation";
+import { getPlatformBySlug } from "@/features/smart-links/platforms/data";
+import { EditPlatformForm } from "@/features/smart-links/platforms/components/EditPlatformForm";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 type PageProps = {
-  params: Promise<{ slug: string }>
-}
+  params: Promise<{ slug: string }>;
+};
 
 export default async function EditPlatformPage({ params }: PageProps) {
-  const { slug } = await params
-  const isNew = slug === "new"
+  const { slug } = await params;
+  const isNew = slug === "new";
 
-  const platform = isNew ? null : await getPlatformBySlug(slug)
+  const platform = isNew ? null : await getPlatformBySlug(slug);
 
   if (!isNew && !platform) {
-    redirect("/admin/platforms")
+    redirect("/admin/platforms");
   }
 
-  return (
-    <EditPlatformForm
-      id={platform?.id || "new"}
-      isNew={isNew}
-      initialPlatform={platform}
-    />
-  )
+  return <EditPlatformForm id={platform?.id || "new"} isNew={isNew} initialPlatform={platform} />;
 }
-

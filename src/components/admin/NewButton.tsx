@@ -26,14 +26,17 @@ export function NewButton({ className, options = [] }: NewButtonProps) {
   const router = useRouter();
 
   // Default options if none provided
-  const defaultOptions = options.length > 0 ? options : [
-    { label: "Album", onClick: () => router.push("/admin/albums/new/edit") },
-    { label: "Artist", onClick: () => router.push("/admin/artists/new/edit") },
-    { label: "Event", onClick: () => router.push("/admin/events/new/edit") },
-    { label: "Label", onClick: () => router.push("/admin/labels/new/edit") },
-    { label: "Update", onClick: () => router.push("/admin/updates/new/edit") },
-    { label: "Platform", onClick: () => router.push("/admin/platforms/new/edit") },
-  ];
+  const defaultOptions =
+    options.length > 0
+      ? options
+      : [
+          { label: "Album", onClick: () => router.push("/admin/albums/new/edit") },
+          { label: "Artist", onClick: () => router.push("/admin/artists/new/edit") },
+          { label: "Event", onClick: () => router.push("/admin/events/new/edit") },
+          { label: "Label", onClick: () => router.push("/admin/labels/new/edit") },
+          { label: "Update", onClick: () => router.push("/admin/updates/new/edit") },
+          { label: "Platform", onClick: () => router.push("/admin/platforms/new/edit") },
+        ];
 
   return (
     <div className={`flex items-center ${className || ""}`}>
@@ -47,7 +50,7 @@ export function NewButton({ className, options = [] }: NewButtonProps) {
                   variant="ghost"
                   size="sm"
                   className="no-shadow !shadow-[0_0_0_0_transparent] hover:!shadow-[0_0_0_0_transparent] dark:!shadow-[0_0_0_0_transparent] dark:hover:!shadow-[0_0_0_0_transparent] rounded-full h-8 w-8 transition-all duration-200 max-md:hover:bg-transparent md:hover:!bg-accent focus-visible:bg-transparent focus-visible:ring-0 p-0"
-                  style={{ boxShadow: 'none' }}
+                  style={{ boxShadow: "none" }}
                 >
                   <div className="h-8 w-8 rounded-full flex items-center justify-center">
                     {/* Inner circle with primary color */}
@@ -91,4 +94,3 @@ export function NewButton({ className, options = [] }: NewButtonProps) {
     </div>
   );
 }
-

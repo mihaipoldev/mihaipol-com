@@ -1,24 +1,18 @@
-"use client"
+"use client";
 
-import { ReactNode } from "react"
-import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
+import { ReactNode } from "react";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 type FormFieldProps = {
-  label?: string
-  required?: boolean
-  error?: string
-  children: ReactNode
-  className?: string
-}
+  label?: string;
+  required?: boolean;
+  error?: string;
+  children: ReactNode;
+  className?: string;
+};
 
-export function FormField({
-  label,
-  required,
-  error,
-  children,
-  className,
-}: FormFieldProps) {
+export function FormField({ label, required, error, children, className }: FormFieldProps) {
   return (
     <div className={cn("space-y-2", className)}>
       {label && (
@@ -28,10 +22,7 @@ export function FormField({
         </Label>
       )}
       {children}
-      {error && (
-        <p className="text-sm text-destructive">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
-  )
+  );
 }
-

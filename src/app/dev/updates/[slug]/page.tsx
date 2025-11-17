@@ -1,117 +1,114 @@
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
-import { getUpdateBySlug } from '@/features/updates/data'
-import { formatDetailDate } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { notFound } from "next/navigation";
+import { Calendar, ExternalLink } from "lucide-react";
+import { getUpdateBySlug } from "@/features/updates/data";
+import { formatUpdateDate } from "@/components/landing/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1000&q=80";
 
 interface UpdateDetailPageProps {
   params: Promise<{
-    slug: string
-  }>
+    slug: string;
+  }>;
 }
 
 export default async function UpdateDetailPage({ params }: UpdateDetailPageProps) {
-  const { slug } = await params
-  const update = await getUpdateBySlug(slug)
+  const { slug } = await params;
+  const update = await getUpdateBySlug(slug);
 
   if (!update) {
-    notFound()
+    notFound();
   }
 
+  const imageUrl = update.image_url ?? FALLBACK_IMAGE;
+  const updateDate = update.date ? new Date(update.date) : null;
+  const formattedDate = updateDate
+    ? updateDate.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : null;
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto w-full max-w-4xl py-16">
-        {/* Back Link */}
-        <Link
-          href="/dev/updates"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to updates
-        </Link>
-
-        {/* Hero Image */}
-        {update.image_url ? (
-          <div className="mb-8 rounded-lg overflow-hidden">
-            <img
-              src={update.image_url}
-              alt={update.title}
-              className="w-full h-auto object-cover aspect-video"
-            />
-          </div>
-        ) : (
-          <div className="mb-8 rounded-lg overflow-hidden bg-gradient-to-br from-muted to-muted/50 aspect-video flex items-center justify-center">
-            <div className="text-muted-foreground/50 text-sm">No image</div>
-          </div>
-        )}
-
-        {/* Meta Row (Category + Date) */}
-        <div className="flex items-center gap-4 mb-6">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-            Update
-          </span>
-          {update.date && (
-            <time className="text-sm text-muted-foreground">
-              {formatDetailDate(update.date)}
-            </time>
-          )}
-        </div>
-
-        {/* Title */}
-        <h1 className="text-4xl md:text-5xl font-bold mb-8 tracking-tight">
-          {update.title}
-        </h1>
-
-        {/* Description/Body */}
-        {update.description && (
-          <div className="prose prose-lg dark:prose-invert max-w-none mb-12">
-            <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-              {update.description.split('\n\n').map((paragraph: string, index: number) => (
-                <p key={index} className="mb-6 last:mb-0">
-                  {paragraph}
-                </p>
-              ))}
+    <div className="min-h-screen">
+      <div className="py-24 px-6">
+        <div className="container mx-auto px-8 max-w-4xl">
+          <div className="space-y-8">
+            {/* Hero Image */}
+            <div className="relative rounded-3xl overflow-hidden shadow-card-hover">
+              <img
+                src={imageUrl}
+                alt={update.title}
+                className="w-full h-auto object-cover aspect-video"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
             </div>
-          </div>
-        )}
 
-        {/* Optional External Link */}
-        {update.read_more_url && (
-          <div className="pt-8 border-t border-border">
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-            >
-              <a
-                href={update.read_more_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2"
-              >
-                Read more
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            {/* Meta and Title Section */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 flex-wrap">
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                  Update
+                </Badge>
+                {updateDate && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <time>{formatUpdateDate(update.date)}</time>
+                  </div>
+                )}
+              </div>
+
+              {/* Title */}
+              <h1 className="text-5xl lg:text-6xl font-bold text-gradient-sunset leading-tight">
+                {update.title}
+              </h1>
+
+              {/* Full Date */}
+              {formattedDate && <p className="text-muted-foreground">{formattedDate}</p>}
+            </div>
+
+            {/* Description/Body */}
+            {update.description && (
+              <Card className="p-8 lg:p-12 bg-card/80 backdrop-blur border-border/50">
+                <div className="prose prose-lg dark:prose-invert max-w-none">
+                  <div className="whitespace-pre-wrap text-foreground leading-relaxed">
+                    {update.description.split("\n\n").map((paragraph: string, index: number) => (
+                      <p key={index} className="mb-6 last:mb-0 text-muted-foreground text-lg">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {/* Optional External Link */}
+            {update.read_more_url && (
+              <div>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="group"
+                  style={{ borderRadius: "1rem" }}
+                  asChild
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-              </a>
-            </Button>
+                  <a href={update.read_more_url} target="_blank" rel="noopener noreferrer">
+                    Read more
+                    <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </a>
+                </Button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
-  )
+  );
 }
-

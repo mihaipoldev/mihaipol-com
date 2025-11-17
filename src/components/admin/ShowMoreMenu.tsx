@@ -77,7 +77,7 @@ export function ShowMoreMenu({
                   variant="ghost"
                   size="sm"
                   className="no-shadow !shadow-[0_0_0_0_transparent] hover:!shadow-[0_0_0_0_transparent] dark:!shadow-[0_0_0_0_transparent] dark:hover:!shadow-[0_0_0_0_transparent] rounded-full h-8 w-8 transition-all duration-200 max-md:hover:bg-transparent md:hover:!bg-accent focus-visible:bg-transparent focus-visible:ring-0 p-0"
-                  style={{ boxShadow: 'none' }}
+                  style={{ boxShadow: "none" }}
                 >
                   <div className="h-8 w-8 rounded-full flex items-center justify-center leading-9">
                     <FontAwesomeIcon
@@ -148,8 +148,7 @@ export function ShowMoreMenu({
                   disabled={option.disabled}
                   className={cn(
                     "cursor-pointer",
-                    option.variant === "destructive" &&
-                      "text-destructive focus:text-destructive"
+                    option.variant === "destructive" && "text-destructive focus:text-destructive"
                   )}
                 >
                   {option.icon && <span className="mr-2">{option.icon}</span>}
@@ -163,4 +162,3 @@ export function ShowMoreMenu({
     </div>
   );
 }
-

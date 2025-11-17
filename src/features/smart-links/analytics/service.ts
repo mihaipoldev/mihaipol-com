@@ -18,9 +18,32 @@ const SERVER_DEDUPE_WINDOW_MS = 1000;
 export function isBotUA(userAgent: string): boolean {
   const ua = userAgent.toLowerCase();
   const patterns = [
-    "bot","spider","crawler","crawl","preview","facebookexternalhit","whatsapp","telegrambot","slackbot","discordbot",
-    "twitterbot","linkedinbot","embedly","quora link preview","pinterestbot","bitlybot","vkshare","skypeuripreview",
-    "yandex","baiduspider","duckduckbot","bingbot","googlebot","applebot","ahrefsbot","semrushbot",
+    "bot",
+    "spider",
+    "crawler",
+    "crawl",
+    "preview",
+    "facebookexternalhit",
+    "whatsapp",
+    "telegrambot",
+    "slackbot",
+    "discordbot",
+    "twitterbot",
+    "linkedinbot",
+    "embedly",
+    "quora link preview",
+    "pinterestbot",
+    "bitlybot",
+    "vkshare",
+    "skypeuripreview",
+    "yandex",
+    "baiduspider",
+    "duckduckbot",
+    "bingbot",
+    "googlebot",
+    "applebot",
+    "ahrefsbot",
+    "semrushbot",
   ];
   return patterns.some((p) => ua.includes(p));
 }
@@ -49,4 +72,3 @@ export async function trackEvent(input: TrackEventInput) {
     metadata: input.metadata ?? null,
   });
 }
-

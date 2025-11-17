@@ -1,3 +1,1 @@
-export * from "@/features/platforms/data"
-
-
+export * from "@/features/platforms/data";

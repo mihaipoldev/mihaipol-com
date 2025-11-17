@@ -1,49 +1,40 @@
-import { supabase } from '@/lib/supabase'
+import { supabase } from "@/lib/supabase";
 
 export async function getAllLabels() {
   try {
     const { data, error } = await supabase
-      .from('labels')
-      .select('*')
-      .order('name', { ascending: true })
+      .from("labels")
+      .select("*")
+      .order("name", { ascending: true });
 
-    if (error) throw error
-    return data || []
+    if (error) throw error;
+    return data || [];
   } catch (error) {
-    console.error('Error fetching all labels:', error)
-    return []
+    console.error("Error fetching all labels:", error);
+    return [];
   }
 }
 
 export async function getLabelById(id: string) {
   try {
-    const { data, error } = await supabase
-      .from('labels')
-      .select('*')
-      .eq('id', id)
-      .single()
+    const { data, error } = await supabase.from("labels").select("*").eq("id", id).single();
 
-    if (error) throw error
-    return data || null
+    if (error) throw error;
+    return data || null;
   } catch (error) {
-    console.error('Error fetching label by id:', error)
-    return null
+    console.error("Error fetching label by id:", error);
+    return null;
   }
 }
 
 export async function getLabelBySlug(slug: string) {
   try {
-    const { data, error } = await supabase
-      .from('labels')
-      .select('*')
-      .eq('slug', slug)
-      .single()
+    const { data, error } = await supabase.from("labels").select("*").eq("slug", slug).single();
 
-    if (error) throw error
-    return data || null
+    if (error) throw error;
+    return data || null;
   } catch (error) {
-    console.error('Error fetching label by slug:', error)
-    return null
+    console.error("Error fetching label by slug:", error);
+    return null;
   }
 }
-

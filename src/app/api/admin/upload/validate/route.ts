@@ -1,23 +1,14 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server";
 
-const ALLOWED_MIME_TYPES = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-]
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { imageUrl } = body
+    const body = await request.json();
+    const { imageUrl } = body;
 
     if (!imageUrl || typeof imageUrl !== "string") {
-      return NextResponse.json(
-        { error: "No imageUrl provided", valid: false },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "No imageUrl provided", valid: false }, { status: 400 });
     }
 
     try {
@@ -27,51 +18,57 @@ export async function POST(request: NextRequest) {
         headers: {
           "User-Agent": "Mozilla/5.0",
         },
-      })
+      });
 
       if (!response.ok) {
         return NextResponse.json(
-          { valid: false, error: `Failed to fetch image: ${response.status} ${response.statusText}` },
+          {
+            valid: false,
+            error: `Failed to fetch image: ${response.status} ${response.statusText}`,
+          },
           { status: 200 }
-        )
+        );
       }
 
       // Check content-type header
-      const contentType = response.headers.get("content-type")
-      if (!contentType || !ALLOWED_MIME_TYPES.some(type => contentType.toLowerCase().includes(type.split("/")[1]))) {
+      const contentType = response.headers.get("content-type");
+      if (
+        !contentType ||
+        !ALLOWED_MIME_TYPES.some((type) => contentType.toLowerCase().includes(type.split("/")[1]))
+      ) {
         return NextResponse.json(
           { valid: false, error: `Invalid content type: ${contentType}. Expected image type.` },
           { status: 200 }
-        )
+        );
       }
 
       // Get the first few bytes to validate it's actually an image
-      const arrayBuffer = await response.arrayBuffer()
-      const buffer = Buffer.from(arrayBuffer)
-      
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
       // Check file signatures (magic numbers)
-      const isValidImage = validateImageSignature(buffer)
-      
+      const isValidImage = validateImageSignature(buffer);
+
       if (!isValidImage) {
         return NextResponse.json(
           { valid: false, error: "File does not appear to be a valid image" },
           { status: 200 }
-        )
+        );
       }
 
-      return NextResponse.json({ valid: true }, { status: 200 })
+      return NextResponse.json({ valid: true }, { status: 200 });
     } catch (fetchError: any) {
       return NextResponse.json(
         { valid: false, error: `Failed to validate image: ${fetchError.message}` },
         { status: 200 }
-      )
+      );
     }
   } catch (error: any) {
-    console.error("Error validating image:", error)
+    console.error("Error validating image:", error);
     return NextResponse.json(
       { valid: false, error: error.message || "Failed to validate image" },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -80,33 +77,32 @@ export async function POST(request: NextRequest) {
  */
 function validateImageSignature(buffer: Buffer): boolean {
   if (buffer.length < 4) {
-    return false
+    return false;
   }
 
   // JPEG: FF D8 FF
   if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
-    return true
+    return true;
   }
 
   // PNG: 89 50 4E 47
   if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
-    return true
+    return true;
   }
 
   // GIF: 47 49 46 38 (GIF8)
   if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38) {
-    return true
+    return true;
   }
 
   // WebP: Check for RIFF...WEBP
   if (buffer.length >= 12) {
-    const riff = buffer.toString("ascii", 0, 4)
-    const webp = buffer.toString("ascii", 8, 12)
+    const riff = buffer.toString("ascii", 0, 4);
+    const webp = buffer.toString("ascii", 8, 12);
     if (riff === "RIFF" && webp === "WEBP") {
-      return true
+      return true;
     }
   }
 
-  return false
+  return false;
 }
-

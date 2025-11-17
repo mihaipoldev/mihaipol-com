@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* City at night - dark urban aesthetic */
+    --background: 220 18% 8%;
+    --foreground: 210 20% 95%;
+
+    --card: 220 16% 12%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 220 16% 12%;
+    --popover-foreground: 210 20% 95%;
+
+    /* Deep teal primary */
+    --primary: 186 68% 42%;
+    --primary-foreground: 210 20% 98%;
+
+    /* Charcoal secondary */
+    --secondary: 220 14% 18%;
+    --secondary-foreground: 210 20% 95%;
+
+    --muted: 220 12% 16%;
+    --muted-foreground: 215 15% 60%;
+
+    /* Violet accent */
+    --accent: 265 70% 55%;
+    --accent-foreground: 210 20% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 220 12% 20%;
+    --input: 220 12% 20%;
+    --ring: 186 68% 42%;
+
+    --radius: 0.75rem;
+
+    /* City glow gradient backgrounds */
+    --gradient-dark: linear-gradient(135deg, hsl(220, 18%, 8%) 0%, hsl(220, 16%, 10%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220, 18%, 8%) 0%, hsl(220, 16%, 12%) 50%, hsl(186, 40%, 12%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(265, 50%, 15%) 0%, hsl(220, 16%, 12%) 100%);
+    
+    /* Glow effects */
+    --glow-primary: 0 0 40px hsl(186 68% 42% / 0.3);
+    --glow-accent: 0 0 40px hsl(265 70% 55% / 0.3);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .gradient-dark {
+    background: var(--gradient-dark);
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  .glow-accent {
+    box-shadow: var(--glow-accent);
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-blob {
+    animation: blob 20s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes blob {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+  }
+}

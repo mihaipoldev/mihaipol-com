@@ -1,7 +1,7 @@
-import Script from "next/script"
-import { getCurrentUser } from "@/lib/auth"
-import { getSupabaseServer } from "@/lib/supabase-ssr"
-import { hexToHsl } from "@/lib/colorUtils"
+import Script from "next/script";
+import { getCurrentUser } from "@/lib/auth";
+import { getSupabaseServer } from "@/lib/supabase-ssr";
+import { hexToHsl } from "@/lib/colorUtils";
 
 /**
  * Server component that injects the user's primary color as a blocking script
@@ -10,34 +10,34 @@ import { hexToHsl } from "@/lib/colorUtils"
  */
 export async function AdminColorStyle() {
   try {
-    const user = await getCurrentUser()
+    const user = await getCurrentUser();
     if (!user?.id) {
-      return null
+      return null;
     }
 
     // Fetch style_color using server-side client
-    const supabase = await getSupabaseServer()
+    const supabase = await getSupabaseServer();
     const { data, error } = await supabase
-      .from('user_settings')
-      .select('style_color')
-      .eq('user_id', user.id)
-      .maybeSingle()
+      .from("user_settings")
+      .select("style_color")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
     if (error || !data?.style_color) {
-      return null
+      return null;
     }
 
-    const styleColor = data.style_color
+    const styleColor = data.style_color;
     if (!styleColor) {
-      return null
+      return null;
     }
 
-    const hsl = hexToHsl(styleColor)
+    const hsl = hexToHsl(styleColor);
     if (!hsl) {
-      return null
+      return null;
     }
 
-    const primaryValue = `${hsl.h} ${hsl.s}% ${hsl.l}%`
+    const primaryValue = `${hsl.h} ${hsl.s}% ${hsl.l}%`;
 
     // Use beforeInteractive script to inject styles IMMEDIATELY and SYNCHRONOUSLY
     // This runs before ANY other JavaScript, preventing any flash
@@ -115,10 +115,9 @@ export async function AdminColorStyle() {
           }}
         />
       </>
-    )
+    );
   } catch (error) {
-    console.error("Failed to initialize color style:", error)
-    return null
+    console.error("Failed to initialize color style:", error);
+    return null;
   }
 }
-

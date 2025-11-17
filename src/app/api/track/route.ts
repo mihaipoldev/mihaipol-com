@@ -63,9 +63,11 @@ export async function POST(req: NextRequest) {
   const res = new NextResponse(null, { status: 204 });
   // Persist session for ~30 days
   if (sessionId && !cookies.get("mp_session")?.value) {
-    res.cookies.set("mp_session", sessionId, { path: "/", maxAge: 60 * 60 * 24 * 30, httpOnly: false });
+    res.cookies.set("mp_session", sessionId, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+      httpOnly: false,
+    });
   }
   return res;
 }
-
-

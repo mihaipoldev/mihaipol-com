@@ -29,9 +29,9 @@ export default function PageTransition({ children }: PageTransitionProps) {
       key={pathname}
       initial={isFirstMount.current ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ 
-        duration: 0.25, 
-        ease: [0.4, 0, 0.2, 1] // Custom easing for smooth transition
+      transition={{
+        duration: 0.25,
+        ease: [0.4, 0, 0.2, 1], // Custom easing for smooth transition
       }}
       className="flex-1"
     >

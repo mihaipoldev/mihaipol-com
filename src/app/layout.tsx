@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { headers } from "next/headers";
 
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminColorStyle } from "@/components/admin/AdminColorStyle";
 import { InstantColorApply } from "@/components/admin/InstantColorApply";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { PublicThemeProvider } from "@/components/theme/PublicThemeProvider";
 import "@/lib/fontawesome";
 
 import "./globals.css";
@@ -38,19 +38,31 @@ export default async function RootLayout({
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || "";
   const isAdminPage = pathname.startsWith("/admin") && pathname !== "/admin/login";
+  const isRootPage = pathname === "/";
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
+      >
         {/* AdminColorStyle applies server-side color IMMEDIATELY from database (runs first) */}
         {isAdminPage && <AdminColorStyle />}
         {/* InstantColorApply applies color from sessionStorage as fallback (runs after, only if AdminColorStyle didn't apply) */}
         <InstantColorApply />
         <QueryProvider>
-          <ThemeProvider>
-            {children}
-            <Toaster />
-          </ThemeProvider>
+          {/* Root page needs PublicThemeProvider since it has no layout wrapper */}
+          {isRootPage ? (
+            <PublicThemeProvider>
+              {children}
+              <Toaster />
+            </PublicThemeProvider>
+          ) : (
+            <>
+              {children}
+              <Toaster />
+            </>
+          )}
         </QueryProvider>
       </body>
     </html>

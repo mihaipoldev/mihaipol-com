@@ -1,16 +1,16 @@
-import Link from 'next/link'
-import { formatDate } from '@/lib/utils'
-import { cn } from '@/lib/utils'
+import Link from "next/link";
+import { formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export type UpdateCardProps = {
-  id: string
-  slug: string
-  title: string
-  image_url?: string | null
-  date?: string | null
-  description?: string | null
-  className?: string
-}
+  id: string;
+  slug: string;
+  title: string;
+  image_url?: string | null;
+  date?: string | null;
+  description?: string | null;
+  className?: string;
+};
 
 export default function UpdateCard({
   id,
@@ -22,10 +22,7 @@ export default function UpdateCard({
   className,
 }: UpdateCardProps) {
   return (
-    <Link
-      href={`/dev/updates/${slug}`}
-      className={cn('flex-shrink-0 w-80 group', className)}
-    >
+    <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)}>
       <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
         {image_url && (
           <div className="aspect-video bg-muted overflow-hidden rounded-lg">
@@ -41,19 +38,12 @@ export default function UpdateCard({
             <span className="relative z-10">{title}</span>
             <span className="absolute bottom-0 left-0 w-0 h-px bg-foreground group-hover:w-full transition-all duration-300 ease-out"></span>
           </h3>
-          {date && (
-            <p className="text-sm text-muted-foreground mb-2">
-              {formatDate(date)}
-            </p>
-          )}
+          {date && <p className="text-sm text-muted-foreground mb-2">{formatDate(date)}</p>}
           {description && (
-            <p className="text-sm text-muted-foreground line-clamp-3">
-              {description}
-            </p>
+            <p className="text-sm text-muted-foreground line-clamp-3">{description}</p>
           )}
         </div>
       </div>
     </Link>
-  )
+  );
 }
-

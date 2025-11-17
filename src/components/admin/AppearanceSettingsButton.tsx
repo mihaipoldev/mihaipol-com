@@ -3,13 +3,7 @@
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaintbrush } from "@fortawesome/free-solid-svg-icons";
 import ThemeToggle from "@/components/theme/ThemeToggle";
@@ -18,9 +12,7 @@ interface AppearanceSettingsButtonProps {
   className?: string;
 }
 
-export function AppearanceSettingsButton({
-  className,
-}: AppearanceSettingsButtonProps) {
+export function AppearanceSettingsButton({ className }: AppearanceSettingsButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -73,4 +65,3 @@ export function AppearanceSettingsButton({
     </div>
   );
 }
-

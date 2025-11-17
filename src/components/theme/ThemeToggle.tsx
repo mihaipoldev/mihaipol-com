@@ -26,7 +26,11 @@ export default function ThemeToggle() {
       className="text-foreground/70 hover:text-foreground hover:bg-accent/50 transition-all duration-300"
     >
       {mounted ? (
-        isDark ? <Sun className="size-4" /> : <Moon className="size-4" />
+        isDark ? (
+          <Sun className="size-4" />
+        ) : (
+          <Moon className="size-4" />
+        )
       ) : (
         <Moon className="size-4" />
       )}

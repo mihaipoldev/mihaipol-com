@@ -5,11 +5,11 @@ import { hexToHsl } from "@/lib/colorUtils";
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  
+
   // Set pathname in a custom header for server components to access
   const response = NextResponse.next();
   response.headers.set("x-pathname", pathname);
-  
+
   // For admin pages, inject color style tag into HTML response
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     try {
@@ -32,13 +32,15 @@ export async function middleware(request: NextRequest) {
         }
       );
 
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (user?.id) {
         const { data } = await supabase
-          .from('user_settings')
-          .select('style_color')
-          .eq('user_id', user.id)
+          .from("user_settings")
+          .select("style_color")
+          .eq("user_id", user.id)
           .maybeSingle();
 
         if (data?.style_color) {
@@ -46,29 +48,26 @@ export async function middleware(request: NextRequest) {
           if (hsl) {
             const primaryValue = `${hsl.h} ${hsl.s}% ${hsl.l}%`;
             const styleTag = `<style id="primary-color-inline">:root,html,body,.preset-balanced,body.preset-balanced{--brand-h:${hsl.h}!important;--brand-s:${hsl.s}%!important;--brand-l:${hsl.l}%!important;--primary:${primaryValue}!important;}</style>`;
-            
+
             // Use transform stream to inject style tag into HTML head
             // Buffer chunks to handle cases where <head> is split across chunks
-            let buffer = '';
+            let buffer = "";
             let headInjected = false;
-            
+
             const stream = new TransformStream({
               transform(chunk, controller) {
                 buffer += new TextDecoder().decode(chunk);
-                
+
                 // Check if we have the <head> tag and haven't injected yet
                 if (!headInjected && /<head[^>]*>/i.test(buffer)) {
-                  buffer = buffer.replace(
-                    /(<head[^>]*>)/i,
-                    `$1${styleTag}`
-                  );
+                  buffer = buffer.replace(/(<head[^>]*>)/i, `$1${styleTag}`);
                   headInjected = true;
                 }
-                
+
                 // If we've injected or buffer is getting large, flush it
                 if (headInjected || buffer.length > 8192) {
                   controller.enqueue(new TextEncoder().encode(buffer));
-                  buffer = '';
+                  buffer = "";
                 }
               },
               flush(controller) {
@@ -91,7 +90,7 @@ export async function middleware(request: NextRequest) {
       console.error("Failed to inject color in middleware:", error);
     }
   }
-  
+
   return response;
 }
 
@@ -107,4 +106,3 @@ export const config = {
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
-

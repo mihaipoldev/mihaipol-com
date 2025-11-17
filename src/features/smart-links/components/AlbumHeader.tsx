@@ -1,3 +1,7 @@
+"use client";
+
+import { useAlbumColors } from "@/components/landing/AlbumGradientBackground";
+
 type AlbumHeaderProps = {
   title: string;
   artistName?: string | null;
@@ -5,16 +9,18 @@ type AlbumHeaderProps = {
 };
 
 export default function AlbumHeader({ title, artistName, catalog_number }: AlbumHeaderProps) {
+  const { textColor, mutedColor } = useAlbumColors();
+
   return (
     <div className="space-y-2 text-center">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 sm:text-3xl">
+      <h1 className="text-2xl font-bold sm:text-3xl" style={{ color: textColor }}>
         {artistName ? `${artistName} - ${title}` : title}
       </h1>
       {catalog_number ? (
-        <p className="text-sm text-gray-600 dark:text-gray-400">{catalog_number}</p>
+        <p className="text-sm" style={{ color: mutedColor }}>
+          {catalog_number}
+        </p>
       ) : null}
     </div>
   );
 }
-
-

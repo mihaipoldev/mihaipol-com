@@ -1,5 +1,5 @@
-import { supabase } from '@/lib/supabase'
-import type { UserSettings, UserColor } from './types'
+import { supabase } from "@/lib/supabase";
+import type { UserSettings, UserColor } from "./types";
 
 /**
  * Fetch user settings record
@@ -7,20 +7,20 @@ import type { UserSettings, UserColor } from './types'
 export async function fetchUserSettings(userId: string): Promise<UserSettings | null> {
   try {
     const { data, error } = await supabase
-      .from('user_settings')
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle()
+      .from("user_settings")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
 
     if (error) {
-      console.error('Error fetching user settings:', error)
-      return null
+      console.error("Error fetching user settings:", error);
+      return null;
     }
 
-    return data
+    return data;
   } catch (error) {
-    console.error('Error fetching user settings:', error)
-    return null
+    console.error("Error fetching user settings:", error);
+    return null;
   }
 }
 
@@ -30,20 +30,20 @@ export async function fetchUserSettings(userId: string): Promise<UserSettings | 
 export async function fetchStyleColor(userId: string): Promise<string | null> {
   try {
     const { data, error } = await supabase
-      .from('user_settings')
-      .select('style_color')
-      .eq('user_id', userId)
-      .maybeSingle()
+      .from("user_settings")
+      .select("style_color")
+      .eq("user_id", userId)
+      .maybeSingle();
 
     if (error) {
-      console.error('Error fetching style color:', error)
-      return null
+      console.error("Error fetching style color:", error);
+      return null;
     }
 
-    return data?.style_color || null
+    return data?.style_color || null;
   } catch (error) {
-    console.error('Error fetching style color:', error)
-    return null
+    console.error("Error fetching style color:", error);
+    return null;
   }
 }
 
@@ -53,20 +53,20 @@ export async function fetchStyleColor(userId: string): Promise<string | null> {
 export async function fetchUserColors(userId: string): Promise<UserColor[]> {
   try {
     const { data, error } = await supabase
-      .from('user_colors')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .from("user_colors")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error('Error fetching user colors:', error)
-      return []
+      console.error("Error fetching user colors:", error);
+      return [];
     }
 
-    return data || []
+    return data || [];
   } catch (error) {
-    console.error('Error fetching user colors:', error)
-    return []
+    console.error("Error fetching user colors:", error);
+    return [];
   }
 }
 
@@ -76,24 +76,23 @@ export async function fetchUserColors(userId: string): Promise<UserColor[]> {
 export async function fetchUserColor(userId: string, colorId: string): Promise<UserColor | null> {
   try {
     const { data, error } = await supabase
-      .from('user_colors')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('id', colorId)
-      .maybeSingle()
+      .from("user_colors")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("id", colorId)
+      .maybeSingle();
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return null // Color not found
+      if (error.code === "PGRST116") {
+        return null; // Color not found
       }
-      console.error('Error fetching user color:', error)
-      return null
+      console.error("Error fetching user color:", error);
+      return null;
     }
 
-    return data
+    return data;
   } catch (error) {
-    console.error('Error fetching user color:', error)
-    return null
+    console.error("Error fetching user color:", error);
+    return null;
   }
 }
-

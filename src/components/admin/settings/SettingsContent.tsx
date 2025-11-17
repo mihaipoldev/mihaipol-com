@@ -1,42 +1,41 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { AccountSettings } from "./AccountSettings"
-import { AppearanceSettings } from "./AppearanceSettings"
-import { PreferencesSettings } from "./PreferencesSettings"
+import { motion } from "framer-motion";
+import { AccountSettings } from "./AccountSettings";
+import { AppearanceSettings } from "./AppearanceSettings";
+import { PreferencesSettings } from "./PreferencesSettings";
 
-type SettingsSection = "account" | "appearance" | "preferences"
+type SettingsSection = "account" | "appearance" | "preferences";
 
 interface SettingsContentProps {
-  activeSection: SettingsSection
+  activeSection: SettingsSection;
 }
 
 export function SettingsContent({ activeSection }: SettingsContentProps) {
   const getContent = () => {
     switch (activeSection) {
       case "account":
-        return <AccountSettings />
+        return <AccountSettings />;
       case "appearance":
-        return <AppearanceSettings />
+        return <AppearanceSettings />;
       case "preferences":
-        return <PreferencesSettings />
+        return <PreferencesSettings />;
       default:
-        return <AccountSettings />
+        return <AccountSettings />;
     }
-  }
+  };
 
   return (
     <motion.div
       key={activeSection}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ 
-        duration: 0.25, 
-        ease: [0.4, 0, 0.2, 1] 
+      transition={{
+        duration: 0.25,
+        ease: [0.4, 0, 0.2, 1],
       }}
     >
       {getContent()}
     </motion.div>
-  )
+  );
 }
-

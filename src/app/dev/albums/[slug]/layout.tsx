@@ -1,10 +1,10 @@
-import type { ReactNode } from 'react'
+import type { ReactNode } from "react";
 
 type AlbumSlugLayoutProps = {
-  children: ReactNode
-}
+  children: ReactNode;
+};
 
 // This layout bypasses the dev layout's navbar/footer for standalone landing page
 export default function AlbumSlugLayout({ children }: AlbumSlugLayoutProps) {
-  return <>{children}</>
+  return <>{children}</>;
 }

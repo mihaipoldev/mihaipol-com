@@ -1,11 +1,10 @@
-import { getAllLabels } from "@/features/labels/data"
-import { LabelsList } from "@/features/labels/components/LabelsList"
+import { getAllLabels } from "@/features/labels/data";
+import { LabelsList } from "@/features/labels/components/LabelsList";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 export default async function LabelsPage() {
-  const labels = await getAllLabels()
-  
-  return <LabelsList initialLabels={labels} />
-}
+  const labels = await getAllLabels();
 
+  return <LabelsList initialLabels={labels} />;
+}

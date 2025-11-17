@@ -1,31 +1,25 @@
-"use client"
+"use client";
 
-import { Switch } from "@/components/ui/switch"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type PublishStateSwitchProps = {
-  checked: boolean
-  onCheckedChange: (checked: boolean) => void
-}
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+};
 
-export function PublishStateSwitch({
-  checked,
-  onCheckedChange,
-}: PublishStateSwitchProps) {
+export function PublishStateSwitch({ checked, onCheckedChange }: PublishStateSwitchProps) {
   return (
     <>
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           .publish-state-switch button[data-state="checked"] > span {
             transform: translateX(28px) !important;
           }
-        `
-      }} />
+        `,
+        }}
+      />
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -39,6 +33,5 @@ export function PublishStateSwitch({
         </Tooltip>
       </TooltipProvider>
     </>
-  )
+  );
 }
-

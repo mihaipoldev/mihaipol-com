@@ -1,74 +1,74 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type PerformanceMetric = {
-  name: string
-  duration: number
-  timestamp: number
-}
+  name: string;
+  duration: number;
+  timestamp: number;
+};
 
 export function PerformanceMonitor() {
-  const [metrics, setMetrics] = useState<PerformanceMetric[]>([])
-  const [isVisible, setIsVisible] = useState(false)
+  const [metrics, setMetrics] = useState<PerformanceMetric[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Listen for performance logs from data fetching
-    const originalLog = console.log
-    const originalWarn = console.warn
+    const originalLog = console.log;
+    const originalWarn = console.warn;
 
     console.log = (...args: any[]) => {
-      originalLog(...args)
-      
-      const message = args.join(" ")
+      originalLog(...args);
+
+      const message = args.join(" ");
       if (message.includes("[DB]")) {
-        const match = message.match(/(\d+)ms/)
+        const match = message.match(/(\d+)ms/);
         if (match) {
-          const duration = parseInt(match[1])
-          const name = message.split("query")[0]?.replace("🔍 [DB]", "").trim() || "Unknown"
-          
+          const duration = parseInt(match[1]);
+          const name = message.split("query")[0]?.replace("🔍 [DB]", "").trim() || "Unknown";
+
           setMetrics((prev) => [
             ...prev.slice(-19), // Keep last 20
             { name, duration, timestamp: Date.now() },
-          ])
+          ]);
         }
       }
-    }
+    };
 
     console.warn = (...args: any[]) => {
-      originalWarn(...args)
-      
-      const message = args.join(" ")
+      originalWarn(...args);
+
+      const message = args.join(" ");
       if (message.includes("SLOW QUERY")) {
-        const match = message.match(/(\d+)ms/)
+        const match = message.match(/(\d+)ms/);
         if (match) {
-          const duration = parseInt(match[1])
-          const name = message.split("took")[0]?.replace("⚠️ [DB] SLOW QUERY:", "").trim() || "Slow Query"
-          
+          const duration = parseInt(match[1]);
+          const name =
+            message.split("took")[0]?.replace("⚠️ [DB] SLOW QUERY:", "").trim() || "Slow Query";
+
           setMetrics((prev) => [
             ...prev.slice(-19),
             { name: `⚠️ ${name}`, duration, timestamp: Date.now() },
-          ])
+          ]);
         }
       }
-    }
+    };
 
     return () => {
-      console.log = originalLog
-      console.warn = originalWarn
-    }
-  }, [])
+      console.log = originalLog;
+      console.warn = originalWarn;
+    };
+  }, []);
 
-  const avgDuration = metrics.length > 0
-    ? Math.round(metrics.reduce((sum, m) => sum + m.duration, 0) / metrics.length)
-    : 0
+  const avgDuration =
+    metrics.length > 0
+      ? Math.round(metrics.reduce((sum, m) => sum + m.duration, 0) / metrics.length)
+      : 0;
 
-  const maxDuration = metrics.length > 0
-    ? Math.max(...metrics.map((m) => m.duration))
-    : 0
+  const maxDuration = metrics.length > 0 ? Math.max(...metrics.map((m) => m.duration)) : 0;
 
-  const slowQueries = metrics.filter((m) => m.duration > 1000).length
+  const slowQueries = metrics.filter((m) => m.duration > 1000).length;
 
   if (!isVisible) {
     return (
@@ -78,7 +78,7 @@ export function PerformanceMonitor() {
       >
         📊 Show Performance
       </button>
-    )
+    );
   }
 
   return (
@@ -131,8 +131,8 @@ export function PerformanceMonitor() {
                     metric.duration > 1000
                       ? "bg-red-500/10 text-red-500"
                       : metric.duration > 500
-                      ? "bg-orange-500/10 text-orange-500"
-                      : "bg-muted"
+                        ? "bg-orange-500/10 text-orange-500"
+                        : "bg-muted"
                   }`}
                 >
                   <span className="truncate flex-1 mr-2">{metric.name}</span>
@@ -152,6 +152,5 @@ export function PerformanceMonitor() {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
-

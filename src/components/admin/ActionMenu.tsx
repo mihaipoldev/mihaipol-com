@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { MoreHorizontal, Pencil, Trash2, ExternalLink } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { MoreHorizontal, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,17 +19,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 type ActionMenuProps = {
-  itemId: string
-  onEdit?: () => void
-  onDelete?: (id: string) => Promise<void>
-  editHref?: string
-  openPageHref?: string
-  deleteLabel?: string
-}
+  itemId: string;
+  onEdit?: () => void;
+  onDelete?: (id: string) => Promise<void>;
+  editHref?: string;
+  openPageHref?: string;
+  deleteLabel?: string;
+};
 
 export function ActionMenu({
   itemId,
@@ -39,52 +39,57 @@ export function ActionMenu({
   openPageHref,
   deleteLabel = "this item",
 }: ActionMenuProps) {
-  const router = useRouter()
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const router = useRouter();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEdit = (e?: React.MouseEvent) => {
-    e?.stopPropagation()
+    e?.stopPropagation();
     if (onEdit) {
-      onEdit()
+      onEdit();
     } else if (editHref) {
-      router.push(editHref)
+      router.push(editHref);
     }
-  }
+  };
 
   const handleOpenPage = (e?: React.MouseEvent) => {
-    e?.stopPropagation()
+    e?.stopPropagation();
     if (openPageHref) {
-      window.open(openPageHref, "_blank", "noopener,noreferrer")
+      window.open(openPageHref, "_blank", "noopener,noreferrer");
     }
-  }
+  };
 
   const handleDelete = async (e?: React.MouseEvent) => {
-    e?.stopPropagation()
-    if (!onDelete) return
+    e?.stopPropagation();
+    if (!onDelete) return;
 
-    setIsDeleting(true)
+    setIsDeleting(true);
     try {
-      await onDelete(itemId)
-      setShowDeleteDialog(false)
+      await onDelete(itemId);
+      setShowDeleteDialog(false);
     } catch (error) {
-      console.error("Error deleting:", error)
+      console.error("Error deleting:", error);
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setShowDeleteDialog(true)
-  }
+    e.stopPropagation();
+    setShowDeleteDialog(true);
+  };
 
   return (
     <>
       <div onClick={(e) => e.stopPropagation()}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="no-shadow !shadow-[0_0_0_0_transparent] hover:!shadow-[0_0_0_0_transparent] dark:!shadow-[0_0_0_0_transparent] dark:hover:!shadow-[0_0_0_0_transparent] h-10 w-10 focus-visible:ring-0 hover:bg-transparent dark:hover:bg-transparent [&:hover_svg]:text-primary" style={{ boxShadow: 'none' }}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="no-shadow !shadow-[0_0_0_0_transparent] hover:!shadow-[0_0_0_0_transparent] dark:!shadow-[0_0_0_0_transparent] dark:hover:!shadow-[0_0_0_0_transparent] h-10 w-10 focus-visible:ring-0 hover:bg-transparent dark:hover:bg-transparent [&:hover_svg]:text-primary"
+              style={{ boxShadow: "none" }}
+            >
               <MoreHorizontal className="h-5 w-5 transition-colors duration-150" />
               <span className="sr-only">Open menu</span>
             </Button>
@@ -135,6 +140,5 @@ export function ActionMenu({
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }
-

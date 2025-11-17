@@ -12,13 +12,23 @@ type AnalyticsDashboardProps = {
 };
 
 export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
-  const { totalPageViews, totalServiceClicks, visitsSeries, clicksSeries, perAlbumRows, perPlatformRows, topCountries } = data;
+  const {
+    totalPageViews,
+    totalServiceClicks,
+    visitsSeries,
+    clicksSeries,
+    perAlbumRows,
+    perPlatformRows,
+    topCountries,
+  } = data;
 
   const totalAlbumPageViews = perAlbumRows.reduce((sum, r) => sum + (r.pageViews || 0), 0);
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8">
-      <div className={`rounded-xl border border-border/50 overflow-hidden ${getAnalyticsGradient()}`}>
+      <div
+        className={`rounded-xl border border-border/50 overflow-hidden ${getAnalyticsGradient()}`}
+      >
         <Tabs defaultValue="visits" className="w-full">
           <TabsList className="grid grid-cols-2 w-full bg-transparent p-0 gap-0 overflow-hidden h-auto min-h-[88px] border-b border-border/30 rounded-none">
             <AdminMetricTab
@@ -49,7 +59,7 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
           </TabsContent>
         </Tabs>
       </div>
-      
+
       {/* Sections outside tabs */}
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Top Performing Albums</h2>
@@ -71,7 +81,12 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                       <Avatar className="h-6 w-6 rounded-md">
                         <AvatarImage src={row.coverImageUrl || undefined} alt={row.title} />
                         <AvatarFallback className="text-[10px] bg-muted">
-                          {row.title?.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase()}
+                          {row.title
+                            ?.split(" ")
+                            .slice(0, 2)
+                            .map((w: string) => w[0])
+                            .join("")
+                            .toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <span>{row.title}</span>
@@ -85,7 +100,9 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                           <div className="h-2 w-14 rounded-full bg-muted">
                             <div
                               className="h-2 rounded-full bg-primary"
-                              style={{ width: `${Math.min(100, (row.pageViews / totalAlbumPageViews) * 100)}%` }}
+                              style={{
+                                width: `${Math.min(100, (row.pageViews / totalAlbumPageViews) * 100)}%`,
+                              }}
                             />
                           </div>
                           <span className="text-[11px] text-muted-foreground">
@@ -139,7 +156,12 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                       <Avatar className="h-6 w-6 rounded-md">
                         <AvatarImage src={row.iconUrl || undefined} alt={row.name} />
                         <AvatarFallback className="text-[10px] bg-muted">
-                          {row.name?.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase()}
+                          {row.name
+                            ?.split(" ")
+                            .slice(0, 2)
+                            .map((w: string) => w[0])
+                            .join("")
+                            .toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <span>{row.name}</span>
@@ -191,4 +213,3 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
     </div>
   );
 }
-

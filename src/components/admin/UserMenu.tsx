@@ -74,9 +74,7 @@ export function UserMenu() {
 
   const userEmail = user.email || "";
   const emailName = userEmail.split("@")[0];
-  const userInitials = emailName
-    ? emailName.slice(0, 1).toUpperCase()
-    : "U";
+  const userInitials = emailName ? emailName.slice(0, 1).toUpperCase() : "U";
 
   return (
     <div className="mt-auto p-2">
@@ -102,7 +100,9 @@ export function UserMenu() {
               )}
             </div>
             <div className="flex flex-1 flex-col gap-0.5 overflow-hidden text-left">
-              <div className="truncate text-md font-bold text-foreground leading-none">{emailName}</div>
+              <div className="truncate text-md font-bold text-foreground leading-none">
+                {emailName}
+              </div>
               <div className="truncate text-xs font-normal leading-none text-muted-foreground">
                 {userEmail}
               </div>
@@ -148,4 +148,3 @@ export function UserMenu() {
     </div>
   );
 }
-
