@@ -240,7 +240,7 @@ export async function getAlbumLinks(albumId: string) {
     const { data, error } = await supabase
       .from('album_links')
       .select(`
-        id, url, cta_label, sort_order, platform_id,
+        id, url, cta_label, sort_order, platform_id, link_type,
         platforms (
           id,
           name,
@@ -255,7 +255,18 @@ export async function getAlbumLinks(albumId: string) {
     console.log(`🔍 [DB] album links query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
-    return data || []
+    
+    // Normalize platforms: Supabase returns array even for one-to-one relationships
+    if (data) {
+      return data.map((link: any) => ({
+        ...link,
+        platforms: Array.isArray(link.platforms) 
+          ? (link.platforms.length > 0 ? link.platforms[0] : null)
+          : link.platforms || null
+      }))
+    }
+    
+    return []
   } catch (error) {
     console.error('Error fetching album links:', error)
     return []
