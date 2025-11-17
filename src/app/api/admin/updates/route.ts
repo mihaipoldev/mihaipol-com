@@ -11,7 +11,11 @@ export async function POST(request: NextRequest) {
     const json = await request.json()
     const parsed = updateCreateSchema.safeParse(json)
     if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
-    const data = await createUpdate(parsed.data)
+    const updateData = {
+      ...parsed.data,
+      publish_status: (parsed.data.publish_status || "draft") as "draft" | "scheduled" | "published" | "archived"
+    }
+    const data = await createUpdate(updateData)
     return created(data)
   } catch (error: any) {
     console.error("Error creating update:", error)
