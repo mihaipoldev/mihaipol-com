@@ -11,7 +11,11 @@ export async function POST(request: NextRequest) {
     const json = await request.json()
     const parsed = albumCreateSchema.safeParse(json)
     if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
-    const data = await createAlbum(parsed.data)
+    const albumData = {
+      ...parsed.data,
+      publish_status: (parsed.data.publish_status || "draft") as "draft" | "scheduled" | "published" | "archived"
+    }
+    const data = await createAlbum(albumData)
     return created(data)
   } catch (error: any) {
     console.error("Error creating album:", error)
