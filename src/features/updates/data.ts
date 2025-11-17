@@ -137,7 +137,7 @@ export async function getUpdateBySlugAdmin(slug: string) {
 
     const { data, error } = await supabase
       .from('updates')
-      .select('id, title, slug, subtitle, date, publish_status, image_url')
+      .select('id, title, slug, subtitle, date, publish_status, image_url, description, read_more_url')
       .eq('slug', slug)
       .single()
 
