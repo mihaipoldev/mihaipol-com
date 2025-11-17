@@ -61,11 +61,20 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}) {
 
     // If labels are requested and we used a join, map the label name
     if (includeLabels && albums && albums.length > 0) {
-      const albumsWithLabels: AlbumWithLabel[] = albums.map((album: any) => ({
-        ...album,
-        labelName: album.labels?.name || null,
-        labels: album.labels, // Keep the full label object for compatibility
-      }))
+      const albumsWithLabels: AlbumWithLabel[] = albums
+        .filter((album: any) => album && typeof album === 'object' && 'id' in album)
+        .map((album: any) => {
+          // Normalize labels: Supabase returns array even for one-to-one relationships
+          const normalizedLabel = Array.isArray(album.labels) 
+            ? (album.labels.length > 0 ? album.labels[0] : null)
+            : album.labels || null
+          
+          return {
+            ...album,
+            labelName: normalizedLabel?.name || null,
+            labels: normalizedLabel, // Keep the full label object for compatibility
+          }
+        })
 
       return albumsWithLabels
     }
