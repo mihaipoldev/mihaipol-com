@@ -11,7 +11,13 @@ export async function POST(request: NextRequest) {
     const json = await request.json()
     const parsed = eventCreateSchema.safeParse(json)
     if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
-    const data = await createEvent(parsed.data)
+    const eventData = {
+      ...parsed.data,
+      date: parsed.data.date || new Date().toISOString().split("T")[0],
+      event_status: (parsed.data.event_status || "upcoming") as "upcoming" | "past" | "cancelled",
+      publish_status: "draft" as "draft" | "scheduled" | "published" | "archived"
+    }
+    const data = await createEvent(eventData)
     return created(data)
   } catch (error: any) {
     console.error("Error creating event:", error)
