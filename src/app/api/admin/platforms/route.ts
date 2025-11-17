@@ -11,7 +11,12 @@ export async function POST(request: NextRequest) {
     const json = await request.json()
     const parsed = platformCreateSchema.safeParse(json)
     if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
-    const data = await createPlatform(parsed.data)
+    const platformData = {
+      ...parsed.data,
+      is_active: true,
+      sort_order: 0
+    }
+    const data = await createPlatform(platformData)
     return created(data)
   } catch (error: any) {
     console.error("Error creating platform:", error)
