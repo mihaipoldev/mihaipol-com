@@ -8,11 +8,19 @@ type FetchAlbumsOptions = {
 }
 
 type AlbumWithLabel = {
+  id: string
+  title: string
+  slug: string
+  cover_image_url: string | null
+  release_date: string | null
+  publish_status: string
+  label_id: string | null
   labelName: string | null
+  labels: { id: string; name: string } | null
   [key: string]: any
 }
 
-async function fetchAlbums(options: FetchAlbumsOptions = {}) {
+async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithLabel[]> {
   const {
     limit,
     order = 'desc',
@@ -61,25 +69,41 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}) {
 
     // If labels are requested and we used a join, map the label name
     if (includeLabels && albums && albums.length > 0) {
-      const albumsWithLabels: AlbumWithLabel[] = albums
-        .filter((album: any) => album && typeof album === 'object' && 'id' in album)
-        .map((album: any) => {
-          // Normalize labels: Supabase returns array even for one-to-one relationships
-          const normalizedLabel = Array.isArray(album.labels) 
-            ? (album.labels.length > 0 ? album.labels[0] : null)
-            : album.labels || null
-          
-          return {
-            ...album,
-            labelName: normalizedLabel?.name || null,
-            labels: normalizedLabel, // Keep the full label object for compatibility
-          }
-        })
+      // Filter out any error objects and ensure we only have valid album objects
+      const validAlbums = (albums as any[]).filter(
+        (album: any) => album && typeof album === 'object' && 'id' in album && !('error' in album)
+      )
+      
+      const albumsWithLabels: AlbumWithLabel[] = validAlbums.map((album: any) => {
+        // Normalize labels: Supabase returns array even for one-to-one relationships
+        const normalizedLabel = Array.isArray(album.labels) 
+          ? (album.labels.length > 0 ? album.labels[0] : null)
+          : album.labels || null
+        
+        return {
+          ...album,
+          labelName: normalizedLabel?.name || null,
+          labels: normalizedLabel, // Keep the full label object for compatibility
+        }
+      })
 
       return albumsWithLabels
     }
 
-    return albums || []
+    // Filter out any error objects for non-label queries too
+    if (albums && albums.length > 0) {
+      const validAlbums = (albums as any[]).filter(
+        (album: any) => album && typeof album === 'object' && 'id' in album && !('error' in album)
+      )
+      
+      return validAlbums.map((album: any): AlbumWithLabel => ({
+        ...album,
+        labelName: null,
+        labels: null,
+      }))
+    }
+
+    return []
   } catch (error) {
     console.error('Error fetching albums:', error)
     return []
