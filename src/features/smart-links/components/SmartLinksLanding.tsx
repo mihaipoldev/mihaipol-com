@@ -3,6 +3,7 @@ import React from "react";
 import CoverArt from "./CoverArt";
 import AlbumHeader from "./AlbumHeader";
 import SmartLinksList from "./SmartLinksList";
+import { SmartLink } from "./SmartLinkItem";
 
 type AlbumSummary = {
   id: string;

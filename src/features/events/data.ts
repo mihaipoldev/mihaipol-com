@@ -22,7 +22,7 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
     // Select only needed columns
     let query = supabase
       .from('events')
-      .select('id, title, slug, date, venue, location, event_status, publish_status, flyer_image_url, description')
+      .select('id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description')
 
     // Filter by publish status
     if (!includeUnpublished) {
@@ -82,7 +82,7 @@ export async function getEventBySlug(slug: string) {
 
     const { data, error } = await supabase
       .from('events')
-      .select('id, title, slug, date, venue, location, event_status, publish_status, flyer_image_url, description')
+      .select('id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, ticket_label, tickets_url')
       .eq('slug', slug)
       .eq('publish_status', 'published')
       .single()

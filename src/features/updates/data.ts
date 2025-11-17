@@ -20,7 +20,7 @@ async function fetchUpdates(options: FetchUpdatesOptions = {}) {
     // Select only needed columns
     let query = supabase
       .from('updates')
-      .select('id, title, slug, date, publish_status, image_url')
+      .select('id, title, slug, date, publish_status, image_url, description')
 
     // Filter by publish status
     if (!includeUnpublished) {
@@ -68,7 +68,7 @@ export async function getUpdateBySlug(slug: string) {
 
     const { data, error } = await supabase
       .from('updates')
-      .select('id, title, slug, date, publish_status, image_url')
+      .select('id, title, slug, date, publish_status, image_url, description, read_more_url')
       .eq('slug', slug)
       .eq('publish_status', 'published')
       .single()
