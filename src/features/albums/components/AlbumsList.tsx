@@ -59,12 +59,12 @@ export function AlbumsList({ initialAlbums }: AlbumsListProps) {
               ({filteredAlbums.length} {filteredAlbums.length === 1 ? 'album' : 'albums'})
             </span>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             Manage your music albums, including releases, track listings, and metadata.
           </p>
         </div>
       </div>
-      <div className="space-y-2">
+      <div className="space-y-4">
         <AdminToolbar
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}

@@ -137,7 +137,18 @@ export async function getAllAlbumsWithLabels() {
     }
 
     if (error) throw error
-    return data || []
+    
+    // Normalize labels: Supabase returns array even for one-to-one relationships
+    if (data) {
+      return data.map((album: any) => ({
+        ...album,
+        labels: Array.isArray(album.labels) 
+          ? (album.labels.length > 0 ? album.labels[0] : null)
+          : album.labels || null
+      }))
+    }
+    
+    return []
   } catch (error) {
     console.error('Error fetching all albums:', error)
     return []
@@ -164,7 +175,19 @@ export async function getAlbumById(id: string) {
     console.log(`🔍 [DB] album by id query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
-    return data || null
+    
+    // Normalize labels: Supabase returns array even for one-to-one relationships
+    if (data) {
+      const normalizedData = {
+        ...data,
+        labels: Array.isArray(data.labels) 
+          ? (data.labels.length > 0 ? data.labels[0] : null)
+          : data.labels || null
+      }
+      return normalizedData
+    }
+    
+    return null
   } catch (error) {
     console.error('Error fetching album by id:', error)
     return null
@@ -191,7 +214,19 @@ export async function getAlbumBySlugAdmin(slug: string) {
     console.log(`🔍 [DB] album by slug (admin) query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
-    return data || null
+    
+    // Normalize labels: Supabase returns array even for one-to-one relationships
+    if (data) {
+      const normalizedData = {
+        ...data,
+        labels: Array.isArray(data.labels) 
+          ? (data.labels.length > 0 ? data.labels[0] : null)
+          : data.labels || null
+      }
+      return normalizedData
+    }
+    
+    return null
   } catch (error) {
     console.error('Error fetching album by slug (admin):', error)
     return null
