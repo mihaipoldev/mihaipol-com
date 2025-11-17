@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faSearch } from "@fortawesome/free-solid-svg-icons"
 
 type AdminToolbarProps = {
-  children: ReactNode
+  children?: ReactNode
   searchValue?: string
   onSearchChange?: (value: string) => void
   searchPlaceholder?: string
@@ -19,7 +19,7 @@ export function AdminToolbar({
   className 
 }: AdminToolbarProps) {
   return (
-    <div className={`flex items-center justify-between gap-4 ${className || ""}`}>
+    <div className={`flex items-center ${children ? 'justify-between' : 'justify-start'} gap-4 ${className || ""}`}>
       <div className="flex-1 max-w-xs">
         <div className="relative">
           <FontAwesomeIcon 
@@ -31,13 +31,15 @@ export function AdminToolbar({
             placeholder={searchPlaceholder}
             value={searchValue || ""}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            className="pl-9 h-9"
+            className="pl-9 h-9 !border-0 focus-visible:!ring-0 focus-visible:!ring-offset-0 !shadow-none outline-none"
           />
         </div>
       </div>
+      {children && (
       <div className="flex items-center gap-2">
         {children}
       </div>
+      )}
     </div>
   )
 }

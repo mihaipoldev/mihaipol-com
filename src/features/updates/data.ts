@@ -14,7 +14,13 @@ async function fetchUpdates(options: FetchUpdatesOptions = {}) {
   } = options
 
   try {
-    let query = supabase.from('updates').select('*')
+    // 🐛 DEBUG: Start timing
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
+    // Select only needed columns
+    let query = supabase
+      .from('updates')
+      .select('id, title, slug, date, publish_status, image_url')
 
     // Filter by publish status
     if (!includeUnpublished) {
@@ -30,6 +36,15 @@ async function fetchUpdates(options: FetchUpdatesOptions = {}) {
     }
 
     const { data, error } = await query
+
+    // 🐛 DEBUG: Log query time
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    const dataCount = data?.length || 0
+    console.log(`🔍 [DB] updates query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`)
+
+    if (queryTime > 1000) {
+      console.warn(`⚠️ [DB] SLOW QUERY: updates fetch took ${queryTime.toFixed(0)}ms`)
+    }
 
     if (error) throw error
     return data || []
@@ -49,12 +64,17 @@ export async function getAllUpdates() {
 
 export async function getUpdateBySlug(slug: string) {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('updates')
-      .select('*')
+      .select('id, title, slug, date, publish_status, image_url')
       .eq('slug', slug)
       .eq('publish_status', 'published')
       .single()
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    console.log(`🔍 [DB] update by slug query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
     return data || null
@@ -67,10 +87,20 @@ export async function getUpdateBySlug(slug: string) {
 // Admin data fetching functions (returns all updates including unpublished)
 export async function getAllUpdatesUnfiltered() {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('updates')
-      .select('*')
+      .select('id, title, slug, subtitle, date, publish_status, image_url')
       .order('date', { ascending: false, nullsFirst: false })
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    const dataCount = data?.length || 0
+    console.log(`🔍 [DB] all updates (unfiltered) query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`)
+
+    if (queryTime > 1000) {
+      console.warn(`⚠️ [DB] SLOW QUERY: all updates (unfiltered) took ${queryTime.toFixed(0)}ms`)
+    }
 
     if (error) throw error
     return data || []
@@ -82,11 +112,16 @@ export async function getAllUpdatesUnfiltered() {
 
 export async function getUpdateById(id: string) {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('updates')
-      .select('*')
+      .select('id, title, slug, date, publish_status, image_url')
       .eq('id', id)
       .single()
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    console.log(`🔍 [DB] update by id query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
     return data || null
@@ -98,11 +133,16 @@ export async function getUpdateById(id: string) {
 
 export async function getUpdateBySlugAdmin(slug: string) {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('updates')
-      .select('*')
+      .select('id, title, slug, subtitle, date, publish_status, image_url')
       .eq('slug', slug)
       .single()
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    console.log(`🔍 [DB] update by slug (admin) query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
     return data || null

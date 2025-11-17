@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { getArtistBySlug } from "@/features/artists/data"
-import { EditArtistForm } from "./EditArtistForm"
+import { EditArtistForm } from "@/features/artists/components/EditArtistForm"
 
 export const dynamic = 'force-dynamic'
 

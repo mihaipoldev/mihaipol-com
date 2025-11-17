@@ -1,6 +1,7 @@
 import { getAllAlbums } from '@/features/albums/data'
 import AlbumCard from '@/components/features/AlbumCard'
-import TrackView from '@/components/analytics/TrackView'
+import TrackView from '@/features/smart-links/analytics/components/TrackView'
+import PageHeader from '@/components/layout/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,13 +12,11 @@ export default async function AlbumsPage() {
     <div className="min-h-screen bg-background">
       <TrackView eventType="section_view" entityType="site_section" entityId="albums" />
       <div className="mx-auto w-full max-w-7xl py-16">
-        {/* Page Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-4">All Albums</h1>
-          <p className="text-lg text-muted-foreground">
-            Explore all releases and collections.
-          </p>
-        </div>
+        <PageHeader
+          className="mb-12"
+          title="All Albums"
+          description="Explore all releases and collections."
+        />
 
         {/* Albums Grid */}
         {albums.length === 0 ? (

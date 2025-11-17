@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react"
 import { Upload, X, Link as LinkIcon, FileImage } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { ShadowInput } from "@/components/admin/ShadowInput"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -153,97 +153,100 @@ export function ImageUploadField({
   }
 
   return (
-    <div className="space-y-4">
-      {/* URL Input - shown first */}
-      <div className="space-y-2">
-        <div className="relative">
-          <LinkIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="url"
-            placeholder={placeholder}
-            value={urlInput}
-            onChange={(e) => handleUrlChange(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-      </div>
-
-      {/* Upload Area - always shown, with image preview inside if available */}
-      <Card
-        ref={dropZoneRef}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={handleBrowseClick}
-        className={cn(
-          "relative border-2 border-dashed transition-colors cursor-pointer",
-          isDragging
-            ? "border-primary bg-primary/5"
-            : "border-muted-foreground/25 hover:border-muted-foreground/50",
-          previewUrl && !imageLoadError && "border-solid"
-        )}
-        style={{ minHeight: '272px' }}
-      >
-        {previewUrl && !imageLoadError ? (
-          <div className="relative w-full h-full flex items-center justify-center" style={{ minHeight: '272px' }}>
-            <img
-              src={previewUrl}
-              alt="Preview"
-              className="max-h-[272px] w-auto object-contain pointer-events-none"
-              onError={handleImageError}
-            />
-            <Button
-              type="button"
-              variant="destructive"
-              size="icon"
-              className="absolute top-2 right-2"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleRemove()
-              }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            {/* Overlay hint when hovering */}
-            <div className="absolute inset-0 bg-background/80 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-              <div className="text-center">
-                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm font-medium">Click or drop to replace image</p>
+    <div className="space-y-3">
+      {/* Compact Layout: Preview + URL Input side by side */}
+      <div className="flex gap-4 items-start">
+        {/* Image Preview - Compact */}
+        <Card
+          ref={dropZoneRef}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={handleBrowseClick}
+          className={cn(
+            "relative border-2 border-dashed transition-all cursor-pointer overflow-hidden group",
+            "flex-shrink-0 w-32 h-32 rounded-lg",
+            isDragging
+              ? "border-primary bg-primary/10 scale-105"
+              : "border-muted-foreground/25 hover:border-primary/40 hover:bg-primary/5",
+            previewUrl && !imageLoadError && "border-solid border-primary/20"
+          )}
+        >
+          {previewUrl && !imageLoadError ? (
+            <>
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="w-full h-full object-cover pointer-events-none"
+                onError={handleImageError}
+              />
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="text-center text-white">
+                  <Upload className="h-5 w-5 mx-auto mb-1" />
+                  <p className="text-xs font-medium">Replace</p>
+                </div>
               </div>
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleRemove()
+                }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full p-3 text-center">
+              <FileImage className="h-6 w-6 text-muted-foreground mb-1.5" />
+              <p className="text-[10px] text-muted-foreground leading-tight">
+                {isDragging ? "Drop here" : "Click to upload"}
+              </p>
             </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+            onChange={handleFileInputChange}
+            className="hidden"
+          />
+        </Card>
+
+        {/* URL Input - Compact */}
+        <div className="flex-1 space-y-2">
+          <div className="relative">
+            <LinkIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <ShadowInput
+              type="url"
+              placeholder={placeholder}
+              value={urlInput}
+              onChange={(e) => handleUrlChange(e.target.value)}
+              className="pl-9"
+            />
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center p-12 text-center" style={{ minHeight: '272px' }}>
-            <div className="mb-4 rounded-full bg-muted p-4">
-              <FileImage className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <p className="mb-2 text-sm font-medium">
-              Drag and drop an image here, or click to browse
-            </p>
-            <p className="mb-4 text-xs text-muted-foreground">
-              Supports JPG, PNG, WebP, GIF (max 10MB)
-            </p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>or</span>
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation()
                 handleBrowseClick()
               }}
+              className="h-7 text-xs"
             >
-              <Upload className="h-4 w-4 mr-2" />
-              Choose File
+              <Upload className="h-3 w-3 mr-1.5" />
+              Browse
             </Button>
+            <span className="text-[10px]">JPG, PNG, WebP, GIF (max 10MB)</span>
           </div>
-        )}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-          onChange={handleFileInputChange}
-          className="hidden"
-        />
-      </Card>
+        </div>
+      </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>

@@ -166,7 +166,6 @@ export function StateBadge({ state, className, label }: StateBadgeProps) {
         variant="secondary" 
         className={cn('bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400', className)}
       >
-        <FontAwesomeIcon icon={faTimes} className="w-3 h-3 mr-1" />
         {label || state}
       </Badge>
     )
@@ -179,9 +178,6 @@ export function StateBadge({ state, className, label }: StateBadgeProps) {
       variant={config.variant} 
       className={cn(config.className, className)}
     >
-      {config.icon && (
-        <FontAwesomeIcon icon={config.icon} className="w-3 h-3 mr-1" />
-      )}
       {displayLabel}
     </Badge>
   )

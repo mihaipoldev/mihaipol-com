@@ -4,11 +4,12 @@ import { useState } from "react"
 import { Camera, Crown, Save } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { FormField } from "@/components/admin/forms/FormField"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { ShadowInput } from "@/components/admin/ShadowInput"
+import { ShadowButton } from "@/components/admin/ShadowButton"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
 export function AccountSettings() {
@@ -51,7 +52,7 @@ export function AccountSettings() {
 
             <div className="flex-1 space-y-4">
               <FormField label="Display Name">
-                <Input
+                <ShadowInput
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Your display name"
@@ -74,7 +75,7 @@ export function AccountSettings() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField label="Email">
-              <Input
+              <ShadowInput
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your.email@example.com"
@@ -84,7 +85,7 @@ export function AccountSettings() {
             </FormField>
 
             <FormField label="Phone">
-              <Input
+              <ShadowInput
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1234567890"
@@ -97,7 +98,7 @@ export function AccountSettings() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Change Password</h3>
             <FormField label="Current Password">
-              <Input
+              <ShadowInput
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
@@ -106,7 +107,7 @@ export function AccountSettings() {
             </FormField>
 
             <FormField label="New Password">
-              <Input
+              <ShadowInput
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -115,7 +116,7 @@ export function AccountSettings() {
             </FormField>
 
             <FormField label="Confirm New Password">
-              <Input
+              <ShadowInput
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -125,10 +126,10 @@ export function AccountSettings() {
           </div>
 
           <div className="flex justify-end pt-4">
-            <Button onClick={handleSave} size="lg" className="gap-2">
+            <ShadowButton onClick={handleSave} size="lg" className="gap-2">
               <Save className="h-4 w-4" />
               Save Changes
-            </Button>
+            </ShadowButton>
           </div>
         </CardContent>
       </Card>

@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Album Editor – Sunset Drive</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --border-soft: #e5e7eb;
+      --border-strong: #d1d5db;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --accent: #6366f1;
+      --accent-soft: #eef2ff;
+      --danger: #ef4444;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.06);
+      --input-h: 42px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #e5e7eb, #f9fafb 40%);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .page-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-title span.badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .page-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      font: inherit;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 8px 16px;
+      cursor: pointer;
+      background: #f9fafb;
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(79, 70, 229, 0.3);
+    }
+
+    button.outline {
+      background: transparent;
+      border-color: var(--border-strong);
+    }
+
+    button.outline:hover {
+      background: #f3f4f6;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(280px, 1.1fr);
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 18px 18px 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #4b5563;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    label {
+      font-size: 13px;
+      color: #374151;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    label .required {
+      color: #ef4444;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="date"],
+    select,
+    textarea {
+      font: inherit;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      height: var(--input-h);
+      outline: none;
+      background: #f9fafb;
+      transition: all 0.12s ease-out;
+      color: var(--text-main);
+    }
+
+    textarea {
+      height: 96px;
+      resize: vertical;
+      min-height: 80px;
+      max-height: 220px;
+      line-height: 1.4;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.5);
+      background: #ffffff;
+    }
+
+    .helper {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Image block */
+
+    .cover-wrapper {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) 170px;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 780px) {
+      .cover-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .cover-input {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .cover-preview {
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--border-strong);
+      background: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      min-height: 170px;
+    }
+
+    .cover-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cover-placeholder {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #f3f4f6;
+      color: #4b5563;
+      gap: 6px;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #10b981;
+    }
+
+    /* Links */
+
+    .links-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .links-header-row .card-subtitle {
+      margin: 0;
+    }
+
+    .links-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .link-row {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1.1fr) minmax(0, 2fr) minmax(0, 1fr) 32px;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
+      background: #f9fafb;
+      cursor: grab;
+    }
+
+    .link-row.dragging {
+      opacity: 0.7;
+      background: #e0e7ff;
+    }
+
+    .link-handle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #9ca3af;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .link-handle span {
+      display: inline-block;
+      transform: translateY(-1px);
+    }
+
+    .link-row input,
+    .link-row select {
+      height: 34px;
+      font-size: 13px;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .link-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .link-remove {
+      background: transparent;
+      border: none;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      width: 26px;
+      height: 26px;
+      cursor: pointer;
+      color: var(--danger);
+    }
+
+    .link-remove:hover {
+      background: rgba(248, 113, 113, 0.08);
+    }
+
+    .links-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .links-footer button {
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      border-color: rgba(129, 140, 248, 0.4);
+      color: #4f46e5;
+      box-shadow: none;
+    }
+
+    .links-footer button:hover {
+      background: #e0e7ff;
+    }
+
+    /* Preview phone */
+
+    .preview-card {
+      position: sticky;
+      top: 20px;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .preview-header span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .device-shell {
+      background: radial-gradient(circle at top, #111827, #020617);
+      border-radius: 32px;
+      padding: 12px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(15, 23, 42, 0.9);
+      max-width: 340px;
+      margin: 0 auto;
+    }
+
+    .device-screen {
+      background: radial-gradient(circle at top left, #020617, #030712 50%, #020617 100%);
+      border-radius: 24px;
+      padding: 16px 14px 14px;
+      color: #e5e7eb;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .device-status-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    .device-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .device-cover {
+      width: 140px;
+      height: 140px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.6);
+    }
+
+    .device-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .device-title {
+      font-size: 18px;
+      font-weight: 650;
+      text-align: center;
+    }
+
+    .device-subtitle {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .device-badge-row {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      opacity: 0.8;
+    }
+
+    .device-badge-row span {
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(55, 65, 81, 0.8);
+    }
+
+    .device-links {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .device-link-button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #111827, #020617);
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      box-shadow: 0 7px 16px rgba(0, 0, 0, 0.65);
+    }
+
+    .device-link-button span.label {
+      font-weight: 500;
+    }
+
+    .device-link-button span.tag {
+      font-size: 11px;
+      opacity: 0.8;
+    }
+
+    .device-footer {
+      margin-top: auto;
+      text-align: center;
+      font-size: 10px;
+      opacity: 0.55;
+    }
+
+    /* Misc */
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #ecfdf5;
+      color: #166534;
+      border: 1px solid #a7f3d0;
+    }
+
+    .badge-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <div>
+          <div class="page-title">
+            Sunset Drive
+            <span class="badge">Edit</span>
+          </div>
+          <div class="helper">
+            Manage album metadata, artwork, links and preview the smart link page.
+          </div>
+        </div>
+        <div class="page-actions">
+          <button class="outline" type="button">Discard</button>
+          <button class="primary" type="button">
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <div class="layout">
+        <!-- LEFT: FORM -->
+        <form class="form" onsubmit="event.preventDefault();">
+          <!-- BASIC INFO -->
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Basic Info</div>
+                <div class="card-subtitle">Title, slug and core metadata.</div>
+              </div>
+              <div class="badge-status">
+                <span class="badge-status-dot"></span> Published
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="field">
+                <label for="title">
+                  Title <span class="required">*</span>
+                </label>
+                <input id="title" type="text" value="Sunset Drive" />
+              </div>
+
+              <div class="field">
+                <label for="slug">
+                  Slug <span class="required">*</span>
+                </label>
+                <input
+                  id="slug"
+                  type="text"
+                  value="sunset-drive"
+                  placeholder="sunset-drive"
+                />
+                <div class="helper">Used in the URL of the smart link page.</div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="catalog">Catalog Number</label>
+                  <input id="catalog" type="text" value="MGR012" />
+                </div>
+                <div class="field">
+                  <label for="type">Album Type</label>
+                  <select id="type">
+                    <option value="single" selected>Single</option>
+                    <option value="ep">EP</option>
+                    <option value="album">Album</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="description">Description</label>
+                <textarea id="description">Uplifting progressive house single perfect for sunset moments and long drives.</textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- ARTWORK / META -->
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Artwork & Meta</div>
+                <div class="card-subtitle">Cover image, release date and label.</div>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="cover-wrapper">
+                <div class="cover-input">
+                  <label for="coverUrl">Cover Image URL</label>
+                  <input
+                    id="coverUrl"
+                    type="url"
+                    value="https://mihaipol-com.b-cdn.net/albums/d0000000-0000-0000-0000-000000000004/image_1763261991313.jpg"
+                  />
+                  <div class="helper">
+                    Paste a direct image URL. In the real app you can also support file uploads.
+                  </div>
+                </div>
+                <div class="cover-preview">
+                  <img
+                    id="coverPreview"
+                    src="https://mihaipol-com.b-cdn.net/albums/d0000000-0000-0000-0000-000000000004/image_1763261991313.jpg"
+                    alt="Cover preview"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+                  />
+                  <div class="cover-placeholder" style="display:none;">
+                    <div style="font-size:13px; margin-bottom:4px;">No artwork yet</div>
+                    <div>Paste an image URL or drop a file in the final app to see a preview here.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field-row" style="margin-top:6px;">
+                <div class="field">
+                  <label for="releaseDate">Release Date</label>
+                  <!-- using yyyy-mm-dd so the browser can show the native date picker -->
+                  <input
+                    id="releaseDate"
+                    type="date"
+                    value="2024-11-01"
+                  />
+                </div>
+                <div class="field">
+                  <label for="label">Label</label>
+                  <input
+                    id="label"
+                    type="text"
+                    value="Deep Space Records"
+                  />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="status">Publish Status</label>
+                <select id="status">
+                  <option selected>Published</option>
+                  <option>Draft</option>
+                  <option>Scheduled</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- LINKS -->
+          <section class="card">
+            <div class="card-header links-header-row">
+              <div>
+                <div class="card-title">Links</div>
+                <div class="card-subtitle">Order and configure the services shown on the smart link page.</div>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="links-list" id="linksList">
+                <div class="link-row" draggable="true">
+                  <div class="link-handle" title="Drag to reorder">
+                    <span>⋮⋮</span>
+                  </div>
+                  <div>
+                    <input type="text" value="Spotify" />
+                    <div class="link-label">Label</div>
+                  </div>
+                  <div>
+                    <input
+                      type="url"
+                      value="https://open.spotify.com/track/sunset-drive"
+                    />
+                    <div class="link-label">URL</div>
+                  </div>
+                  <div>
+                    <select>
+                      <option value="stream" selected>Stream</option>
+                      <option value="buy">Buy</option>
+                    </select>
+                    <div class="link-label">Type</div>
+                  </div>
+                  <button type="button" class="link-remove" title="Remove">
+                    ✕
+                  </button>
+                </div>
+
+                <div class="link-row" draggable="true">
+                  <div class="link-handle" title="Drag to reorder">
+                    <span>⋮⋮</span>
+                  </div>
+                  <div>
+                    <input type="text" value="Beatport" />
+                    <div class="link-label">Label</div>
+                  </div>
+                  <div>
+                    <input
+                      type="url"
+                      value="https://www.beatport.com/track/sunset-drive/4567890"
+                    />
+                    <div class="link-label">URL</div>
+                  </div>
+                  <div>
+                    <select>
+                      <option value="stream">Stream</option>
+                      <option value="buy" selected>Buy</option>
+                    </select>
+                    <div class="link-label">Type</div>
+                  </div>
+                  <button type="button" class="link-remove" title="Remove">
+                    ✕
+                  </button>
+                </div>
+
+                <div class="link-row" draggable="true">
+                  <div class="link-handle" title="Drag to reorder">
+                    <span>⋮⋮</span>
+                  </div>
+                  <div>
+                    <input type="text" value="Bandcamp" />
+                    <div class="link-label">Label</div>
+                  </div>
+                  <div>
+                    <input
+                      type="url"
+                      value="https://mihai-pol.bandcamp.com/track/sunset-drive"
+                    />
+                    <div class="link-label">URL</div>
+                  </div>
+                  <div>
+                    <select>
+                      <option value="stream">Stream</option>
+                      <option value="buy" selected>Buy</option>
+                    </select>
+                    <div class="link-label">Type</div>
+                  </div>
+                  <button type="button" class="link-remove" title="Remove">
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              <div class="links-footer">
+                <button type="button" id="addLinkBtn">+ Add Link</button>
+                <span>Drag the handle on the left to change order. The order is used in the phone preview.</span>
+              </div>
+            </div>
+          </section>
+        </form>
+
+        <!-- RIGHT: PREVIEW -->
+        <aside class="preview-card">
+          <section class="card">
+            <div class="preview-header">
+              <div>
+                <div class="card-title">Smart Link Preview</div>
+                <span>Mobile view (read-only in this demo)</span>
+              </div>
+              <span class="pill">
+                <span class="pill-dot"></span>
+                Live
+              </span>
+            </div>
+
+            <div class="device-shell">
+              <div class="device-screen">
+                <div class="device-status-bar">
+                  <span>9:41</span>
+                  <span>••• 100%</span>
+                </div>
+
+                <div class="device-header">
+                  <div class="device-cover">
+                    <img
+                      id="previewCover"
+                      src="https://mihaipol-com.b-cdn.net/albums/d0000000-0000-0000-0000-000000000004/image_1763261991313.jpg"
+                      alt="Preview cover"
+                    />
+                  </div>
+                  <div class="device-title" id="previewTitle">Sunset Drive</div>
+                  <div class="device-subtitle" id="previewArtist">Mihai Pol</div>
+                  <div class="device-badge-row">
+                    <span id="previewLabel">Deep Space Records</span>
+                    <span id="previewType">Single · 2024</span>
+                  </div>
+                </div>
+
+                <div class="device-links" id="previewLinks">
+                  <!-- buttons generated by JS -->
+                </div>
+
+                <div class="device-footer">
+                  Links and layout here are purely visual for now – in the real app they’ll reflect the active services.
+                </div>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Live preview bindings ---
+
+    const titleInput = document.getElementById("title");
+    const labelInput = document.getElementById("label");
+    const typeSelect = document.getElementById("type");
+    const releaseDateInput = document.getElementById("releaseDate");
+    const coverUrlInput = document.getElementById("coverUrl");
+
+    const previewTitle = document.getElementById("previewTitle");
+    const previewLabel = document.getElementById("previewLabel");
+    const previewType = document.getElementById("previewType");
+    const previewCover = document.getElementById("previewCover");
+    const linksList = document.getElementById("linksList");
+    const previewLinks = document.getElementById("previewLinks");
+
+    function formatYear(dateValue) {
+      if (!dateValue) return "";
+      const d = new Date(dateValue);
+      if (!isNaN(d.getTime())) {
+        return d.getFullYear();
+      }
+      return "";
+    }
+
+    function updatePreviewFromForm() {
+      previewTitle.textContent = titleInput.value || "Untitled Release";
+      previewLabel.textContent = labelInput.value || "Unknown Label";
+
+      const year = formatYear(releaseDateInput.value) || "2024";
+      const typeText = typeSelect.options[typeSelect.selectedIndex].text;
+      previewType.textContent = typeText + " · " + year;
+
+      // rebuild link buttons
+      previewLinks.innerHTML = "";
+      const rows = linksList.querySelectorAll(".link-row");
+      rows.forEach((row) => {
+        const nameInput = row.querySelector("input[type='text']");
+        const typeSelect = row.querySelector("select");
+        const urlInput = row.querySelector("input[type='url']");
+
+        if (!nameInput || !urlInput) return;
+        const label = nameInput.value || "Service";
+        const url = urlInput.value || "#";
+        const type =
+          typeSelect && typeSelect.value === "buy"
+            ? "Buy"
+            : "Listen";
+
+        const btn = document.createElement("div");
+        btn.className = "device-link-button";
+        const left = document.createElement("span");
+        left.className = "label";
+        left.textContent = label;
+        const right = document.createElement("span");
+        right.className = "tag";
+        right.textContent = type;
+        btn.appendChild(left);
+        btn.appendChild(right);
+        btn.title = url;
+        previewLinks.appendChild(btn);
+      });
+
+      if (!rows.length) {
+        const empty = document.createElement("div");
+        empty.style.fontSize = "11px";
+        empty.style.opacity = "0.7";
+        empty.textContent = "Add at least one service link to preview buttons.";
+        previewLinks.appendChild(empty);
+      }
+    }
+
+    titleInput.addEventListener("input", updatePreviewFromForm);
+    labelInput.addEventListener("input", updatePreviewFromForm);
+    typeSelect.addEventListener("change", updatePreviewFromForm);
+    releaseDateInput.addEventListener("change", updatePreviewFromForm);
+
+    coverUrlInput.addEventListener("input", () => {
+      previewCover.src = coverUrlInput.value;
+    });
+
+    // --- Draggable links ---
+
+    let draggedRow = null;
+
+    function initRowEvents(row) {
+      row.addEventListener("dragstart", () => {
+        draggedRow = row;
+        row.classList.add("dragging");
+      });
+
+      row.addEventListener("dragend", () => {
+        row.classList.remove("dragging");
+        draggedRow = null;
+        updatePreviewFromForm();
+      });
+
+      const removeBtn = row.querySelector(".link-remove");
+      if (removeBtn) {
+        removeBtn.addEventListener("click", () => {
+          row.remove();
+          updatePreviewFromForm();
+        });
+      }
+
+      // update preview when editing link
+      const inputs = row.querySelectorAll("input, select");
+      inputs.forEach((input) => {
+        input.addEventListener("input", updatePreviewFromForm);
+        input.addEventListener("change", updatePreviewFromForm);
+      });
+    }
+
+    function getDragAfterElement(container, y) {
+      const elements = [
+        ...container.querySelectorAll(".link-row:not(.dragging)"),
+      ];
+      return elements.reduce(
+        (closest, child) => {
+          const box = child.getBoundingClientRect();
+          const offset = y - box.top - box.height / 2;
+          if (offset < 0 && offset > closest.offset) {
+            return { offset, element: child };
+          } else {
+            return closest;
+          }
+        },
+        { offset: Number.NEGATIVE_INFINITY, element: null }
+      ).element;
+    }
+
+    linksList.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      const afterElement = getDragAfterElement(linksList, e.clientY);
+      if (!draggedRow) return;
+      if (afterElement == null) {
+        linksList.appendChild(draggedRow);
+      } else {
+        linksList.insertBefore(draggedRow, afterElement);
+      }
+    });
+
+    // init existing rows
+    linksList.querySelectorAll(".link-row").forEach(initRowEvents);
+
+    // Add link button
+    const addLinkBtn = document.getElementById("addLinkBtn");
+    addLinkBtn.addEventListener("click", () => {
+      const row = document.createElement("div");
+      row.className = "link-row";
+      row.setAttribute("draggable", "true");
+      row.innerHTML = `
+        <div class="link-handle" title="Drag to reorder">
+          <span>⋮⋮</span>
+        </div>
+        <div>
+          <input type="text" value="New Service" />
+          <div class="link-label">Label</div>
+        </div>
+        <div>
+          <input type="url" placeholder="https://…" />
+          <div class="link-label">URL</div>
+        </div>
+        <div>
+          <select>
+            <option value="stream" selected>Stream</option>
+            <option value="buy">Buy</option>
+          </select>
+          <div class="link-label">Type</div>
+        </div>
+        <button type="button" class="link-remove" title="Remove">✕</button>
+      `;
+      linksList.appendChild(row);
+      initRowEvents(row);
+      updatePreviewFromForm();
+    });
+
+    // initial preview
+    updatePreviewFromForm();
+  </script>
+</body>
+</html>

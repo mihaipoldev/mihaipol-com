@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { getEventBySlugAdmin } from "@/features/events/data"
-import { EditEventForm } from "./EditEventForm"
+import { EditEventForm } from "@/features/events/components/EditEventForm"
 
 export const dynamic = 'force-dynamic'
 

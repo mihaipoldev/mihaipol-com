@@ -21,9 +21,17 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}) {
   } = options
 
   try {
+    // 🐛 DEBUG: Start timing
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
+    // Select only needed columns and use join if labels are needed
+    const selectColumns = includeLabels
+      ? `id, title, slug, cover_image_url, release_date, publish_status, label_id, labels(id, name)`
+      : `id, title, slug, cover_image_url, release_date, publish_status, label_id`
+
     let query = supabase
       .from('albums')
-      .select('*')
+      .select(selectColumns)
 
     // Filter by publish status
     if (!includeUnpublished) {
@@ -40,33 +48,26 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}) {
 
     const { data: albums, error } = await query
 
+    // 🐛 DEBUG: Log query time
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    const dataCount = albums?.length || 0
+    console.log(`🔍 [DB] albums query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`)
+
+    if (queryTime > 1000) {
+      console.warn(`⚠️ [DB] SLOW QUERY: albums fetch took ${queryTime.toFixed(0)}ms`)
+    }
+
     if (error) throw error
 
-    // If labels are requested, fetch and join them
+    // If labels are requested and we used a join, map the label name
     if (includeLabels && albums && albums.length > 0) {
-      const labelIds = albums.filter((a) => a.label_id).map((a) => a.label_id)
-      
-      if (labelIds.length > 0) {
-        const { data: labels } = await supabase
-          .from('labels')
-          .select('id, name')
-          .in('id', labelIds)
-
-        // Map labels to albums
-        const labelsMap = new Map(labels?.map((l) => [l.id, l.name]) || [])
-        const albumsWithLabels: AlbumWithLabel[] = albums.map((album) => ({
-          ...album,
-          labelName: album.label_id ? labelsMap.get(album.label_id) || null : null,
-        }))
-
-        return albumsWithLabels
-      }
-
-      // No label_ids, but still return with labelName: null
-      return albums.map((album) => ({
+      const albumsWithLabels: AlbumWithLabel[] = albums.map((album: any) => ({
         ...album,
-        labelName: null,
+        labelName: album.labels?.name || null,
+        labels: album.labels, // Keep the full label object for compatibility
       }))
+
+      return albumsWithLabels
     }
 
     return albums || []
@@ -87,12 +88,21 @@ export async function getAllAlbums() {
 
 export async function getAlbumBySlug(slug: string) {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('albums')
-      .select('*')
+      .select('id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, description')
       .eq('slug', slug)
       .eq('publish_status', 'published')
       .single()
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    console.log(`🔍 [DB] album by slug query completed in ${queryTime.toFixed(0)}ms`)
+
+    if (queryTime > 1000) {
+      console.warn(`⚠️ [DB] SLOW QUERY: album by slug took ${queryTime.toFixed(0)}ms`)
+    }
 
     if (error) throw error
     return data || null
@@ -105,16 +115,26 @@ export async function getAlbumBySlug(slug: string) {
 // Admin data fetching functions (returns all albums including unpublished)
 export async function getAllAlbumsWithLabels() {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('albums')
       .select(`
-        *,
+        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status,
         labels (
           id,
           name
         )
       `)
       .order('release_date', { ascending: false, nullsFirst: false })
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    const dataCount = data?.length || 0
+    console.log(`🔍 [DB] all albums with labels query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`)
+
+    if (queryTime > 1000) {
+      console.warn(`⚠️ [DB] SLOW QUERY: all albums with labels took ${queryTime.toFixed(0)}ms`)
+    }
 
     if (error) throw error
     return data || []
@@ -126,10 +146,12 @@ export async function getAllAlbumsWithLabels() {
 
 export async function getAlbumById(id: string) {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('albums')
       .select(`
-        *,
+        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, description,
         labels (
           id,
           name
@@ -137,6 +159,9 @@ export async function getAlbumById(id: string) {
       `)
       .eq('id', id)
       .single()
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    console.log(`🔍 [DB] album by id query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
     return data || null
@@ -148,10 +173,12 @@ export async function getAlbumById(id: string) {
 
 export async function getAlbumBySlugAdmin(slug: string) {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('albums')
       .select(`
-        *,
+        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, description,
         labels (
           id,
           name
@@ -159,6 +186,9 @@ export async function getAlbumBySlugAdmin(slug: string) {
       `)
       .eq('slug', slug)
       .single()
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    console.log(`🔍 [DB] album by slug (admin) query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
     return data || null
@@ -170,10 +200,12 @@ export async function getAlbumBySlugAdmin(slug: string) {
 
 export async function getAlbumLinks(albumId: string) {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('album_links')
       .select(`
-        *,
+        id, url, cta_label, sort_order, platform_id,
         platforms (
           id,
           name,
@@ -183,6 +215,9 @@ export async function getAlbumLinks(albumId: string) {
       `)
       .eq('album_id', albumId)
       .order('sort_order', { ascending: true })
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    console.log(`🔍 [DB] album links query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
     return data || []

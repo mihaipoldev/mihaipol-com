@@ -1,10 +1,10 @@
 import { getAllEventsUnfiltered } from "@/features/events/data"
-import { EventsClient } from "./EventsClient"
+import { EventsList } from "@/features/events/components/EventsList"
 
 export const dynamic = 'force-dynamic'
 
 export default async function EventsPage() {
   const events = await getAllEventsUnfiltered()
   
-  return <EventsClient initialEvents={events} />
+  return <EventsList initialEvents={events} />
 }

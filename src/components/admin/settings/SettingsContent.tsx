@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { AccountSettings } from "./AccountSettings"
 import { AppearanceSettings } from "./AppearanceSettings"
 import { PreferencesSettings } from "./PreferencesSettings"
@@ -26,20 +26,17 @@ export function SettingsContent({ activeSection }: SettingsContentProps) {
   }
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={activeSection}
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.96 }}
-        transition={{ 
-          duration: 0.3, 
-          ease: [0.4, 0, 0.2, 1] 
-        }}
-      >
-        {getContent()}
-      </motion.div>
-    </AnimatePresence>
+    <motion.div
+      key={activeSection}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ 
+        duration: 0.25, 
+        ease: [0.4, 0, 0.2, 1] 
+      }}
+    >
+      {getContent()}
+    </motion.div>
   )
 }
 

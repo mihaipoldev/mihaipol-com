@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServiceSupabaseClient } from "@/lib/supabase/server";
+import { trackEvent, isBotUA, shouldDedupe } from "@/features/smart-links/analytics/service";
 
 type TrackBody = {
   event_type: "page_view" | "link_click" | "section_view";
@@ -9,50 +9,10 @@ type TrackBody = {
   metadata?: Record<string, unknown> | null;
 };
 
-// Simple in-process dedupe (helps in dev/edge double-invoke scenarios).
-// Note: Best-effort only (stateless runtimes may not share memory).
-const recentKeys: Map<string, number> = new Map();
-const SERVER_DEDUPE_WINDOW_MS = 1000;
-
-// Lightweight bot detection to avoid external dependency
-function isBot(userAgent: string): boolean {
-  const ua = userAgent.toLowerCase();
-  // Common crawlers and preview bots
-  const patterns = [
-    "bot",
-    "spider",
-    "crawler",
-    "crawl",
-    "preview",
-    "facebookexternalhit",
-    "whatsapp",
-    "telegrambot",
-    "slackbot",
-    "discordbot",
-    "twitterbot",
-    "linkedinbot",
-    "embedly",
-    "quora link preview",
-    "pinterestbot",
-    "bitlybot",
-    "vkshare",
-    "skypeuripreview",
-    "yandex",
-    "baiduspider",
-    "duckduckbot",
-    "bingbot",
-    "googlebot",
-    "applebot",
-    "ahrefsbot",
-    "semrushbot",
-  ];
-  return patterns.some((p) => ua.includes(p));
-}
-
 export async function POST(req: NextRequest) {
   const userAgent = req.headers.get("user-agent") || "";
   // Filter obvious bots/crawlers
-  if (!userAgent || isBot(userAgent)) {
+  if (!userAgent || isBotUA(userAgent)) {
     return new NextResponse(null, { status: 204 });
   }
 
@@ -76,21 +36,16 @@ export async function POST(req: NextRequest) {
 
   // Dedupe identical events in a short window per session to avoid double inserts
   const dedupeKey = `${body.event_type}:${body.entity_type}:${body.entity_id}:${sessionId ?? "anon"}`;
-  const now = Date.now();
-  const last = recentKeys.get(dedupeKey) ?? 0;
-  if (now - last < SERVER_DEDUPE_WINDOW_MS) {
+  if (shouldDedupe(dedupeKey)) {
     return new NextResponse(null, { status: 204 });
   }
-  recentKeys.set(dedupeKey, now);
 
   const country = req.headers.get("x-vercel-ip-country") || null;
   const city = req.headers.get("x-vercel-ip-city") || null;
   const referer = req.headers.get("referer") || null;
 
-  const supabase = getServiceSupabaseClient();
-
   try {
-    await supabase.from("analytics_events").insert({
+    await trackEvent({
       event_type: body.event_type,
       entity_type: body.entity_type,
       entity_id: body.entity_id,

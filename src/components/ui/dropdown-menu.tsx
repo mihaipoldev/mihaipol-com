@@ -79,16 +79,29 @@ const DropdownMenuSubContent = React.forwardRef<
     }
   }, [])
 
+  // Convert HSL color to HSLA with opacity for semi-transparent background
+  const getBackgroundWithOpacity = (color: string) => {
+    if (color.includes('var(--')) {
+      // For CSS variables, use the modern syntax: hsl(var(--background) / 0.85)
+      return color.replace('hsl(', 'hsl(').replace(')', ' / 0.85)')
+    } else {
+      // For computed HSL values, convert to HSLA
+      return color.replace('hsl(', 'hsla(').replace(')', ' / 0.85)')
+    }
+  }
+
   return (
     <DropdownMenuPrimitive.SubContent
       ref={ref}
       style={{
-        backgroundColor: bgColor,
+        backgroundColor: getBackgroundWithOpacity(bgColor),
         color: textColor,
       }}
       className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 shadow-lg",
-        "!shadow-[0px_1px_1px_0px_rgba(16,17,26,0.08)] dark:!shadow-[0px_1px_1px_0px_rgba(255,255,255,0.08)]",
+        "z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 backdrop-blur-xl",
+        "shadow-xl",
+        "!shadow-[0_8px_30px_rgba(0,0,0,0.12),0_4px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.04)]",
+        "dark:!shadow-[0_8px_30px_rgba(0,0,0,0.4),0_4px_12px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.2)]",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
         className
       )}
@@ -152,18 +165,31 @@ const DropdownMenuContent = React.forwardRef<
     return () => observer.disconnect()
   }, [])
 
+  // Convert HSL color to HSLA with opacity for semi-transparent background
+  const getBackgroundWithOpacity = (color: string) => {
+    if (color.includes('var(--')) {
+      // For CSS variables, use the modern syntax: hsl(var(--background) / 0.85)
+      return color.replace('hsl(', 'hsl(').replace(')', ' / 0.85)')
+    } else {
+      // For computed HSL values, convert to HSLA
+      return color.replace('hsl(', 'hsla(').replace(')', ' / 0.85)')
+    }
+  }
+
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
         ref={ref}
         sideOffset={sideOffset}
         style={{
-          backgroundColor: bgColor,
+          backgroundColor: getBackgroundWithOpacity(bgColor),
           color: textColor,
         }}
         className={cn(
-          "z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border p-1 shadow-md",
-          "!shadow-[0px_1px_1px_0px_rgba(16,17,26,0.08)] dark:!shadow-[0px_1px_1px_0px_rgba(255,255,255,0.08)]",
+          "z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border p-1 backdrop-blur-xl",
+          "shadow-xl",
+          "!shadow-[0_8px_30px_rgba(0,0,0,0.12),0_4px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.04)]",
+          "dark:!shadow-[0_8px_30px_rgba(0,0,0,0.4),0_4px_12px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.2)]",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
           className
         )}

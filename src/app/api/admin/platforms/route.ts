@@ -1,53 +1,52 @@
-import { NextRequest, NextResponse } from "next/server"
-import { createPlatform, updatePlatform, deletePlatform } from "@/features/platforms/mutations"
+import { NextRequest } from "next/server"
+import { createPlatform, updatePlatform, deletePlatform } from "@/features/smart-links/platforms/mutations"
+import { platformCreateSchema, platformUpdateSchema } from "@/features/platforms/schemas"
+import { ok, created, badRequest, serverError } from "@/lib/api"
+import { requireAdmin } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const data = await createPlatform(body)
-    return NextResponse.json(data, { status: 201 })
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
+    const json = await request.json()
+    const parsed = platformCreateSchema.safeParse(json)
+    if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
+    const data = await createPlatform(parsed.data)
+    return created(data)
   } catch (error: any) {
     console.error("Error creating platform:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to create platform" },
-      { status: 500 }
-    )
+    return serverError("Failed to create platform", error?.message)
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { id, ...updates } = body
-    if (!id) {
-      return NextResponse.json({ error: "Missing platform id" }, { status: 400 })
-    }
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
+    const json = await request.json()
+    const parsed = platformUpdateSchema.safeParse(json)
+    if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
+    const { id, ...updates } = parsed.data
     const data = await updatePlatform(id, updates)
-    return NextResponse.json(data)
+    return ok(data)
   } catch (error: any) {
     console.error("Error updating platform:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to update platform" },
-      { status: 500 }
-    )
+    return serverError("Failed to update platform", error?.message)
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
     const searchParams = request.nextUrl.searchParams
     const id = searchParams.get("id")
-    if (!id) {
-      return NextResponse.json({ error: "Missing platform id" }, { status: 400 })
-    }
+    if (!id) return badRequest("Missing platform id")
     await deletePlatform(id)
-    return NextResponse.json({ success: true })
+    return ok({ success: true })
   } catch (error: any) {
     console.error("Error deleting platform:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to delete platform" },
-      { status: 500 }
-    )
+    return serverError("Failed to delete platform", error?.message)
   }
 }
 

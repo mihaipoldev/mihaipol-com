@@ -1,11 +1,8 @@
 import { redirect } from "next/navigation"
-import {
-  getAlbumBySlugAdmin,
-  getAlbumLinks,
-} from "@/features/albums/data"
+import { getAlbumBySlugAdmin, getAlbumLinks } from "@/features/albums/data"
 import { getAllLabels } from "@/features/labels/data"
-import { getAllPlatforms } from "@/features/platforms/data"
-import { EditAlbumForm } from "./EditAlbumForm"
+import { getAllPlatforms } from "@/features/smart-links/platforms/data"
+import { EditAlbumForm } from "@/features/albums/components/EditAlbumForm"
 
 export const dynamic = 'force-dynamic'
 

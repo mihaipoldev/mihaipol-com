@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { getUpdateBySlugAdmin } from "@/features/updates/data"
-import { EditUpdateForm } from "./EditUpdateForm"
+import { EditUpdateForm } from "@/features/updates/components/EditUpdateForm"
 
 export const dynamic = 'force-dynamic'
 

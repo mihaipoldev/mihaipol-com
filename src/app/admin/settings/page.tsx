@@ -4,7 +4,6 @@ import { Suspense, useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { SettingsSidebar } from "@/components/admin/settings/SettingsSidebar"
 import { SettingsContent } from "@/components/admin/settings/SettingsContent"
-import { AdminPageTitle } from "@/components/admin/AdminPageTitle"
 
 type SettingsSection = "account" | "appearance" | "preferences"
 
@@ -62,13 +61,6 @@ function SettingsPageInner() {
 
   return (
     <div className="w-full">
-      <div className="mb-6">
-        <AdminPageTitle title="Settings" />
-        <p className="text-muted-foreground mt-1">
-          Manage your account, app preferences, and appearance
-        </p>
-      </div>
-
       <div className="flex gap-6">
         {/* Sidebar */}
         <div className="w-64 flex-shrink-0">

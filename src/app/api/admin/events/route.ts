@@ -1,63 +1,52 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { createEvent, updateEvent, deleteEvent } from "@/features/events/mutations"
+import { eventCreateSchema, eventUpdateSchema } from "@/features/events/schemas"
+import { ok, created, badRequest, serverError } from "@/lib/api"
+import { requireAdmin } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const data = await createEvent(body)
-    return NextResponse.json(data, { status: 201 })
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
+    const json = await request.json()
+    const parsed = eventCreateSchema.safeParse(json)
+    if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
+    const data = await createEvent(parsed.data)
+    return created(data)
   } catch (error: any) {
     console.error("Error creating event:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to create event" },
-      { status: 500 }
-    )
+    return serverError("Failed to create event", error?.message)
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { id, ...updates } = body
-    
-    if (!id) {
-      return NextResponse.json(
-        { error: "Missing event id" },
-        { status: 400 }
-      )
-    }
-    
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
+    const json = await request.json()
+    const parsed = eventUpdateSchema.safeParse(json)
+    if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
+    const { id, ...updates } = parsed.data
     const data = await updateEvent(id, updates)
-    return NextResponse.json(data)
+    return ok(data)
   } catch (error: any) {
     console.error("Error updating event:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to update event" },
-      { status: 500 }
-    )
+    return serverError("Failed to update event", error?.message)
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
     const searchParams = request.nextUrl.searchParams
     const id = searchParams.get("id")
-    
-    if (!id) {
-      return NextResponse.json(
-        { error: "Missing event id" },
-        { status: 400 }
-      )
-    }
-    
+    if (!id) return badRequest("Missing event id")
     await deleteEvent(id)
-    return NextResponse.json({ success: true })
+    return ok({ success: true })
   } catch (error: any) {
     console.error("Error deleting event:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to delete event" },
-      { status: 500 }
-    )
+    return serverError("Failed to delete event", error?.message)
   }
 }
 

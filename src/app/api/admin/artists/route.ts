@@ -1,63 +1,52 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { createArtist, updateArtist, deleteArtist } from "@/features/artists/mutations"
+import { artistCreateSchema, artistUpdateSchema } from "@/features/artists/schemas"
+import { ok, created, badRequest, serverError } from "@/lib/api"
+import { requireAdmin } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const data = await createArtist(body)
-    return NextResponse.json(data, { status: 201 })
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
+    const json = await request.json()
+    const parsed = artistCreateSchema.safeParse(json)
+    if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
+    const data = await createArtist(parsed.data)
+    return created(data)
   } catch (error: any) {
     console.error("Error creating artist:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to create artist" },
-      { status: 500 }
-    )
+    return serverError("Failed to create artist", error?.message)
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { id, ...updates } = body
-    
-    if (!id) {
-      return NextResponse.json(
-        { error: "Missing artist id" },
-        { status: 400 }
-      )
-    }
-    
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
+    const json = await request.json()
+    const parsed = artistUpdateSchema.safeParse(json)
+    if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
+    const { id, ...updates } = parsed.data
     const data = await updateArtist(id, updates)
-    return NextResponse.json(data)
+    return ok(data)
   } catch (error: any) {
     console.error("Error updating artist:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to update artist" },
-      { status: 500 }
-    )
+    return serverError("Failed to update artist", error?.message)
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
     const searchParams = request.nextUrl.searchParams
     const id = searchParams.get("id")
-    
-    if (!id) {
-      return NextResponse.json(
-        { error: "Missing artist id" },
-        { status: 400 }
-      )
-    }
-    
+    if (!id) return badRequest("Missing artist id")
     await deleteArtist(id)
-    return NextResponse.json({ success: true })
+    return ok({ success: true })
   } catch (error: any) {
     console.error("Error deleting artist:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to delete artist" },
-      { status: 500 }
-    )
+    return serverError("Failed to delete artist", error?.message)
   }
 }
 

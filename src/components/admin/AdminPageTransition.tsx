@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useRef, type ReactNode } from "react";
 
@@ -11,13 +11,6 @@ type AdminPageTransitionProps = {
 export default function AdminPageTransition({ children }: AdminPageTransitionProps) {
   const pathname = usePathname();
   const isFirstMount = useRef(true);
-  const previousPathname = useRef(pathname);
-
-  // Track if pathname changed
-  const pathnameChanged = previousPathname.current !== pathname;
-  if (pathnameChanged) {
-    previousPathname.current = pathname;
-  }
 
   // Mark as mounted after first render
   if (isFirstMount.current) {
@@ -25,18 +18,20 @@ export default function AdminPageTransition({ children }: AdminPageTransitionPro
   }
 
   return (
-    <motion.div
-      key={pathname}
-      initial={isFirstMount.current ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ 
-        duration: 0.25, 
-        ease: [0.4, 0, 0.2, 1] // Custom easing for smooth transition
-      }}
-      className="flex flex-1 flex-col"
-    >
-      {children}
-    </motion.div>
+    <div className="relative flex flex-1 flex-col">
+      <motion.div
+        key={pathname}
+        initial={isFirstMount.current ? false : { opacity: 0, scale: 0.99 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          duration: 0.15,
+          ease: "easeOut",
+        }}
+        className="flex flex-1 flex-col"
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 }
 

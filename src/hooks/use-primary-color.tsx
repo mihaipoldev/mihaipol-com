@@ -1,262 +1,247 @@
 "use client"
 
 import { useEffect, useState } from "react"
-
-export type PrimaryColorType = "brand" | "custom"
-export type BrandColorValue = 
-  | "slate" 
-  | "blue" 
-  | "indigo" 
-  | "violet" 
-  | "cyan" 
-  | "turquoise" 
-  | "yellow" 
-  | "orange" 
-  | "coral" 
-  | "red"
-
-export interface PrimaryColor {
-  type: PrimaryColorType
-  value: BrandColorValue | string // BrandColorValue for brand, hex string for custom
-}
+import { hexToHsl } from "@/lib/colorUtils"
+import { getSupabaseBrowser } from "@/lib/supabase-browser"
 
 const STORAGE_KEY = "primary-color"
-const DEFAULT_COLOR: PrimaryColor = { type: "brand", value: "orange" }
+const DEFAULT_COLOR = "#ff9500" // Orange hex color
 
 /**
- * Converts hex color to HSL values
+ * Applies the primary color (hex) to the document by converting to HSL and setting CSS variables
  */
-function hexToHsl(hex: string): { h: number; s: number; l: number } | null {
-  // Remove # if present
-  hex = hex.replace("#", "")
-  
-  // Parse hex
-  const r = parseInt(hex.substring(0, 2), 16) / 255
-  const g = parseInt(hex.substring(2, 4), 16) / 255
-  const b = parseInt(hex.substring(4, 6), 16) / 255
-
-  const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  let h = 0
-  let s = 0
-  const l = (max + min) / 2
-
-  if (max === min) {
-    h = s = 0 // achromatic
-  } else {
-    const d = max - min
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-    
-    switch (max) {
-      case r:
-        h = ((g - b) / d + (g < b ? 6 : 0)) / 6
-        break
-      case g:
-        h = ((b - r) / d + 2) / 6
-        break
-      case b:
-        h = ((r - g) / d + 4) / 6
-        break
-    }
-  }
-
-  return {
-    h: Math.round(h * 360),
-    s: Math.round(s * 100),
-    l: Math.round(l * 100),
-  }
-}
-
-/**
- * Applies the primary color to the document
- */
-function applyPrimaryColor(color: PrimaryColor) {
-  console.log("🎨 applyPrimaryColor called with:", color)
-  
+function applyPrimaryColor(hexColor: string) {
   if (typeof document === "undefined") {
-    console.log("❌ Document is undefined, returning early")
     return
   }
 
   const body = document.body
   const html = document.documentElement
 
-  console.log("📝 Current body classes:", body.className)
-  console.log("📝 Current body data-brand:", body.getAttribute("data-brand"))
-  console.log("📝 Current html data-brand:", html.getAttribute("data-brand"))
-
-  if (color.type === "brand") {
-    console.log("🎯 Applying brand color:", color.value)
-    
-    // Brand color HSL values mapping
-    const brandColorMap: Record<BrandColorValue, { h: number; s: string; l: string }> = {
-      slate: { h: 215, s: "20%", l: "45%" },
-      blue: { h: 217, s: "91%", l: "60%" },
-      indigo: { h: 239, s: "84%", l: "67%" },
-      violet: { h: 262, s: "83%", l: "58%" },
-      cyan: { h: 188, s: "94%", l: "42%" },
-      turquoise: { h: 174, s: "77%", l: "40%" },
-      yellow: { h: 48, s: "96%", l: "53%" },
-      orange: { h: 24, s: "94%", l: "50%" },
-      coral: { h: 16, s: "100%", l: "66%" },
-      red: { h: 0, s: "84%", l: "60%" },
-    }
-    
-    const brandColor = brandColorMap[color.value as BrandColorValue]
-    
-    if (brandColor) {
-      // Set the brand color via data-brand attribute (for CSS fallback)
-      body.setAttribute("data-brand", color.value as BrandColorValue)
-      html.setAttribute("data-brand", color.value as BrandColorValue)
-      
-      // IMPORTANT: Set CSS variables directly on body (which has .preset-balanced class)
-      // Use "important" flag to override the hardcoded values in .preset-balanced CSS
-      body.style.setProperty("--brand-h", brandColor.h.toString(), "important")
-      body.style.setProperty("--brand-s", brandColor.s, "important")
-      body.style.setProperty("--brand-l", brandColor.l, "important")
-      
-      // Also set on html for cascade
-      html.style.setProperty("--brand-h", brandColor.h.toString(), "important")
-      html.style.setProperty("--brand-s", brandColor.s, "important")
-      html.style.setProperty("--brand-l", brandColor.l, "important")
-      
-      // Directly set --primary on body (where .preset-balanced is) to ensure it updates immediately
-      const primaryValue = `${brandColor.h} ${brandColor.s} ${brandColor.l}`
-      body.style.setProperty("--primary", primaryValue, "important")
-      html.style.setProperty("--primary", primaryValue, "important")
-      
-      console.log("✅ Set data-brand to:", color.value)
-      console.log("✅ Set CSS variables directly on body (preset-balanced):")
-      console.log("  --brand-h:", brandColor.h)
-      console.log("  --brand-s:", brandColor.s)
-      console.log("  --brand-l:", brandColor.l)
-      console.log("  --primary:", primaryValue)
-      
-      // Check computed styles on body (where .preset-balanced is)
-      const bodyComputed = window.getComputedStyle(body)
-      console.log("🎨 Computed on body --brand-h:", bodyComputed.getPropertyValue("--brand-h"))
-      console.log("🎨 Computed on body --brand-s:", bodyComputed.getPropertyValue("--brand-s"))
-      console.log("🎨 Computed on body --brand-l:", bodyComputed.getPropertyValue("--brand-l"))
-      console.log("🎨 Computed on body --primary:", bodyComputed.getPropertyValue("--primary"))
-      
-      // Check inline styles
-      console.log("🔍 Body inline --brand-h:", body.style.getPropertyValue("--brand-h"))
-      console.log("🔍 Body inline --primary:", body.style.getPropertyValue("--primary"))
-      
-      // Force a reflow to ensure visual update
-      void body.offsetHeight
-      
-      // Trigger a custom event to notify components
-      window.dispatchEvent(new CustomEvent("primaryColorChanged", { detail: color }))
-    } else {
-      console.error("❌ Unknown brand color:", color.value)
-    }
-  } else {
-    console.log("🎯 Applying custom color:", color.value)
-    
-    // For custom colors, convert hex to HSL and set CSS variables
-    const hsl = hexToHsl(color.value as string)
-    console.log("🌈 Converted HSL:", hsl)
-    
-    if (hsl) {
-      // Remove data-brand attributes first
-      body.removeAttribute("data-brand")
-      html.removeAttribute("data-brand")
-      
-      // IMPORTANT: Set CSS variables directly on body (which has .preset-balanced class)
-      // Use "important" flag to override the hardcoded values in .preset-balanced CSS
-      body.style.setProperty("--brand-h", hsl.h.toString(), "important")
-      body.style.setProperty("--brand-s", `${hsl.s}%`, "important")
-      body.style.setProperty("--brand-l", `${hsl.l}%`, "important")
-      
-      // Also set on html for cascade
-      html.style.setProperty("--brand-h", hsl.h.toString(), "important")
-      html.style.setProperty("--brand-s", `${hsl.s}%`, "important")
-      html.style.setProperty("--brand-l", `${hsl.l}%`, "important")
-      
-      // Directly set --primary on body (where .preset-balanced is) to ensure it updates immediately
-      const primaryValue = `${hsl.h} ${hsl.s}% ${hsl.l}%`
-      body.style.setProperty("--primary", primaryValue, "important")
-      html.style.setProperty("--primary", primaryValue, "important")
-      
-      console.log("✅ Set CSS variables directly on body (preset-balanced):")
-      console.log("  --brand-h:", hsl.h)
-      console.log("  --brand-s:", `${hsl.s}%`)
-      console.log("  --brand-l:", `${hsl.l}%`)
-      console.log("  --primary:", primaryValue)
-      
-      // Check computed styles on body (where .preset-balanced is)
-      const bodyComputed = window.getComputedStyle(body)
-      console.log("🎨 Computed on body --brand-h:", bodyComputed.getPropertyValue("--brand-h"))
-      console.log("🎨 Computed on body --brand-s:", bodyComputed.getPropertyValue("--brand-s"))
-      console.log("🎨 Computed on body --brand-l:", bodyComputed.getPropertyValue("--brand-l"))
-      console.log("🎨 Computed on body --primary:", bodyComputed.getPropertyValue("--primary"))
-      
-      // Check inline styles
-      console.log("🔍 Body inline --brand-h:", body.style.getPropertyValue("--brand-h"))
-      console.log("🔍 Body inline --primary:", body.style.getPropertyValue("--primary"))
-      
-      // Force a reflow to ensure visual update
-      void body.offsetHeight
-      
-      // Trigger a custom event to notify components
-      window.dispatchEvent(new CustomEvent("primaryColorChanged", { detail: color }))
-    } else {
-      console.error("❌ Failed to convert hex to HSL")
-    }
+  // Convert hex to HSL
+  const hsl = hexToHsl(hexColor)
+  
+  if (!hsl) {
+    console.error("❌ Failed to convert hex to HSL:", hexColor)
+    return
   }
+
+  // Remove data-brand attributes (we're using hex codes now)
+  body.removeAttribute("data-brand")
+  html.removeAttribute("data-brand")
+  
+  // Apply inline styles IMMEDIATELY for instant visual feedback
+  // This runs AFTER React hydration, so no hydration mismatch issues
+  const startTime = performance.now();
+  console.log('[usePrimaryColor] applyPrimaryColor called at', startTime.toFixed(2) + 'ms');
+  console.log('[usePrimaryColor] Color:', hexColor, 'HSL:', hsl);
+  console.log('[usePrimaryColor] Document readyState:', document.readyState);
+  
+  const primaryValue = `${hsl.h} ${hsl.s}% ${hsl.l}%`
+  
+  // Check what's currently applied
+  const currentH = document.documentElement.style.getPropertyValue('--brand-h');
+  const currentPrimary = document.documentElement.style.getPropertyValue('--primary');
+  console.log('[usePrimaryColor] Current --brand-h:', currentH || '(none)');
+  console.log('[usePrimaryColor] Current --primary:', currentPrimary || '(none)');
+  
+  // Apply to documentElement (doesn't cause hydration issues since React already hydrated)
+  if (document.documentElement) {
+    console.log('[usePrimaryColor] Applying inline styles to documentElement');
+    document.documentElement.style.setProperty("--brand-h", hsl.h.toString(), "important")
+    document.documentElement.style.setProperty("--brand-s", `${hsl.s}%`, "important")
+    document.documentElement.style.setProperty("--brand-l", `${hsl.l}%`, "important")
+    document.documentElement.style.setProperty("--primary", primaryValue, "important")
+    
+    // Verify
+    const appliedH = document.documentElement.style.getPropertyValue('--brand-h');
+    console.log('[usePrimaryColor] Verified --brand-h after apply:', appliedH);
+  }
+  
+  // Also inject style tag for persistence
+  injectColorOverrideStyle(hsl)
+  
+  const endTime = performance.now();
+  console.log('[usePrimaryColor] ✅ Applied color:', hexColor, 'HSL:', hsl, 'in', (endTime - startTime).toFixed(2) + 'ms')
+  
+  // Force a reflow to ensure visual update
+  void body.offsetHeight
+  
+  // Trigger a custom event to notify components
+  window.dispatchEvent(new CustomEvent("primaryColorChanged", { detail: { hexColor } }))
+}
+
+// Removed applyToElement - we only use style tags to avoid hydration mismatch
+
+// Inject a style tag to override CSS class values with higher specificity
+function injectColorOverrideStyle(hsl: { h: number; s: number; l: number }) {
+  const styleId = "primary-color-override"
+  let styleEl = document.getElementById(styleId) as HTMLStyleElement
+  
+  if (!styleEl) {
+    styleEl = document.createElement("style")
+    styleEl.id = styleId
+    document.head.appendChild(styleEl)
+  }
+  
+  const primaryValue = `${hsl.h} ${hsl.s}% ${hsl.l}%`
+  
+  // Use very high specificity selectors to override .preset-balanced
+  styleEl.textContent = `
+    .preset-balanced,
+    body.preset-balanced,
+    html .preset-balanced,
+    body .preset-balanced {
+      --brand-h: ${hsl.h} !important;
+      --brand-s: ${hsl.s}% !important;
+      --brand-l: ${hsl.l}% !important;
+      --primary: ${primaryValue} !important;
+    }
+    
+    :root {
+      --brand-h: ${hsl.h} !important;
+      --brand-s: ${hsl.s}% !important;
+      --brand-l: ${hsl.l}% !important;
+      --primary: ${primaryValue} !important;
+    }
+  `
 }
 
 /**
- * Hook to manage primary color selection with sessionStorage persistence
+ * Hook to manage primary color selection with database and sessionStorage persistence
  */
 export function usePrimaryColor() {
-  const [primaryColor, setPrimaryColorState] = useState<PrimaryColor>(DEFAULT_COLOR)
+  const [primaryColor, setPrimaryColorState] = useState<string>(DEFAULT_COLOR)
   const [mounted, setMounted] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  // Load from sessionStorage on mount
+  // Load from database and sessionStorage on mount
   useEffect(() => {
     if (typeof window === "undefined") return
 
-    try {
-      const stored = sessionStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored) as PrimaryColor
-        setPrimaryColorState(parsed)
-        applyPrimaryColor(parsed)
-      } else {
-        // Apply default on first load
+    const loadColor = async () => {
+      try {
+        // First, try to get user and fetch from database
+        let dbColor: string | null = null
+        try {
+          const supabase = getSupabaseBrowser()
+          const { data: { user } } = await supabase.auth.getUser()
+          
+          if (user?.id) {
+            // Fetch style_color from database
+            const { data, error } = await supabase
+              .from('user_settings')
+              .select('style_color')
+              .eq('user_id', user.id)
+              .maybeSingle()
+            
+            if (!error && data?.style_color) {
+              dbColor = data.style_color
+            }
+          }
+        } catch (error) {
+          // If we can't get user or fetch from DB, that's okay - use fallback
+          console.log("Could not fetch color from database, using fallback")
+        }
+
+        // Use database color if available, otherwise try sessionStorage, otherwise use default
+        let colorToUse = dbColor
+        if (!colorToUse) {
+          const stored = sessionStorage.getItem(STORAGE_KEY)
+          if (stored) {
+            try {
+              // Try to parse as JSON (old format) or use as string (new format)
+              const parsed = JSON.parse(stored)
+              colorToUse = typeof parsed === 'string' ? parsed : parsed.value || DEFAULT_COLOR
+            } catch {
+              // If it's not JSON, use it as-is (should be a hex string)
+              colorToUse = stored.startsWith('#') ? stored : DEFAULT_COLOR
+            }
+          } else {
+            colorToUse = DEFAULT_COLOR
+          }
+        }
+
+        // Ensure it's a valid hex color
+        if (!colorToUse || !colorToUse.startsWith('#')) {
+          colorToUse = DEFAULT_COLOR
+        }
+
+        setPrimaryColorState(colorToUse)
+        applyPrimaryColor(colorToUse)
+        
+        // Save to sessionStorage as cache
+        sessionStorage.setItem(STORAGE_KEY, colorToUse)
+      } catch (error) {
+        console.error("Failed to load primary color:", error)
         applyPrimaryColor(DEFAULT_COLOR)
+      } finally {
+        setLoading(false)
+        setMounted(true)
       }
-    } catch (error) {
-      console.error("Failed to load primary color from sessionStorage:", error)
-      applyPrimaryColor(DEFAULT_COLOR)
-    } finally {
-      setMounted(true)
     }
+
+    loadColor()
   }, [])
 
   // Function to set primary color
-  const setPrimaryColor = (color: PrimaryColor) => {
-    console.log("🔧 setPrimaryColor called with:", color)
-    console.log("📦 Current state before update:", primaryColor)
+  const setPrimaryColor = async (hexColor: string) => {
+    // Validate hex color format
+    if (!hexColor || !hexColor.startsWith('#')) {
+      console.error("Invalid hex color:", hexColor)
+      return
+    }
+
+    // Update state first for instant visual feedback
+    setPrimaryColorState(hexColor)
+    applyPrimaryColor(hexColor)
     
-    // Update state first
-    setPrimaryColorState(color)
-    console.log("✅ State updated to:", color)
-    
-    // Apply immediately for instant visual feedback
-    console.log("🚀 Calling applyPrimaryColor...")
-    applyPrimaryColor(color)
-    
-    // Save to sessionStorage
+    // Save to sessionStorage as cache
     if (typeof window !== "undefined") {
       try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(color))
-        console.log("💾 Saved to sessionStorage:", color)
+        sessionStorage.setItem(STORAGE_KEY, hexColor)
       } catch (error) {
         console.error("❌ Failed to save primary color to sessionStorage:", error)
       }
+    }
+
+    // Save to database (async, don't block UI)
+    try {
+      const supabase = getSupabaseBrowser()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user?.id) {
+        // Check if record exists
+        const { data: existing } = await supabase
+          .from('user_settings')
+          .select('user_id')
+          .eq('user_id', user.id)
+          .maybeSingle()
+
+        if (existing) {
+          // Record exists, use UPDATE
+          const { error } = await supabase
+            .from('user_settings')
+            .update({ style_color: hexColor })
+            .eq('user_id', user.id)
+
+          if (error) throw error
+        } else {
+          // Record doesn't exist, use INSERT
+          const { error } = await supabase
+            .from('user_settings')
+            .insert({
+              user_id: user.id,
+              role: 'user',
+              style_color: hexColor,
+            })
+
+          if (error) throw error
+        }
+      }
+    } catch (error) {
+      console.error("❌ Failed to save primary color to database:", error)
+      // Don't throw - we've already updated the UI
     }
   }
 
@@ -264,6 +249,6 @@ export function usePrimaryColor() {
     primaryColor,
     setPrimaryColor,
     mounted,
+    loading,
   }
 }
-

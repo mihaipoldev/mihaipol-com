@@ -1,6 +1,7 @@
 import { getAllEvents } from '@/features/events/data'
 import EventCard from '@/components/features/EventCard'
-import TrackView from '@/components/analytics/TrackView'
+import TrackView from '@/features/smart-links/analytics/components/TrackView'
+import PageHeader from '@/components/layout/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,13 +12,11 @@ export default async function EventsPage() {
     <div className="min-h-screen bg-background">
       <TrackView eventType="section_view" entityType="site_section" entityId="events" />
       <div className="mx-auto w-full max-w-7xl py-16">
-        {/* Page Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-4">All Events</h1>
-          <p className="text-lg text-muted-foreground">
-            Upcoming shows and performances.
-          </p>
-        </div>
+        <PageHeader
+          className="mb-12"
+          title="All Events"
+          description="Upcoming shows and performances."
+        />
 
         {/* Events List */}
         {events.length === 0 ? (

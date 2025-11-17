@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
-import { getPlatformBySlug } from "@/features/platforms/data"
-import { EditPlatformForm } from "./EditPlatformForm"
+import { getPlatformBySlug } from "@/features/smart-links/platforms/data"
+import { EditPlatformForm } from "@/features/smart-links/platforms/components/EditPlatformForm"
 
 export const dynamic = 'force-dynamic'
 

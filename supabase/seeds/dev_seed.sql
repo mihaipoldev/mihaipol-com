@@ -196,3 +196,46 @@ INSERT INTO public.event_artists (event_id, artist_id, role, set_time, sort_orde
   ('e0000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000001', 'headliner', '2025-01-01 00:00:00+00', 1),
   ('e0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000001', 'headliner', '2024-06-20 21:00:00+00', 1);
 
+-- ========================================
+-- 10. USER_COLORS (custom brand colors for users)
+-- ========================================
+-- Note: This seeds colors for the first admin user found in user_settings
+-- If you want to seed colors for a specific user, replace the subquery with a specific UUID
+
+INSERT INTO public.user_colors (user_id, name, hex_value, hsl_h, hsl_s, hsl_l)
+SELECT 
+  us.user_id,
+  color_data.name,
+  color_data.hex_value,
+  color_data.hsl_h,
+  color_data.hsl_s,
+  color_data.hsl_l
+FROM (
+  SELECT user_id 
+  FROM public.user_settings 
+  WHERE role = 'admin' 
+  LIMIT 1
+) us
+CROSS JOIN (
+  VALUES
+    -- Vibrant colors
+    ('Electric Blue', '#0066FF', 220, 100, 50),
+    ('Sunset Orange', '#FF6600', 24, 100, 50),
+    ('Neon Green', '#00FF66', 144, 100, 50),
+    ('Deep Purple', '#6600FF', 264, 100, 50),
+    ('Hot Pink', '#FF0066', 336, 100, 50),
+    -- Muted/Professional colors
+    ('Ocean Blue', '#3382C7', 210, 55, 50),
+    ('Forest Green', '#2D8659', 150, 50, 33),
+    ('Burgundy', '#8B2D4A', 340, 50, 35),
+    ('Slate Gray', '#4A5568', 215, 15, 35),
+    ('Amber', '#F59E0B', 38, 96, 50),
+    -- Dark/Modern colors
+    ('Midnight Blue', '#1E3A8A', 220, 65, 30),
+    ('Dark Teal', '#0D9488', 175, 85, 30),
+    ('Charcoal', '#374151', 210, 10, 25),
+    ('Deep Red', '#991B1B', 0, 70, 35),
+    ('Royal Purple', '#5B21B6', 258, 70, 40)
+) AS color_data(name, hex_value, hsl_h, hsl_s, hsl_l)
+WHERE EXISTS (SELECT 1 FROM public.user_settings WHERE role = 'admin' LIMIT 1);
+

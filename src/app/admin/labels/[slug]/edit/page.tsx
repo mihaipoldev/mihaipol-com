@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { getLabelBySlug } from "@/features/labels/data"
-import { EditLabelForm } from "./EditLabelForm"
+import { EditLabelForm } from "@/features/labels/components/EditLabelForm"
 
 export const dynamic = 'force-dynamic'
 

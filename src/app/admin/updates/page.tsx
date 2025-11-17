@@ -1,11 +1,11 @@
 import { getAllUpdatesUnfiltered } from "@/features/updates/data"
-import { UpdatesClient } from "./UpdatesClient"
+import { UpdatesList } from "@/features/updates/components/UpdatesList"
 
 export const dynamic = 'force-dynamic'
 
 export default async function UpdatesPage() {
   const updates = await getAllUpdatesUnfiltered()
   
-  return <UpdatesClient initialUpdates={updates} />
+  return <UpdatesList initialUpdates={updates || []} />
 }
 

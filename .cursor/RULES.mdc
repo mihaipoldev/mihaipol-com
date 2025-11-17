@@ -1,0 +1,11 @@
+---
+alwaysApply: true
+---
+- Components folder structure: ui are basic (base) components and in other folders are bigger components that might use other components
+- We use Feature folder Structure for comps/logic → `features/`  
+- Folders:  
+  - `app`  
+  - `components/`  
+  - `features/`  
+- Bunny CDN → never `delete`, always `move to trash`  
+- ! ICONS: Use **Font Awesome React** icons only.  

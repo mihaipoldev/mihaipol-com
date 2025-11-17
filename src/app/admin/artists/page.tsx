@@ -1,11 +1,11 @@
 import { getAllArtists } from "@/features/artists/data"
-import { ArtistsClient } from "./ArtistsClient"
+import { ArtistsList } from "@/features/artists/components/ArtistsList"
 
 export const dynamic = 'force-dynamic'
 
 export default async function ArtistsPage() {
   const artists = await getAllArtists()
   
-  return <ArtistsClient initialArtists={artists} />
+  return <ArtistsList initialArtists={artists} />
 }
 

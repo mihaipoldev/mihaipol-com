@@ -41,6 +41,7 @@ export function TableTitleCell({
       target="_blank" 
       rel="noopener noreferrer"
       className="hover:underline"
+      onClick={(e) => e.stopPropagation()}
     >
       {title}
     </Link>

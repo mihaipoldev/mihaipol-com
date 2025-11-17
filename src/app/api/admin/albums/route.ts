@@ -1,53 +1,54 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { createAlbum, updateAlbum, deleteAlbum } from "@/features/albums/mutations"
+import { albumCreateSchema, albumUpdateSchema } from "@/features/albums/schemas"
+import { ok, created, badRequest, serverError } from "@/lib/api"
+import { requireAdmin } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const data = await createAlbum(body)
-    return NextResponse.json(data, { status: 201 })
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
+    const json = await request.json()
+    const parsed = albumCreateSchema.safeParse(json)
+    if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
+    const data = await createAlbum(parsed.data)
+    return created(data)
   } catch (error: any) {
     console.error("Error creating album:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to create album" },
-      { status: 500 }
-    )
+    return serverError("Failed to create album", error?.message)
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { id, ...updates } = body
-    if (!id) {
-      return NextResponse.json({ error: "Missing album id" }, { status: 400 })
-    }
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
+    const json = await request.json()
+    const parsed = albumUpdateSchema.safeParse(json)
+    if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten())
+    const { id, ...updates } = parsed.data
     const data = await updateAlbum(id, updates)
-    return NextResponse.json(data)
+    return ok(data)
   } catch (error: any) {
     console.error("Error updating album:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to update album" },
-      { status: 500 }
-    )
+    return serverError("Failed to update album", error?.message)
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
+    const guard = await requireAdmin(request)
+    if ("status" in (guard as any)) return guard as any
     const searchParams = request.nextUrl.searchParams
     const id = searchParams.get("id")
     if (!id) {
-      return NextResponse.json({ error: "Missing album id" }, { status: 400 })
+      return badRequest("Missing album id")
     }
     await deleteAlbum(id)
-    return NextResponse.json({ success: true })
+    return ok({ success: true })
   } catch (error: any) {
     console.error("Error deleting album:", error)
-    return NextResponse.json(
-      { error: error.message || "Failed to delete album" },
-      { status: 500 }
-    )
+    return serverError("Failed to delete album", error?.message)
   }
 }
 

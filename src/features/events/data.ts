@@ -16,7 +16,13 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
   } = options
 
   try {
-    let query = supabase.from('events').select('*')
+    // 🐛 DEBUG: Start timing
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
+    // Select only needed columns
+    let query = supabase
+      .from('events')
+      .select('id, title, slug, date, venue, location, event_status, publish_status, flyer_image_url, description')
 
     // Filter by publish status
     if (!includeUnpublished) {
@@ -43,6 +49,15 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
 
     const { data, error } = await query
 
+    // 🐛 DEBUG: Log query time
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    const dataCount = data?.length || 0
+    console.log(`🔍 [DB] events query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`)
+
+    if (queryTime > 1000) {
+      console.warn(`⚠️ [DB] SLOW QUERY: events fetch took ${queryTime.toFixed(0)}ms`)
+    }
+
     if (error) throw error
     return data || []
   } catch (error) {
@@ -63,12 +78,17 @@ export async function getAllEvents() {
 
 export async function getEventBySlug(slug: string) {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('events')
-      .select('*')
+      .select('id, title, slug, date, venue, location, event_status, publish_status, flyer_image_url, description')
       .eq('slug', slug)
       .eq('publish_status', 'published')
       .single()
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    console.log(`🔍 [DB] event by slug query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
     return data || null
@@ -81,10 +101,20 @@ export async function getEventBySlug(slug: string) {
 // Admin data fetching functions (returns all events including unpublished)
 export async function getAllEventsUnfiltered() {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('events')
-      .select('*')
+      .select('id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, ticket_label, tickets_url')
       .order('date', { ascending: false })
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    const dataCount = data?.length || 0
+    console.log(`🔍 [DB] all events (unfiltered) query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`)
+
+    if (queryTime > 1000) {
+      console.warn(`⚠️ [DB] SLOW QUERY: all events (unfiltered) took ${queryTime.toFixed(0)}ms`)
+    }
 
     if (error) throw error
     return data || []
@@ -96,11 +126,16 @@ export async function getAllEventsUnfiltered() {
 
 export async function getEventById(id: string) {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('events')
-      .select('*')
+      .select('id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, ticket_label, tickets_url')
       .eq('id', id)
       .single()
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    console.log(`🔍 [DB] event by id query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
     return data || null
@@ -112,11 +147,16 @@ export async function getEventById(id: string) {
 
 export async function getEventBySlugAdmin(slug: string) {
   try {
+    const queryStartTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
     const { data, error } = await supabase
       .from('events')
-      .select('*')
+      .select('id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, ticket_label, tickets_url')
       .eq('slug', slug)
       .single()
+
+    const queryTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - queryStartTime
+    console.log(`🔍 [DB] event by slug (admin) query completed in ${queryTime.toFixed(0)}ms`)
 
     if (error) throw error
     return data || null

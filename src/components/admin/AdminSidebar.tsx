@@ -15,12 +15,15 @@ import {
   faLink,
   faExternalLink,
   faNewspaper,
+  faGlobe,
 } from "@fortawesome/free-solid-svg-icons"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useState } from "react"
+import { UserMenu } from "./UserMenu"
+import { getSidebarGradient, getSidebarAccentGradient } from "@/lib/gradient-presets"
 
 const overviewItems = [
   {
@@ -62,11 +65,6 @@ const smartLinksItems = [
     icon: faChartLine,
   },
   {
-    title: "Releases",
-    href: "/admin/releases",
-    icon: faCompactDisc,
-  },
-  {
     title: "Platforms",
     href: "/admin/platforms",
     icon: faRadio,
@@ -79,40 +77,54 @@ const settingsItems = [
     href: "/admin/settings",
     icon: faGear,
   },
+  {
+    title: "Performance Test",
+    href: "/admin/test-performance",
+    icon: faChartLine,
+  },
 ]
 
 function SidebarContent() {
   const pathname = usePathname()
   const router = useRouter()
+  const sidebarAccentGradient = getSidebarAccentGradient()
+  const hoverGradientClasses = sidebarAccentGradient.split(' ').map(cls => `hover:${cls}`).join(' ')
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col relative sidebar-sparkles">
+      {/* Sparkles */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="sparkle" style={{ top: '25%', left: '5%', animationDelay: '0s' }} />
+        <div className="sparkle" style={{ top: '45%', left: '10%', animationDelay: '5s' }} />
+        <div className="sparkle" style={{ top: '70%', left: '7%', animationDelay: '10s' }} />
+        <div className="sparkle" style={{ top: '35%', left: '15%', animationDelay: '7s' }} />
+      </div>
       {/* Logo/Brand */}
-      <div className="flex h-16 items-center justify-between px-6 mt-1">
-        <Link href="/admin" className="flex flex-col">
-          <span className="text-2xl font-bold text-sidebar-foreground leading-tight uppercase">Mihai Pol</span>
-          <span className="text-xs text-sidebar-foreground/60 leading-tight -mt-0.5">Admin</span>
+      <div className="flex h-16 items-center justify-between px-6 mt-2 mb-2">
+        <Link href="/admin" className="flex flex-col group">
+          <span className="text-2xl font-bold text-sidebar-foreground leading-tight uppercase tracking-tight transition-colors group-hover:text-primary">Mihai Pol</span>
+          <span className="text-xs text-sidebar-foreground/60 leading-tight -mt-0.5 font-medium">Artist Portal</span>
         </Link>
         <Link href="/dev">
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors !shadow-none dark:!shadow-none hover:!shadow-none dark:hover:!shadow-none ring-0 focus-visible:ring-0"
+            className="h-11 w-11 rounded-xl bg-primary/5 text-primary border border-primary/20 hover:bg-primary/15 hover:border-primary/30 hover:scale-105 transition-all duration-200 !shadow-none dark:!shadow-none hover:!shadow-none dark:hover:!shadow-none ring-0 focus-visible:ring-0 group/button"
             aria-label="Go to website"
           >
-            <FontAwesomeIcon icon={faExternalLink} className="h-5 w-5" />
+            <FontAwesomeIcon icon={faGlobe} className="h-5 w-5 transition-transform duration-200 group-hover/button:rotate-12" />
           </Button>
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-6 p-4 pt-5">
+      <nav className="flex-1 space-y-7 p-5 pt-6">
         {/* Overview Category */}
-        <div className="space-y-2">
-          <div className="text-sm md:text-xs font-normal text-sidebar-foreground/70 px-3">
+        <div className="space-y-2.5">
+          <div className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider px-3 mb-1">
             Overview
           </div>
-          <div className="flex flex-col gap-00">
+          <div className="flex flex-col gap-0.5">
             {overviewItems.map((item) => {
               // For Dashboard, only match exactly /admin, not sub-routes
               // For other items, match the exact route or sub-routes
@@ -127,11 +139,11 @@ function SidebarContent() {
                   onClick={() => router.push(item.href)}
                   data-active={isActive}
                   className={cn(
-                    "peer/menu-button flex w-full items-center overflow-hidden rounded-md px-4 py-2 text-left text-[15px] font-normal outline-none ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:font-medium h-10 gap-5",
+                    `peer/menu-button flex w-full items-center overflow-hidden rounded-lg px-4 py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-5`,
                     "[&>svg]:size-4 [&>svg]:shrink-0",
                     "[&>span:last-child]:truncate",
                     isActive
-                      ? "bg-sidebar-accent font-bold hover:font-bold text-sidebar-accent-foreground"
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary`
                       : "text-sidebar-muted-foreground"
                   )}
                 >
@@ -144,11 +156,11 @@ function SidebarContent() {
         </div>
 
         {/* Smart Links Category */}
-        <div className="space-y-2">
-          <div className="text-sm md:text-xs font-normal text-sidebar-foreground/70 px-3">
+        <div className="space-y-2.5">
+          <div className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider px-3 mb-1">
             Smart Links
           </div>
-          <div className="flex flex-col gap-0">
+          <div className="flex flex-col gap-0.5">
             {smartLinksItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
 
@@ -159,11 +171,11 @@ function SidebarContent() {
                   onClick={() => router.push(item.href)}
                   data-active={isActive}
                   className={cn(
-                    "peer/menu-button flex w-full items-center overflow-hidden rounded-md px-4 py-2 text-left text-[15px] font-normal outline-none ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:font-medium h-10 gap-1.5",
+                    `peer/menu-button flex w-full items-center overflow-hidden rounded-lg px-4 py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-1.5`,
                     "[&>svg]:size-4 [&>svg]:shrink-0",
                     "[&>span:last-child]:truncate gap-5",
                     isActive
-                      ? "bg-sidebar-accent font-bold hover:font-bold text-sidebar-accent-foreground"
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary`
                       : "text-sidebar-muted-foreground"
                   )}
                 >
@@ -176,11 +188,11 @@ function SidebarContent() {
         </div>
 
         {/* Settings Category */}
-        <div className="space-y-2">
-          <div className="text-sm md:text-xs font-normal text-sidebar-foreground/70 px-3">
+        <div className="space-y-2.5">
+          <div className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider px-3 mb-1">
             Settings
           </div>
-          <div className="flex flex-col gap-0">
+          <div className="flex flex-col gap-0.5">
             {settingsItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
 
@@ -191,11 +203,11 @@ function SidebarContent() {
                   onClick={() => router.push(item.href)}
                   data-active={isActive}
                   className={cn(
-                    "peer/menu-button flex w-full items-center overflow-hidden rounded-md px-4 py-2 text-left text-[15px] font-normal outline-none ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:font-medium h-12 gap-1.5",
+                    `peer/menu-button flex w-full items-center overflow-hidden rounded-lg px-4 py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-1.5`,
                     "[&>svg]:size-4 [&>svg]:shrink-0",
                     "[&>span:last-child]:truncate gap-5",
                     isActive
-                      ? "bg-sidebar-accent font-bold hover:font-bold text-sidebar-accent-foreground"
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary`
                       : "text-sidebar-muted-foreground"
                   )}
                 >
@@ -209,12 +221,7 @@ function SidebarContent() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-sidebar-border p-4">
-        <div className="text-xs text-sidebar-muted-foreground">
-          <p className="font-medium">Mihai Pol</p>
-          <p>Admin Dashboard</p>
-        </div>
-      </div>
+      <UserMenu />
     </div>
   )
 }
@@ -241,7 +248,7 @@ export function AdminSidebarMobile() {
           <FontAwesomeIcon icon={faBars} className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-64 p-0">
+      <SheetContent side="left" className={`w-64 p-0 ${getSidebarGradient()}`}>
         <SidebarContent />
       </SheetContent>
     </Sheet>

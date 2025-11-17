@@ -1,11 +1,11 @@
 import { getAllAlbumsWithLabels } from "@/features/albums/data"
-import { AlbumsClient } from "./AlbumsClient"
+import { AlbumsList } from "@/features/albums/components/AlbumsList"
 
 export const dynamic = 'force-dynamic'
 
 export default async function AlbumsPage() {
   const albums = await getAllAlbumsWithLabels()
   
-  return <AlbumsClient initialAlbums={albums} />
+  return <AlbumsList initialAlbums={albums} />
 }
 

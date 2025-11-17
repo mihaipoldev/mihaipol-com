@@ -1,6 +1,6 @@
 "use client"
 
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { MoreHorizontal, Pencil, Trash2, ExternalLink } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import {
@@ -27,6 +27,7 @@ type ActionMenuProps = {
   onEdit?: () => void
   onDelete?: (id: string) => Promise<void>
   editHref?: string
+  openPageHref?: string
   deleteLabel?: string
 }
 
@@ -35,13 +36,15 @@ export function ActionMenu({
   onEdit,
   onDelete,
   editHref,
+  openPageHref,
   deleteLabel = "this item",
 }: ActionMenuProps) {
   const router = useRouter()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleEdit = () => {
+  const handleEdit = (e?: React.MouseEvent) => {
+    e?.stopPropagation()
     if (onEdit) {
       onEdit()
     } else if (editHref) {
@@ -49,7 +52,15 @@ export function ActionMenu({
     }
   }
 
-  const handleDelete = async () => {
+  const handleOpenPage = (e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    if (openPageHref) {
+      window.open(openPageHref, "_blank", "noopener,noreferrer")
+    }
+  }
+
+  const handleDelete = async (e?: React.MouseEvent) => {
+    e?.stopPropagation()
     if (!onDelete) return
 
     setIsDeleting(true)
@@ -63,30 +74,45 @@ export function ActionMenu({
     }
   }
 
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setShowDeleteDialog(true)
+  }
+
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="no-shadow !shadow-[0_0_0_0_transparent] hover:!shadow-[0_0_0_0_transparent] dark:!shadow-[0_0_0_0_transparent] dark:hover:!shadow-[0_0_0_0_transparent] h-8 w-8 focus-visible:ring-0" style={{ boxShadow: 'none' }}>
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setShowDeleteDialog(true)}
-            className="text-destructive focus:text-destructive cursor-pointer"
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div onClick={(e) => e.stopPropagation()}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="no-shadow !shadow-[0_0_0_0_transparent] hover:!shadow-[0_0_0_0_transparent] dark:!shadow-[0_0_0_0_transparent] dark:hover:!shadow-[0_0_0_0_transparent] h-10 w-10 focus-visible:ring-0 hover:bg-transparent dark:hover:bg-transparent [&:hover_svg]:text-primary" style={{ boxShadow: 'none' }}>
+              <MoreHorizontal className="h-5 w-5 transition-colors duration-150" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+            {openPageHref && (
+              <>
+                <DropdownMenuItem onClick={handleOpenPage} className="cursor-pointer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Open Page
+                </DropdownMenuItem>
+              </>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleDeleteClick}
+              className="text-destructive focus:text-destructive cursor-pointer"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>

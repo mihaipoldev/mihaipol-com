@@ -122,6 +122,78 @@ body {
   .font-sans {
     font-family: var(--font-family-primary);
   }
+
+  .sidebar-accent-glow {
+    border-left: 3px solid hsl(var(--primary));
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .sidebar-sparkles {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sidebar-sparkles::before,
+  .sidebar-sparkles::after {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: hsl(var(--primary));
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    box-shadow: 
+      0 0 6px hsl(var(--primary) / 0.8),
+      0 0 12px hsl(var(--primary) / 0.5),
+      0 0 18px hsl(var(--primary) / 0.3);
+  }
+
+  .sidebar-sparkles::before {
+    top: 15%;
+    left: 8%;
+    animation: sparkle 12s infinite;
+  }
+
+  .sidebar-sparkles::after {
+    top: 55%;
+    left: 12%;
+    animation: sparkle 15s infinite 4s;
+  }
+
+  @keyframes sparkle {
+    0%, 100% {
+      opacity: 0;
+      transform: scale(0) translateY(0) translateX(0);
+    }
+    15% {
+      opacity: 1;
+      transform: scale(1.5) translateY(-15px) translateX(5px);
+    }
+    30% {
+      opacity: 0.9;
+      transform: scale(2) translateY(-30px) translateX(10px);
+    }
+    45% {
+      opacity: 0;
+      transform: scale(0) translateY(-45px) translateX(15px);
+    }
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: hsl(var(--primary));
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    box-shadow: 
+      0 0 6px hsl(var(--primary) / 0.8),
+      0 0 12px hsl(var(--primary) / 0.5),
+      0 0 18px hsl(var(--primary) / 0.3);
+    animation: sparkle 14s infinite;
+  }
 }
 
 /* ============================================
@@ -149,24 +221,26 @@ body {
 /* Admin Panel Balanced Color Preset */
 .preset-balanced {
   /* Brand channels (used everywhere) */
-  /* ---brand-h: 10;
-  --brand-s: 97%;
-  --brand-l: 65%; */
-
-  /* Brand channels (used everywhere) */
-  /* --brand-h: 214; 
-  --brand-s: 90%;
-  --brand-l: 52%; */
-
-  /* Brand channels (used everywhere) */
-  /*--brand-h: 223; 
+  /* Default values - will be overridden by ColorInitializer and usePrimaryColor hook */
+  /* These are fallback values only */
+  --brand-h: 223; 
   --brand-s: 70%;
-  --brand-l: 67%; */
+  --brand-l: 67%;
 
-  /* Brand channels (used everywhere) */
-   --brand-h: 147; 
+  /* Nemphis */ 
+  /* --brand-h: 147; 
   --brand-s: 72%;
-  --brand-l: 40%;
+  --brand-l: 40%;*/
+
+  /* Apple Blue */
+  /*--brand-h: 210; 
+  --brand-s: 100%;
+  --brand-l: 40%;*/
+
+  /* Purple */
+   /* --brand-h: 254; 
+  --brand-s: 56%;
+  --brand-l: 66%;*/
 
   /* Typography Controls */
   /* Font Pairing 1: Roboto + Open Sans (Default) */
@@ -197,12 +271,12 @@ body {
   --letter-spacing-base: 0;
 
   /* Roundness Controls */
-  --radius: 10px;
-  --radius-subtle: 6px;
-  --radius-regular: 8px;
-  --radius-large: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
+  --radius: 14px;
+  --radius-subtle: 10px;
+  --radius-regular: 12px;
+  --radius-large: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
   --radius-full: 9999px;
 
   /* Spacing Controls */
@@ -222,11 +296,11 @@ body {
 
   /* ── LIGHT ───────────────────────────────────────── */
   /* Balanced approach: moderate contrast, comfortable ratios */
-  --background: var(--brand-h) 0% 100%;        /* slightly warmer than pure white */
+  --background: var(--brand-h) 1% 96%;        /* slightly warmer than pure white */
   --foreground: 255 0% 18%;
 
-  --card: var(--brand-h) 5% 97%;                 /* subtle brand tint */
-  --card-foreground: var(--brand-h) 15% 25%; 
+  --card: var(--brand-h) 1% 92%;                 /* subtle brand tint */
+  --card-foreground: var(--brand-h) 10% 25%; 
 
   --popover: var(--brand-h) 12% 97%;
   --popover-foreground: var(--brand-h) 15% 25%;
@@ -239,14 +313,14 @@ body {
   --accent: var(--brand-h) 5% 95%;
   --accent-foreground: var(--brand-h) 20% 15%;
 
-  --muted: var(--brand-h) 5% 96%;
-  --muted-foreground: var(--brand-h) 8% 43%;
+  --muted: var(--brand-h) 2% 90%;
+  --muted-foreground: var(--brand-h) 2% 43%;
 
   --secondary: var(--brand-h) 20% 90%;
   --secondary-foreground: var(--brand-h) 35% 15%;
 
   /* Borders with moderate brand presence */
-  --border: var(--brand-h) 5% 92%;
+  --border: var(--brand-h) 2% 85%;
   --input: var(--border);
   --ring: var(--primary);
 
@@ -255,12 +329,12 @@ body {
   --destructive-foreground: 0 0% 98%;
 
   /* Sidebar: balanced contrast */
-  --sidebar-background: var(--brand-h) 2% 97.5%;
+  --sidebar-background: var(--brand-h) 1% 88%;
   --sidebar-foreground: var(--brand-h) 50% 15%;
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: var(--brand-h) 6% 92%;
-  --sidebar-accent-foreground: var(--brand-h) 50% 15%;
+  --sidebar-accent: var(--brand-h) 2% 90%;
+  --sidebar-accent-foreground: var(--brand-h) 50% 50%;
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
   --sidebar-muted: var(--muted);
@@ -274,7 +348,7 @@ body {
   /* ── DARK ────────────────────────────────────────── */
   /* Balanced dark mode with moderate contrast */
   --background: var(--brand-h) 1% 10%;     /* warmer dark background */
-  --foreground: 240 40% 95%;
+  --foreground: 240 40% 98%;
 
   --card: var(--brand-h) 2% 16%;
   --card-foreground: var(--brand-h) 15% 85%;
@@ -291,12 +365,12 @@ body {
   --accent-foreground: var(--brand-h) 30% 98%;
 
   --muted: var(--brand-h) 2% 22%;
-  --muted-foreground: var(--brand-h) 0% 85%;
+  --muted-foreground: var(--brand-h) 0% 80%;
 
   --secondary: var(--brand-h) 25% 22%;
   --secondary-foreground: var(--brand-h) 45% 95%;
 
-  --border: var(--brand-h) 0% 30%;
+  --border: var(--brand-h) 0% 25%;
   --input: var(--border);
   --ring: var(--primary);
 
@@ -305,13 +379,13 @@ body {
   --destructive-foreground: 0 0% 98%;
 
   /* Sidebar: balanced dark contrast */
-  --sidebar-background: var(--brand-h) 1% 15.5%;
+  --sidebar-background: var(--brand-h) 1% 18%;
   --sidebar-foreground: var(--brand-h) 10% 92%;
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: var(--brand-h) 1% 10%;
   --sidebar-accent-foreground: var(--brand-h) 10% 94%;
-  --sidebar-border: var(--border);
+  --sidebar-border: var(--brand-h) 0% 30%;
   --sidebar-ring: var(--ring);
   --sidebar-muted: var(--muted);
   --sidebar-muted-foreground: var(--muted-foreground);
@@ -439,4 +513,20 @@ body.preset-balanced [data-radix-dropdown-menu-content],
 body.preset-balanced div[role="menu"] {
   background-color: hsl(var(--background)) !important;
   color: hsl(var(--foreground)) !important;
+}
+
+/* React Colorful Color Picker Styles */
+.react-colorful {
+  width: 100% !important;
+  min-width: 100% !important;
+}
+
+.react-colorful__saturation {
+  width: 100% !important;
+  min-width: 100% !important;
+}
+
+.react-colorful__hue {
+  width: 100% !important;
+  min-width: 100% !important;
 }

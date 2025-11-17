@@ -1,11 +1,11 @@
-import { getAllPlatforms } from "@/features/platforms/data"
-import { PlatformsClient } from "./PlatformsClient"
+import { getAllPlatforms } from "@/features/smart-links/platforms/data"
+import { PlatformsList } from "@/features/smart-links/platforms/components/PlatformsList"
 
 export const dynamic = 'force-dynamic'
 
 export default async function PlatformsPage() {
   const platforms = await getAllPlatforms()
   
-  return <PlatformsClient initialPlatforms={platforms} />
+  return <PlatformsList initialPlatforms={platforms} />
 }
 
