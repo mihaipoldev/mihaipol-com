@@ -4,7 +4,8 @@ import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AdminMetricTab } from "@/components/admin/AdminMetricTab";
 import { AnalyticsLineChart } from "./AnalyticsLineChart";
-import { getAnalyticsGradient } from "@/lib/gradient-presets";
+import { getCardGradient } from "@/lib/gradient-presets";
+import { cn } from "@/lib/utils";
 import type { AnalyticsData } from "../data";
 
 type AnalyticsDashboardProps = {
@@ -27,7 +28,10 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8">
       <div
-        className={`rounded-xl border border-border/50 overflow-hidden ${getAnalyticsGradient()}`}
+        className={cn(
+          "rounded-xl overflow-hidden bg-card/50 text-card-foreground dark:bg-card/30 shadow-lg transition-all duration-300 hover:shadow-xl",
+          getCardGradient()
+        )}
       >
         <Tabs defaultValue="visits" className="w-full">
           <TabsList className="grid grid-cols-2 w-full bg-transparent p-0 gap-0 overflow-hidden h-auto min-h-[88px] border-b border-border/30 rounded-none">

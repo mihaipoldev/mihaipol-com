@@ -3,9 +3,9 @@ import { getServiceSupabaseClient } from "@/lib/supabase/server";
 export async function createPlatform(platformData: {
   name: string;
   slug: string;
-  display_name: string;
   base_url?: string | null;
   icon_url?: string | null;
+  icon_horizontal_url?: string | null;
   default_cta_label?: string | null;
 }) {
   try {

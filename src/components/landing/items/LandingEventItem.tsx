@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatEventDate } from "../utils";
 import type { LandingEvent } from "../types";
+import TrackedExternalLink from "@/components/features/TrackedExternalLink";
 
 type LandingEventItemProps = {
   event: LandingEvent;
@@ -30,9 +31,20 @@ export default function LandingEventItem({ event }: LandingEventItemProps) {
         <div className="col-span-3 text-sm text-muted-foreground">{venue}</div>
         <div className="col-span-3 text-sm text-muted-foreground">{location}</div>
         <div className="col-span-1 text-right">
-          <a href="#" className="text-xs text-primary hover:underline transition-all duration-200">
-            Tickets
-          </a>
+          {event.tickets_url ? (
+            <TrackedExternalLink
+              href={event.tickets_url}
+              eventType="link_click"
+              entityType="event_link"
+              entityId={event.id}
+              metadata={{ url: event.tickets_url, event_slug: event.slug }}
+              className="text-xs text-primary hover:underline transition-all duration-200"
+            >
+              {event.ticket_label || "Tickets"}
+            </TrackedExternalLink>
+          ) : (
+            <span className="text-xs text-muted-foreground">TBA</span>
+          )}
         </div>
       </div>
     </div>

@@ -17,7 +17,6 @@ import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
 import { AdminToolbar } from "@/components/admin/AdminToolbar";
 import { Button } from "@/components/ui/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Badge } from "@/components/ui/badge";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
@@ -26,9 +25,9 @@ type Platform = {
   id: string;
   name: string;
   slug: string;
-  display_name: string;
   base_url: string | null;
   icon_url: string | null;
+  icon_horizontal_url: string | null;
   default_cta_label: string | null;
 };
 
@@ -76,11 +75,7 @@ export function PlatformsList({ initialPlatforms }: PlatformsListProps) {
 
   const filteredPlatforms = platforms.filter((platform) => {
     const query = searchQuery.toLowerCase();
-    return (
-      platform.name.toLowerCase().includes(query) ||
-      platform.display_name.toLowerCase().includes(query) ||
-      platform.base_url?.toLowerCase().includes(query)
-    );
+    return platform.name.toLowerCase().includes(query);
   });
 
   return (
@@ -112,8 +107,8 @@ export function PlatformsList({ initialPlatforms }: PlatformsListProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="pl-4 w-24">Cover</TableHead>
-              <TableHead className="w-[40%]">Name</TableHead>
-              <TableHead>Base URL</TableHead>
+              <TableHead className="w-64">Name</TableHead>
+              <TableHead className="w-80">Display Icon</TableHead>
               <TableHead>Default CTA Label</TableHead>
               <TableHead className="text-right pr-4">Actions</TableHead>
             </TableRow>
@@ -136,38 +131,29 @@ export function PlatformsList({ initialPlatforms }: PlatformsListProps) {
                   >
                     <CoverImageCell
                       imageUrl={platform.icon_url}
-                      title={platform.display_name}
+                      title={platform.name}
                       showInitials={true}
                       className="pl-4"
                     />
                     <TableTitleCell
-                      title={platform.display_name}
+                      title={platform.name}
                       imageUrl={undefined}
                       showInitials={false}
-                      className="w-[40%]"
+                      className="w-64"
                     />
-                    <TableCell>
-                      {platform.base_url ? (
-                        <a
-                          href={platform.base_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {platform.base_url}
-                        </a>
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
+                    <CoverImageCell
+                      imageUrl={platform.icon_horizontal_url}
+                      title={platform.name}
+                      showInitials={true}
+                      horizontal={true}
+                    />
                     <TableCell>{platform.default_cta_label || "-"}</TableCell>
                     <TableCell className="text-right pr-4">
                       <ActionMenu
                         itemId={platform.id}
                         editHref={`/admin/platforms/${platformSlug}/edit`}
                         onDelete={handleDelete}
-                        deleteLabel={`platform "${platform.display_name}"`}
+                        deleteLabel={`platform "${platform.name}"`}
                       />
                     </TableCell>
                   </TableRow>

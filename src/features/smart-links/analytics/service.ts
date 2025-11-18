@@ -1,8 +1,8 @@
 import { getServiceSupabaseClient } from "@/lib/supabase/server";
 
 export type TrackEventInput = {
-  event_type: "page_view" | "link_click" | "section_view";
-  entity_type: "album" | "album_link" | "site_section";
+  event_type: "page_view" | "link_click" | "section_view" | "session_start";
+  entity_type: "album" | "album_link" | "site_section" | "event" | "event_link" | "update" | "update_link";
   entity_id: string;
   session_id?: string | null;
   user_agent?: string | null;
@@ -60,7 +60,7 @@ export function shouldDedupe(key: string): boolean {
 
 export async function trackEvent(input: TrackEventInput) {
   const supabase = getServiceSupabaseClient();
-  await supabase.from("analytics_events").insert({
+  const { error } = await supabase.from("analytics_events").insert({
     event_type: input.event_type,
     entity_type: input.entity_type,
     entity_id: input.entity_id,
@@ -71,4 +71,12 @@ export async function trackEvent(input: TrackEventInput) {
     referrer: input.referrer ?? null,
     metadata: input.metadata ?? null,
   });
+  
+  if (error) {
+    // Log error in development to help debug
+    if (process.env.NODE_ENV === "development") {
+      console.error("Database insert error:", error);
+    }
+    throw error;
+  }
 }

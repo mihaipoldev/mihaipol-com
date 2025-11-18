@@ -21,9 +21,9 @@ import { supabase } from "@/lib/supabase";
 const platformSchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required"),
-  display_name: z.string().min(1, "Display name is required"),
   base_url: z.string().url().optional().or(z.literal("")),
   icon_url: z.string().url().optional().or(z.literal("")),
+  icon_horizontal_url: z.string().url().optional().or(z.literal("")),
   default_cta_label: z.string().optional().or(z.literal("")),
 });
 
@@ -35,14 +35,15 @@ type CreatePlatformModalProps = {
   onSuccess: (platform: {
     id: string;
     name: string;
-    display_name: string;
     icon_url: string | null;
+    icon_horizontal_url: string | null;
     default_cta_label: string | null;
   }) => void;
 };
 
 export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePlatformModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedHorizontalFile, setSelectedHorizontalFile] = useState<File | null>(null);
 
   const {
     register,
@@ -56,9 +57,9 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
     defaultValues: {
       name: "",
       slug: "",
-      display_name: "",
       base_url: "",
       icon_url: "",
+      icon_horizontal_url: "",
       default_cta_label: "",
     },
   });
@@ -68,6 +69,7 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
     if (!open) {
       reset();
       setSelectedFile(null);
+      setSelectedHorizontalFile(null);
     }
   }, [open, reset]);
 
@@ -105,7 +107,9 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
   const onSubmit = async (data: PlatformFormData) => {
     try {
       const newImageUrl = data.icon_url?.trim() || null;
+      const newHorizontalImageUrl = data.icon_horizontal_url?.trim() || null;
       let finalImageUrl = newImageUrl;
+      let finalHorizontalImageUrl = newHorizontalImageUrl;
 
       // If there's a selected file, upload it to Bunny
       if (selectedFile) {
@@ -159,12 +163,63 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
         }
       }
 
+      // Handle horizontal icon upload
+      if (selectedHorizontalFile) {
+        try {
+          const formData = new FormData();
+          formData.append("file", selectedHorizontalFile);
+          formData.append("folderPath", "platforms/temp");
+          const uploadResponse = await fetch("/api/admin/upload", {
+            method: "POST",
+            body: formData,
+          });
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || "Failed to upload horizontal image");
+          }
+          const uploadData = await uploadResponse.json();
+          finalHorizontalImageUrl = uploadData.url;
+        } catch (uploadError: any) {
+          console.error("Error uploading horizontal image:", uploadError);
+          toast.error(uploadError.message || "Failed to upload horizontal image");
+          return;
+        }
+      } else if (newHorizontalImageUrl && !newHorizontalImageUrl.includes("mihaipol-com.b-cdn.net")) {
+        const validation = await validateImageUrl(newHorizontalImageUrl);
+        if (!validation.valid) {
+          toast.error(
+            validation.error ||
+              "Horizontal image not supported or not accessible. Please check the URL or upload a file."
+          );
+          return;
+        }
+        try {
+          const formData = new FormData();
+          formData.append("imageUrl", newHorizontalImageUrl);
+          formData.append("folderPath", "platforms/temp");
+          const uploadResponse = await fetch("/api/admin/upload", {
+            method: "POST",
+            body: formData,
+          });
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || "Failed to upload horizontal image from URL");
+          }
+          const uploadData = await uploadResponse.json();
+          finalHorizontalImageUrl = uploadData.url;
+        } catch (uploadError: any) {
+          console.error("Error uploading horizontal image from URL:", uploadError);
+          toast.error(uploadError.message || "Failed to upload horizontal image from URL");
+          return;
+        }
+      }
+
       const submitData = {
         name: data.name,
         slug: data.slug,
-        display_name: data.display_name,
         base_url: data.base_url && data.base_url.trim() ? data.base_url.trim() : null,
         icon_url: finalImageUrl || null,
+        icon_horizontal_url: finalHorizontalImageUrl || null,
         default_cta_label:
           data.default_cta_label && data.default_cta_label.trim()
             ? data.default_cta_label.trim()
@@ -203,6 +258,9 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
 
       const created = await response.json();
 
+      let updatedIconUrl = finalImageUrl;
+      let updatedHorizontalIconUrl = finalHorizontalImageUrl;
+
       // Move from temp to permanent if needed
       if (finalImageUrl && finalImageUrl.includes("/platforms/temp/") && created?.id) {
         try {
@@ -219,19 +277,55 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
           });
           if (moveResponse.ok) {
             const moveData = await moveResponse.json();
-            await fetch("/api/admin/platforms", {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-                ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-              },
-              body: JSON.stringify({ id: created.id, icon_url: moveData.url }),
-            });
-            // Update finalImageUrl with the moved URL
-            finalImageUrl = moveData.url;
+            updatedIconUrl = moveData.url;
           }
         } catch (moveError) {
           console.error("Failed to move image from temp folder:", moveError);
+        }
+      }
+
+      // Move horizontal icon from temp to permanent if needed
+      if (finalHorizontalImageUrl && finalHorizontalImageUrl.includes("/platforms/temp/") && created?.id) {
+        try {
+          const moveResponse = await fetch("/api/admin/upload/move", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+            },
+            body: JSON.stringify({
+              imageUrl: finalHorizontalImageUrl,
+              newFolderPath: `platforms/${created.id}`,
+            }),
+          });
+          if (moveResponse.ok) {
+            const moveData = await moveResponse.json();
+            updatedHorizontalIconUrl = moveData.url;
+          }
+        } catch (moveError) {
+          console.error("Failed to move horizontal image from temp folder:", moveError);
+        }
+      }
+
+      // Update both icons if any were moved
+      if ((updatedIconUrl !== finalImageUrl || updatedHorizontalIconUrl !== finalHorizontalImageUrl) && created?.id) {
+        try {
+          await fetch("/api/admin/platforms", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+            },
+            body: JSON.stringify({ 
+              id: created.id, 
+              icon_url: updatedIconUrl,
+              icon_horizontal_url: updatedHorizontalIconUrl,
+            }),
+          });
+          finalImageUrl = updatedIconUrl;
+          finalHorizontalImageUrl = updatedHorizontalIconUrl;
+        } catch (updateError) {
+          console.error("Failed to update moved image URLs:", updateError);
         }
       }
 
@@ -239,8 +333,8 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
       onSuccess({
         id: created.id,
         name: created.name,
-        display_name: created.display_name,
         icon_url: finalImageUrl,
+        icon_horizontal_url: finalHorizontalImageUrl,
         default_cta_label: created.default_cta_label || null,
       });
       onOpenChange(false);
@@ -278,10 +372,6 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
             </FormField>
           </div>
 
-          <FormField label="Display Name" required error={errors.display_name?.message}>
-            <ShadowInput {...register("display_name")} placeholder="Display name" />
-          </FormField>
-
           <FormField label="Base URL" error={errors.base_url?.message}>
             <ShadowInput type="url" {...register("base_url")} placeholder="https://example.com" />
           </FormField>
@@ -294,6 +384,17 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
               folderPath="platforms/temp"
               error={errors.icon_url?.message}
               placeholder="https://example.com/icon.png"
+            />
+          </FormField>
+
+          <FormField label="Icon Horizontal Image" error={errors.icon_horizontal_url?.message}>
+            <ImageUploadField
+              value={watch("icon_horizontal_url") || null}
+              onChange={(url) => setValue("icon_horizontal_url", url || "")}
+              onFileChange={(file) => setSelectedHorizontalFile(file)}
+              folderPath="platforms/temp"
+              error={errors.icon_horizontal_url?.message}
+              placeholder="https://example.com/icon-horizontal.png"
             />
           </FormField>
 

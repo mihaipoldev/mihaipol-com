@@ -26,26 +26,37 @@ export default function LandingFooter() {
                 <div className="w-16 h-16 rounded-full bg-gradient-sunset shadow-card" />
                 <div>
                   <h3 className="font-bold text-xl">Mihai Pol</h3>
-                  <p className="text-sm text-muted-foreground">Electronic Music Producer</p>
+                  <p className="text-sm text-muted-foreground">Electronic Music</p>
                 </div>
               </div>
-              <p className="text-muted-foreground">
-                Creating atmospheric electronic music from Los Angeles. Available for bookings and
-                collaborations.
+              <p className="text-muted-foreground italic">
+                "The ability to simplify means to eliminate the unnecessary so that the necessary may speak." — Hans Hofmann
               </p>
             </div>
             <div className="space-y-4">
               <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
                 Connect
               </h4>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                style={{ borderRadius: "0.75rem" }}
-              >
-                Contact
-              </Button>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>
+                  Bookings:{" "}
+                  <Link
+                    href="mailto:ioana@griffith.ro"
+                    className="text-foreground hover:text-primary transition-colors underline"
+                  >
+                    ioana@griffith.ro
+                  </Link>
+                </p>
+                <p>
+                  Demos:{" "}
+                  <Link
+                    href="mailto:mihaipol@griffith.ro"
+                    className="text-foreground hover:text-primary transition-colors underline"
+                  >
+                    mihaipol@griffith.ro
+                  </Link>
+                </p>
+              </div>
             </div>
           </div>
           <div className="flex flex-wrap gap-4 justify-center mb-12">

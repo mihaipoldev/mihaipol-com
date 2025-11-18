@@ -198,8 +198,7 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
                       (link): SmartLink => ({
                         id: link.id,
                         url: link.url,
-                        platformName:
-                          link.platforms?.display_name || link.platforms?.name || "Unknown",
+                        platformName: link.platforms?.name || "Unknown",
                         platformIconUrl: null,
                         ctaLabel: link.cta_label || null,
                       })

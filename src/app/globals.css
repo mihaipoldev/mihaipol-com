@@ -124,8 +124,18 @@ body {
   }
 
   .sidebar-accent-glow {
-    border-left: 3px solid hsl(var(--primary));
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    position: relative;
+  }
+
+  .sidebar-accent-glow::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, hsl(var(--primary) / 0.5), hsl(var(--primary) / 0.3), hsl(var(--primary) / 0.15));
+    border-radius: 0;
   }
 
   .sidebar-sparkles {
@@ -1279,46 +1289,46 @@ body.preset-landing-page-8 {
 
 .preset-landing-page-9,
 body.preset-landing-page-9 {
-  --background: 260 35% 6%;
-  --foreground: 280 20% 96%;
-  --card: 260 35% 10%;
-  --card-foreground: 280 20% 96%;
-  --popover: 260 35% 10%;
-  --popover-foreground: 280 20% 96%;
+  --background: 260 25% 97%;
+  --foreground: 280 25% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 280 25% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 280 25% 10%;
 
-  --primary: 305 90% 60%;
+  --primary: 305 80% 58%;
   --primary-foreground: 0 0% 0%;
-  --primary-glow: 305 95% 68%;
+  --primary-glow: 305 90% 68%;
 
-  --secondary: 190 90% 55%;
+  --secondary: 190 80% 55%;
   --secondary-foreground: 0 0% 0%;
-  --secondary-glow: 190 95% 65%;
+  --secondary-glow: 190 90% 65%;
 
-  --accent: 55 95% 60%;
+  --accent: 55 90% 58%;
   --accent-foreground: 0 0% 0%;
   --accent-glow: 55 95% 70%;
 
-  --muted: 260 25% 16%;
-  --muted-foreground: 280 20% 80%;
+  --muted: 260 18% 93%;
+  --muted-foreground: 280 18% 40%;
 
-  --destructive: 0 80% 60%;
+  --destructive: 0 80% 55%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 260 35% 24%;
-  --input: 260 35% 24%;
-  --ring: 305 90% 60%;
+  --border: 260 18% 88%;
+  --input: 260 18% 88%;
+  --ring: 305 80% 58%;
   --radius: 1rem;
 
-  --gradient-start: 305 90% 60%;
-  --gradient-mid: 190 90% 55%;
-  --gradient-end: 55 95% 60%;
+  --gradient-start: 305 80% 58%;
+  --gradient-mid: 190 80% 55%;
+  --gradient-end: 55 90% 58%;
 
-  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.35);
-  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.45);
-  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.55);
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.25);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.35);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.45);
 
-  --shadow-card: 0 4px 24px hsl(305 90% 60% / 0.22);
-  --shadow-card-hover: 0 8px 32px hsl(305 90% 60% / 0.32);
+  --shadow-card: 0 4px 24px hsl(305 80% 58% / 0.12);
+  --shadow-card-hover: 0 8px 32px hsl(305 80% 58% / 0.2);
 }
 
 .dark .preset-landing-page-9,
@@ -1368,46 +1378,46 @@ body.preset-landing-page-9 {
 
 .preset-landing-page-10,
 body.preset-landing-page-10 {
-  --background: 220 35% 8%;
-  --foreground: 210 20% 96%;
-  --card: 220 35% 11%;
-  --card-foreground: 210 20% 96%;
-  --popover: 220 35% 11%;
-  --popover-foreground: 210 20% 96%;
+  --background: 220 20% 97%;
+  --foreground: 220 25% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 25% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 25% 12%;
 
-  --primary: 45 85% 58%;
+  --primary: 45 85% 56%;
   --primary-foreground: 0 0% 8%;
-  --primary-glow: 45 90% 68%;
+  --primary-glow: 45 90% 66%;
 
-  --secondary: 215 22% 40%;
+  --secondary: 215 25% 32%;
   --secondary-foreground: 0 0% 100%;
-  --secondary-glow: 215 24% 48%;
+  --secondary-glow: 215 30% 40%;
 
-  --accent: 200 60% 50%;
+  --accent: 200 55% 50%;
   --accent-foreground: 0 0% 100%;
-  --accent-glow: 200 65% 58%;
+  --accent-glow: 200 60% 58%;
 
-  --muted: 220 25% 18%;
-  --muted-foreground: 210 18% 80%;
+  --muted: 220 18% 93%;
+  --muted-foreground: 220 18% 40%;
 
   --destructive: 0 70% 52%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 220 30% 24%;
-  --input: 220 30% 24%;
-  --ring: 45 85% 58%;
+  --border: 220 18% 88%;
+  --input: 220 18% 88%;
+  --ring: 45 85% 56%;
   --radius: 1rem;
 
-  --gradient-start: 45 85% 58%;
-  --gradient-mid: 215 22% 40%;
-  --gradient-end: 200 60% 50%;
+  --gradient-start: 45 85% 56%;
+  --gradient-mid: 215 25% 32%;
+  --gradient-end: 200 55% 50%;
 
-  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.3);
-  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.36);
-  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.42);
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.26);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.34);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.4);
 
-  --shadow-card: 0 4px 24px hsl(45 85% 58% / 0.2);
-  --shadow-card-hover: 0 8px 32px hsl(45 85% 58% / 0.28);
+  --shadow-card: 0 4px 24px hsl(45 85% 56% / 0.12);
+  --shadow-card-hover: 0 8px 32px hsl(45 85% 56% / 0.2);
 }
 
 .dark .preset-landing-page-10,
@@ -1724,46 +1734,46 @@ body.preset-landing-page-13 {
 
 .preset-landing-page-14,
 body.preset-landing-page-14 {
-  --background: 230 25% 5%;
-  --foreground: 210 20% 96%;
-  --card: 230 25% 9%;
-  --card-foreground: 210 20% 96%;
-  --popover: 230 25% 9%;
-  --popover-foreground: 210 20% 96%;
+  --background: 230 20% 97%;
+  --foreground: 210 20% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 20% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 20% 10%;
 
-  --primary: 10 85% 60%;
+  --primary: 10 85% 58%;
   --primary-foreground: 0 0% 0%;
-  --primary-glow: 10 90% 68%;
+  --primary-glow: 10 90% 66%;
 
   --secondary: 35 90% 55%;
   --secondary-foreground: 0 0% 0%;
   --secondary-glow: 35 95% 63%;
 
-  --accent: 200 80% 60%;
+  --accent: 200 75% 55%;
   --accent-foreground: 0 0% 0%;
-  --accent-glow: 200 85% 68%;
+  --accent-glow: 200 80% 64%;
 
-  --muted: 230 20% 16%;
-  --muted-foreground: 210 18% 80%;
+  --muted: 230 16% 92%;
+  --muted-foreground: 210 18% 40%;
 
   --destructive: 0 80% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 230 25% 22%;
-  --input: 230 25% 22%;
-  --ring: 10 85% 60%;
+  --border: 230 16% 88%;
+  --input: 230 16% 88%;
+  --ring: 10 85% 58%;
   --radius: 1rem;
 
-  --gradient-start: 10 85% 60%;
+  --gradient-start: 10 85% 58%;
   --gradient-mid: 35 90% 55%;
-  --gradient-end: 200 80% 60%;
+  --gradient-end: 200 75% 55%;
 
-  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.36);
-  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.46);
-  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.54);
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.28);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.38);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.46);
 
-  --shadow-card: 0 4px 24px hsl(10 85% 60% / 0.22);
-  --shadow-card-hover: 0 8px 32px hsl(10 85% 60% / 0.32);
+  --shadow-card: 0 4px 24px hsl(10 85% 58% / 0.14);
+  --shadow-card-hover: 0 8px 32px hsl(10 85% 58% / 0.22);
 }
 
 .dark .preset-landing-page-14,
@@ -1807,4 +1817,538 @@ body.preset-landing-page-14 {
 
   --shadow-card: 0 4px 24px hsl(10 90% 64% / 0.25);
   --shadow-card-hover: 0 8px 32px hsl(10 90% 64% / 0.34);
+}
+
+/* THEME 15 – Neon Matrix */
+
+.preset-landing-page-15,
+body.preset-landing-page-15 {
+  --background: 210 20% 8%;
+  --foreground: 150 15% 96%;
+  --card: 210 22% 10%;
+  --card-foreground: 150 15% 96%;
+  --popover: 210 22% 10%;
+  --popover-foreground: 150 15% 96%;
+
+  --primary: 120 90% 55%;
+  --primary-foreground: 0 0% 5%;
+  --primary-glow: 120 95% 65%;
+
+  --secondary: 190 90% 55%;
+  --secondary-foreground: 0 0% 5%;
+  --secondary-glow: 190 95% 65%;
+
+  --accent: 50 95% 60%;
+  --accent-foreground: 0 0% 5%;
+  --accent-glow: 50 98% 70%;
+
+  --muted: 210 18% 16%;
+  --muted-foreground: 150 15% 80%;
+
+  --destructive: 0 80% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 210 25% 24%;
+  --input: 210 25% 24%;
+  --ring: 120 90% 55%;
+  --radius: 1rem;
+
+  --gradient-start: 120 90% 55%;
+  --gradient-mid: 190 90% 55%;
+  --gradient-end: 50 95% 60%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.38);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.48);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.6);
+
+  --shadow-card: 0 4px 24px hsl(120 90% 55% / 0.22);
+  --shadow-card-hover: 0 8px 32px hsl(120 90% 55% / 0.32);
+}
+
+.dark .preset-landing-page-15,
+.dark body.preset-landing-page-15 {
+  --background: 210 24% 4%;
+  --foreground: 150 20% 96%;
+  --card: 210 26% 8%;
+  --card-foreground: 150 20% 96%;
+  --popover: 210 26% 8%;
+  --popover-foreground: 150 20% 96%;
+
+  --primary: 120 95% 60%;
+  --primary-foreground: 0 0% 5%;
+  --primary-glow: 120 98% 70%;
+
+  --secondary: 190 95% 60%;
+  --secondary-foreground: 0 0% 5%;
+  --secondary-glow: 190 98% 70%;
+
+  --accent: 50 98% 64%;
+  --accent-foreground: 0 0% 5%;
+  --accent-glow: 50 100% 74%;
+
+  --muted: 210 24% 14%;
+  --muted-foreground: 150 20% 80%;
+
+  --destructive: 0 80% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 210 30% 20%;
+  --input: 210 30% 20%;
+  --ring: 120 95% 60%;
+
+  --gradient-start: 120 95% 60%;
+  --gradient-mid: 190 95% 60%;
+  --gradient-end: 50 98% 64%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.4);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.5);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.64);
+
+  --shadow-card: 0 4px 24px hsl(120 95% 60% / 0.26);
+  --shadow-card-hover: 0 8px 32px hsl(120 95% 60% / 0.36);
+}
+
+/* THEME 16 – Teal & Sand Luxe */
+
+.preset-landing-page-16,
+body.preset-landing-page-16 {
+  --background: 35 40% 97%;
+  --foreground: 200 20% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 200 20% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 200 20% 12%;
+
+  --primary: 185 65% 45%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 185 75% 55%;
+
+  --secondary: 35 35% 55%;
+  --secondary-foreground: 0 0% 10%;
+  --secondary-glow: 35 42% 62%;
+
+  --accent: 15 70% 55%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 15 78% 62%;
+
+  --muted: 35 28% 92%;
+  --muted-foreground: 200 16% 40%;
+
+  --destructive: 0 70% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 35 24% 86%;
+  --input: 35 24% 86%;
+  --ring: 185 65% 45%;
+  --radius: 1rem;
+
+  --gradient-start: 185 65% 45%;
+  --gradient-mid: 35 35% 55%;
+  --gradient-end: 15 70% 55%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.26);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.34);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.4);
+
+  --shadow-card: 0 4px 24px hsl(185 65% 45% / 0.12);
+  --shadow-card-hover: 0 8px 32px hsl(185 65% 45% / 0.2);
+}
+
+.dark .preset-landing-page-16,
+.dark body.preset-landing-page-16 {
+  --background: 210 28% 6%;
+  --foreground: 35 32% 95%;
+  --card: 210 28% 10%;
+  --card-foreground: 35 32% 95%;
+  --popover: 210 28% 10%;
+  --popover-foreground: 35 32% 95%;
+
+  --primary: 185 70% 50%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 185 80% 60%;
+
+  --secondary: 35 40% 52%;
+  --secondary-foreground: 0 0% 10%;
+  --secondary-glow: 35 46% 60%;
+
+  --accent: 15 75% 56%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 15 82% 64%;
+
+  --muted: 210 20% 18%;
+  --muted-foreground: 35 24% 80%;
+
+  --destructive: 0 70% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 210 26% 22%;
+  --input: 210 26% 22%;
+  --ring: 185 70% 50%;
+
+  --gradient-start: 185 70% 50%;
+  --gradient-mid: 35 40% 52%;
+  --gradient-end: 15 75% 56%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.28);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.36);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.44);
+
+  --shadow-card: 0 4px 24px hsl(185 70% 50% / 0.2);
+  --shadow-card-hover: 0 8px 32px hsl(185 70% 50% / 0.28);
+}
+
+/* THEME 17 – Mono Ice Minimal */
+
+.preset-landing-page-17,
+body.preset-landing-page-17 {
+  --background: 210 15% 98%;
+  --foreground: 220 15% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 15% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 15% 12%;
+
+  --primary: 210 40% 35%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 210 45% 45%;
+
+  --secondary: 210 16% 55%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-glow: 210 22% 62%;
+
+  --accent: 200 30% 45%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 200 35% 55%;
+
+  --muted: 210 12% 93%;
+  --muted-foreground: 220 12% 42%;
+
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 210 12% 88%;
+  --input: 210 12% 88%;
+  --ring: 210 40% 35%;
+  --radius: 1rem;
+
+  --gradient-start: 210 40% 35%;
+  --gradient-mid: 210 16% 55%;
+  --gradient-end: 200 30% 45%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.22);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.3);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.36);
+
+  --shadow-card: 0 4px 24px hsl(210 40% 35% / 0.08);
+  --shadow-card-hover: 0 8px 32px hsl(210 40% 35% / 0.14);
+}
+
+.dark .preset-landing-page-17,
+.dark body.preset-landing-page-17 {
+  --background: 215 22% 6%;
+  --foreground: 210 20% 96%;
+  --card: 215 22% 10%;
+  --card-foreground: 210 20% 96%;
+  --popover: 215 22% 10%;
+  --popover-foreground: 210 20% 96%;
+
+  --primary: 210 42% 58%;
+  --primary-foreground: 0 0% 0%;
+  --primary-glow: 210 50% 66%;
+
+  --secondary: 210 20% 48%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-glow: 210 26% 56%;
+
+  --accent: 200 35% 52%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 200 42% 60%;
+
+  --muted: 215 18% 18%;
+  --muted-foreground: 210 18% 80%;
+
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 215 22% 22%;
+  --input: 215 22% 22%;
+  --ring: 210 42% 58%;
+
+  --gradient-start: 210 42% 58%;
+  --gradient-mid: 210 20% 48%;
+  --gradient-end: 200 35% 52%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.26);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.34);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.4);
+
+  --shadow-card: 0 4px 24px hsl(210 42% 58% / 0.2);
+  --shadow-card-hover: 0 8px 32px hsl(210 42% 58% / 0.26);
+}
+
+/* THEME 18 – Soft Sunrise Minimal */
+
+.preset-landing-page-18,
+body.preset-landing-page-18 {
+  --background: 40 45% 98%;
+  --foreground: 25 25% 16%;
+  --card: 0 0% 100%;
+  --card-foreground: 25 25% 16%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 25 25% 16%;
+
+  --primary: 30 80% 55%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 30 88% 62%;
+
+  --secondary: 15 60% 52%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-glow: 15 68% 60%;
+
+  --accent: 195 50% 52%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 195 60% 60%;
+
+  --muted: 40 30% 93%;
+  --muted-foreground: 25 20% 42%;
+
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 40 26% 88%;
+  --input: 40 26% 88%;
+  --ring: 30 80% 55%;
+  --radius: 1rem;
+
+  --gradient-start: 30 80% 55%;
+  --gradient-mid: 15 60% 52%;
+  --gradient-end: 195 50% 52%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.24);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.32);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.38);
+
+  --shadow-card: 0 4px 24px hsl(30 80% 55% / 0.1);
+  --shadow-card-hover: 0 8px 32px hsl(30 80% 55% / 0.18);
+}
+
+.dark .preset-landing-page-18,
+.dark body.preset-landing-page-18 {
+  --background: 24 28% 7%;
+  --foreground: 40 35% 95%;
+  --card: 24 28% 11%;
+  --card-foreground: 40 35% 95%;
+  --popover: 24 28% 11%;
+  --popover-foreground: 40 35% 95%;
+
+  --primary: 30 85% 60%;
+  --primary-foreground: 0 0% 0%;
+  --primary-glow: 30 92% 68%;
+
+  --secondary: 15 70% 56%;
+  --secondary-foreground: 0 0% 0%;
+  --secondary-glow: 15 78% 64%;
+
+  --accent: 195 55% 56%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 195 65% 64%;
+
+  --muted: 24 22% 18%;
+  --muted-foreground: 40 28% 80%;
+
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 24 26% 22%;
+  --input: 24 26% 22%;
+  --ring: 30 85% 60%;
+
+  --gradient-start: 30 85% 60%;
+  --gradient-mid: 15 70% 56%;
+  --gradient-end: 195 55% 56%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.28);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.36);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.44);
+
+  --shadow-card: 0 4px 24px hsl(30 85% 60% / 0.22);
+  --shadow-card-hover: 0 8px 32px hsl(30 85% 60% / 0.3);
+}
+
+/* THEME 19 – Deep Teal Studio */
+
+.preset-landing-page-19,
+body.preset-landing-page-19 {
+  --background: 190 20% 96%;
+  --foreground: 195 25% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 195 25% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 195 25% 12%;
+
+  --primary: 180 55% 38%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 180 60% 48%;
+
+  --secondary: 200 18% 40%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-glow: 200 22% 50%;
+
+  --accent: 160 40% 45%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 160 46% 54%;
+
+  --muted: 190 16% 90%;
+  --muted-foreground: 195 18% 40%;
+
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 190 14% 84%;
+  --input: 190 14% 84%;
+  --ring: 180 55% 38%;
+  --radius: 1rem;
+
+  --gradient-start: 180 55% 38%;
+  --gradient-mid: 200 18% 40%;
+  --gradient-end: 160 40% 45%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.24);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.32);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.38);
+
+  --shadow-card: 0 4px 24px hsl(180 55% 38% / 0.1);
+  --shadow-card-hover: 0 8px 32px hsl(180 55% 38% / 0.18);
+}
+
+.dark .preset-landing-page-19,
+.dark body.preset-landing-page-19 {
+  --background: 195 26% 6%;
+  --foreground: 185 24% 95%;
+  --card: 195 26% 10%;
+  --card-foreground: 185 24% 95%;
+  --popover: 195 26% 10%;
+  --popover-foreground: 185 24% 95%;
+
+  --primary: 180 60% 45%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 180 68% 52%;
+
+  --secondary: 200 22% 45%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-glow: 200 26% 52%;
+
+  --accent: 160 45% 48%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 160 52% 56%;
+
+  --muted: 195 20% 18%;
+  --muted-foreground: 185 22% 80%;
+
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 195 26% 22%;
+  --input: 195 26% 22%;
+  --ring: 180 60% 45%;
+
+  --gradient-start: 180 60% 45%;
+  --gradient-mid: 200 22% 45%;
+  --gradient-end: 160 45% 48%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.28);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.36);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.44);
+
+  --shadow-card: 0 4px 24px hsl(180 60% 45% / 0.22);
+  --shadow-card-hover: 0 8px 32px hsl(180 60% 45% / 0.3);
+}
+
+/* THEME 20 – Airy Mint Mono */
+
+.preset-landing-page-20,
+body.preset-landing-page-20 {
+  --background: 150 30% 97%;
+  --foreground: 160 18% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 160 18% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 160 18% 14%;
+
+  --primary: 160 45% 38%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 160 52% 46%;
+
+  --secondary: 150 20% 55%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-glow: 150 26% 62%;
+
+  --accent: 200 22% 45%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 200 28% 52%;
+
+  --muted: 150 18% 92%;
+  --muted-foreground: 160 16% 40%;
+
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 150 16% 86%;
+  --input: 150 16% 86%;
+  --ring: 160 45% 38%;
+  --radius: 1rem;
+
+  --gradient-start: 160 45% 38%;
+  --gradient-mid: 150 20% 55%;
+  --gradient-end: 200 22% 45%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.22);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.3);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.36);
+
+  --shadow-card: 0 4px 24px hsl(160 45% 38% / 0.08);
+  --shadow-card-hover: 0 8px 32px hsl(160 45% 38% / 0.16);
+}
+
+.dark .preset-landing-page-20,
+.dark body.preset-landing-page-20 {
+  --background: 160 20% 6%;
+  --foreground: 140 22% 95%;
+  --card: 160 20% 10%;
+  --card-foreground: 140 22% 95%;
+  --popover: 160 20% 10%;
+  --popover-foreground: 140 22% 95%;
+
+  --primary: 160 52% 46%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 160 60% 54%;
+
+  --secondary: 150 24% 52%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-glow: 150 30% 60%;
+
+  --accent: 200 26% 50%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 200 32% 58%;
+
+  --muted: 160 18% 18%;
+  --muted-foreground: 140 20% 80%;
+
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 160 22% 22%;
+  --input: 160 22% 22%;
+  --ring: 160 52% 46%;
+
+  --gradient-start: 160 52% 46%;
+  --gradient-mid: 150 24% 52%;
+  --gradient-end: 200 26% 50%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.26);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.34);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.4);
+
+  --shadow-card: 0 4px 24px hsl(160 52% 46% / 0.2);
+  --shadow-card-hover: 0 8px 32px hsl(160 52% 46% / 0.28);
 }

@@ -17,9 +17,9 @@ import { supabase } from "@/lib/supabase";
 const platformSchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required"),
-  display_name: z.string().min(1, "Display name is required"),
   base_url: z.string().url().optional().or(z.literal("")),
   icon_url: z.string().url().optional().or(z.literal("")),
+  icon_horizontal_url: z.string().url().optional().or(z.literal("")),
   default_cta_label: z.string().optional().or(z.literal("")),
 });
 
@@ -29,9 +29,9 @@ type Platform = {
   id: string;
   name: string;
   slug: string;
-  display_name: string;
   base_url: string | null;
   icon_url: string | null;
+  icon_horizontal_url: string | null;
   default_cta_label: string | null;
 };
 
@@ -44,6 +44,7 @@ type EditPlatformFormProps = {
 export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFormProps) {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedHorizontalFile, setSelectedHorizontalFile] = useState<File | null>(null);
 
   const {
     register,
@@ -65,13 +66,14 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
       const formData: Partial<PlatformFormData> = {
         name: initialPlatform.name || "",
         slug: initialPlatform.slug || "",
-        display_name: initialPlatform.display_name || "",
         base_url: initialPlatform.base_url || "",
         icon_url: initialPlatform.icon_url || "",
+        icon_horizontal_url: initialPlatform.icon_horizontal_url || "",
         default_cta_label: initialPlatform.default_cta_label || "",
       };
       reset(formData);
       setSelectedFile(null);
+      setSelectedHorizontalFile(null);
     }
   }, [initialPlatform, isNew, reset]);
 
@@ -114,12 +116,19 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
     try {
       const newImageUrl = data.icon_url?.trim() || null;
       const oldImageUrl = initialPlatform?.icon_url || null;
+      const newHorizontalImageUrl = data.icon_horizontal_url?.trim() || null;
+      const oldHorizontalImageUrl = initialPlatform?.icon_horizontal_url || null;
 
       const normalizedNewUrl = newImageUrl || null;
       const normalizedOldUrl = oldImageUrl || null;
       const imageUrlChanged = normalizedNewUrl !== normalizedOldUrl;
 
+      const normalizedNewHorizontalUrl = newHorizontalImageUrl || null;
+      const normalizedOldHorizontalUrl = oldHorizontalImageUrl || null;
+      const horizontalImageUrlChanged = normalizedNewHorizontalUrl !== normalizedOldHorizontalUrl;
+
       let finalImageUrl = normalizedNewUrl;
+      let finalHorizontalImageUrl = normalizedNewHorizontalUrl;
 
       // If there's a selected file, upload it to Bunny (always check this first)
       if (selectedFile) {
@@ -186,6 +195,68 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
         }
       }
 
+      // Handle horizontal icon upload
+      if (selectedHorizontalFile) {
+        try {
+          const formData = new FormData();
+          formData.append("file", selectedHorizontalFile);
+          formData.append("folderPath", id === "new" ? "platforms/temp" : `platforms/${id}`);
+          const uploadResponse = await fetch("/api/admin/upload", {
+            method: "POST",
+            body: formData,
+          });
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || "Failed to upload horizontal image");
+          }
+          const uploadData = await uploadResponse.json();
+          finalHorizontalImageUrl = uploadData.url;
+        } catch (uploadError: any) {
+          console.error("Error uploading horizontal image:", uploadError);
+          toast.error(uploadError.message || "Failed to upload horizontal image");
+          return;
+        }
+      } else if (horizontalImageUrlChanged) {
+        if (normalizedNewHorizontalUrl && !normalizedNewHorizontalUrl.includes("mihaipol-com.b-cdn.net")) {
+          const validation = await validateImageUrl(normalizedNewHorizontalUrl);
+          if (!validation.valid) {
+            toast.error(
+              validation.error ||
+                "Horizontal image not supported or not accessible. Please check the URL or upload a file."
+            );
+            return;
+          }
+          try {
+            const formData = new FormData();
+            formData.append("imageUrl", normalizedNewHorizontalUrl);
+            formData.append("folderPath", id === "new" ? "platforms/temp" : `platforms/${id}`);
+            const uploadResponse = await fetch("/api/admin/upload", {
+              method: "POST",
+              body: formData,
+            });
+            if (!uploadResponse.ok) {
+              const error = await uploadResponse.json();
+              throw new Error(error.error || "Failed to upload horizontal image from URL");
+            }
+            const uploadData = await uploadResponse.json();
+            finalHorizontalImageUrl = uploadData.url;
+          } catch (uploadError: any) {
+            console.error("Error uploading horizontal image from URL:", uploadError);
+            toast.error(uploadError.message || "Failed to upload horizontal image from URL");
+            return;
+          }
+        } else if (normalizedNewHorizontalUrl && normalizedNewHorizontalUrl.includes("mihaipol-com.b-cdn.net")) {
+          const validation = await validateImageUrl(normalizedNewHorizontalUrl);
+          if (!validation.valid) {
+            toast.error(
+              validation.error ||
+                "Horizontal image not supported or not accessible. Please check the URL or upload a file."
+            );
+            return;
+          }
+        }
+      }
+
       // Move old image to trash if it's from our CDN and we're replacing it
       if (
         !isNew &&
@@ -205,12 +276,31 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
         }
       }
 
+      // Move old horizontal image to trash if it's from our CDN and we're replacing it
+      if (
+        !isNew &&
+        normalizedOldHorizontalUrl &&
+        normalizedOldHorizontalUrl.includes("mihaipol-com.b-cdn.net") &&
+        finalHorizontalImageUrl !== normalizedOldHorizontalUrl
+      ) {
+        try {
+          await fetch("/api/admin/upload/trash", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ imageUrl: normalizedOldHorizontalUrl }),
+          });
+        } catch (trashError) {
+          console.error("Failed to move old horizontal image to trash:", trashError);
+          // Don't fail the save if trash fails
+        }
+      }
+
       const submitData = {
         name: data.name,
         slug: data.slug,
-        display_name: data.display_name,
         base_url: data.base_url && data.base_url.trim() ? data.base_url.trim() : null,
         icon_url: finalImageUrl || null,
+        icon_horizontal_url: finalHorizontalImageUrl || null,
         default_cta_label:
           data.default_cta_label && data.default_cta_label.trim()
             ? data.default_cta_label.trim()
@@ -252,6 +342,9 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
           throw new Error(errorMessage);
         }
         const created = await response.json();
+        let updatedIconUrl = finalImageUrl;
+        let updatedHorizontalIconUrl = finalHorizontalImageUrl;
+        
         if (finalImageUrl && finalImageUrl.includes("/platforms/temp/") && created?.id) {
           try {
             const moveResponse = await fetch("/api/admin/upload/move", {
@@ -264,19 +357,51 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
             });
             if (moveResponse.ok) {
               const moveData = await moveResponse.json();
-              const { data: sessionData } = await supabase.auth.getSession();
-              const accessToken = sessionData?.session?.access_token;
-              await fetch("/api/admin/platforms", {
-                method: "PUT",
-                headers: {
-                  "Content-Type": "application/json",
-                  ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-                },
-                body: JSON.stringify({ id: created.id, icon_url: moveData.url }),
-              });
+              updatedIconUrl = moveData.url;
             }
           } catch (moveError) {
             console.error("Failed to move image from temp folder:", moveError);
+          }
+        }
+        
+        if (finalHorizontalImageUrl && finalHorizontalImageUrl.includes("/platforms/temp/") && created?.id) {
+          try {
+            const moveResponse = await fetch("/api/admin/upload/move", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                imageUrl: finalHorizontalImageUrl,
+                newFolderPath: `platforms/${created.id}`,
+              }),
+            });
+            if (moveResponse.ok) {
+              const moveData = await moveResponse.json();
+              updatedHorizontalIconUrl = moveData.url;
+            }
+          } catch (moveError) {
+            console.error("Failed to move horizontal image from temp folder:", moveError);
+          }
+        }
+        
+        // Update both icons if any were moved
+        if ((updatedIconUrl !== finalImageUrl || updatedHorizontalIconUrl !== finalHorizontalImageUrl) && created?.id) {
+          try {
+            const { data: sessionData } = await supabase.auth.getSession();
+            const accessToken = sessionData?.session?.access_token;
+            await fetch("/api/admin/platforms", {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+              },
+              body: JSON.stringify({ 
+                id: created.id, 
+                icon_url: updatedIconUrl,
+                icon_horizontal_url: updatedHorizontalIconUrl,
+              }),
+            });
+          } catch (updateError) {
+            console.error("Failed to update moved image URLs:", updateError);
           }
         }
         toast.success("Platform created successfully");
@@ -324,8 +449,7 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
     }
   };
 
-  const displayNameValue = watch("display_name");
-  const displayName = isNew ? undefined : initialPlatform?.display_name || displayNameValue;
+  const displayName = isNew ? undefined : initialPlatform?.name || nameValue;
 
   return (
     <div className="w-full max-w-7xl relative">
@@ -360,10 +484,6 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
               </FormField>
             </div>
 
-            <FormField label="Display Name" required error={errors.display_name?.message}>
-              <ShadowInput {...register("display_name")} placeholder="Display name" />
-            </FormField>
-
             <FormField label="Base URL" error={errors.base_url?.message}>
               <ShadowInput type="url" {...register("base_url")} placeholder="https://example.com" />
             </FormField>
@@ -376,6 +496,17 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
                 folderPath={id === "new" ? "platforms/temp" : `platforms/${id}`}
                 error={errors.icon_url?.message}
                 placeholder="https://example.com/icon.png"
+              />
+            </FormField>
+
+            <FormField label="Icon Horizontal Image" error={errors.icon_horizontal_url?.message}>
+              <ImageUploadField
+                value={watch("icon_horizontal_url") || null}
+                onChange={(url) => setValue("icon_horizontal_url", url || "")}
+                onFileChange={(file) => setSelectedHorizontalFile(file)}
+                folderPath={id === "new" ? "platforms/temp" : `platforms/${id}`}
+                error={errors.icon_horizontal_url?.message}
+                placeholder="https://example.com/icon-horizontal.png"
               />
             </FormField>
 

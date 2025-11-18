@@ -6,7 +6,6 @@ export type Label = {
 export type Platform = {
   id: string;
   name: string;
-  display_name: string;
   icon_url: string | null;
   default_cta_label: string | null;
 };

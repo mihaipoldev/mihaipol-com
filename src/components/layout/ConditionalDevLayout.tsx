@@ -57,7 +57,7 @@ export default function ConditionalDevLayout({ children }: ConditionalDevLayoutP
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background preset-landing-page-13 relative">
+    <div className="flex min-h-screen flex-col bg-background preset-landing-page-17 relative">
       {/* Animated Background */}
       <div
         className="fixed inset-0 bg-gradient-sunset opacity-10 animate-gradient-shift"

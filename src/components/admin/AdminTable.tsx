@@ -7,7 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getTableGradient } from "@/lib/gradient-presets";
+import { getCardGradient } from "@/lib/gradient-presets";
+import { cn } from "@/lib/utils";
 
 type AdminTableProps = {
   children: ReactNode;
@@ -16,7 +17,12 @@ type AdminTableProps = {
 
 export function AdminTable({ children, className }: AdminTableProps) {
   return (
-    <div className={`w-full overflow-x-auto rounded-md ${getTableGradient()}`}>
+    <div
+      className={cn(
+        "w-full overflow-x-auto rounded-xl bg-card/50 text-card-foreground dark:bg-card/30 shadow-lg transition-all duration-300 hover:shadow-xl",
+        getCardGradient()
+      )}
+    >
       <Table className={className}>{children}</Table>
     </div>
   );

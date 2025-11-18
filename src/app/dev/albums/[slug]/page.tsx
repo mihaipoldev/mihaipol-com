@@ -4,7 +4,6 @@ import TrackView from "@/features/smart-links/analytics/components/TrackView";
 import LinksLogger from "@/components/dev/LinksLogger";
 import { SmartLinksLanding } from "@/features/smart-links";
 import AlbumGradientBackground from "@/components/landing/AlbumGradientBackground";
-import AlbumHeader from "@/components/landing/AlbumHeader";
 import AlbumFooter from "@/components/landing/AlbumFooter";
 import React from "react";
 
@@ -27,7 +26,6 @@ export default async function AlbumDetailPage({ params }: AlbumDetailPageProps) 
   const { album, links } = data;
   return (
     <AlbumGradientBackground coverImageUrl={album.coverImageUrl}>
-      <AlbumHeader />
       <TrackView
         eventType="page_view"
         entityType="album"

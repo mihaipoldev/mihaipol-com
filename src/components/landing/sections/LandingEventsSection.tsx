@@ -11,7 +11,7 @@ type LandingEventsSectionProps = {
 export default function LandingEventsSection({ events }: LandingEventsSectionProps) {
   return (
     <section id="events" className="py-24 px-6">
-      <div className="container mx-auto px-8">
+      <div className="container mx-auto px-0 md:px-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4">Upcoming Events</h2>
           <p className="text-muted-foreground">Catch Mihai on tour.</p>

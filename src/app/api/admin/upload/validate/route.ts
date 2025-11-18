@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,13 +31,17 @@ export async function POST(request: NextRequest) {
       }
 
       // Check content-type header
-      const contentType = response.headers.get("content-type");
-      if (
-        !contentType ||
-        !ALLOWED_MIME_TYPES.some((type) => contentType.toLowerCase().includes(type.split("/")[1]))
-      ) {
+      const contentType = response.headers.get("content-type")?.toLowerCase() || "";
+      // Check if content type matches any allowed MIME type (handles cases like "image/svg+xml; charset=utf-8")
+      const isValidContentType = ALLOWED_MIME_TYPES.some((type) => {
+        const normalizedType = type.toLowerCase();
+        // Check if content type starts with the MIME type or contains it
+        return contentType.startsWith(normalizedType) || contentType.includes(normalizedType);
+      });
+      
+      if (!contentType || !isValidContentType) {
         return NextResponse.json(
-          { valid: false, error: `Invalid content type: ${contentType}. Expected image type.` },
+          { valid: false, error: `Invalid content type: ${contentType || "unknown"}. Expected one of: ${ALLOWED_MIME_TYPES.join(", ")}` },
           { status: 200 }
         );
       }
@@ -100,6 +104,14 @@ function validateImageSignature(buffer: Buffer): boolean {
     const riff = buffer.toString("ascii", 0, 4);
     const webp = buffer.toString("ascii", 8, 12);
     if (riff === "RIFF" && webp === "WEBP") {
+      return true;
+    }
+  }
+
+  // SVG: Check for XML declaration or <svg tag
+  if (buffer.length >= 4) {
+    const start = buffer.toString("utf-8", 0, Math.min(100, buffer.length)).trim();
+    if (start.startsWith("<?xml") || start.startsWith("<svg")) {
       return true;
     }
   }

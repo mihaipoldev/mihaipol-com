@@ -30,14 +30,14 @@ export default function SmartLinksLanding({
   showDebug,
   disableTracking,
 }: SmartLinksLandingProps) {
-  const { cardBgColor } = useAlbumColors();
+  const { cardBgColor, colorsReady } = useAlbumColors();
 
   return (
     <>
       {showDebug ? <LinksLogger value={links} label="Album links" /> : null}
 
-      <div className="w-full px-4 py-8 sm:py-12">
-        <div className="w-full max-w-md mx-auto space-y-6 sm:space-y-8">
+      <div className="w-full px-4 py-4 sm:py-6">
+        <div className="w-full max-w-sm mx-auto space-y-5 sm:space-y-6">
           <div className="relative mx-auto w-full max-w-[360px] flex-shrink-0">
             <CoverArt title={album.title} coverImageUrl={album.coverImageUrl} />
           </div>
@@ -51,8 +51,11 @@ export default function SmartLinksLanding({
           </div>
 
           <div
-            className="flex-shrink-0 overflow-hidden rounded-3xl shadow-xl backdrop-blur-xl border border-white/10 dark:border-white/5 transition-all duration-1000"
-            style={{ backgroundColor: cardBgColor }}
+            className="flex-shrink-0 overflow-hidden rounded-3xl shadow-xl backdrop-blur-xl transition-opacity duration-300"
+            style={{ 
+              backgroundColor: cardBgColor,
+              opacity: colorsReady ? 1 : 0,
+            }}
           >
             <SmartLinksList links={links} disableTracking={disableTracking} />
           </div>

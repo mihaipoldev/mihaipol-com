@@ -1,8 +1,8 @@
 // Lightweight tracker helpers (no React hooks here so this file stays server-safe)
 // Always non-blocking; errors are swallowed.
 
-export type TrackEventType = "page_view" | "link_click" | "section_view";
-export type TrackEntityType = "album" | "album_link" | "site_section";
+export type TrackEventType = "page_view" | "link_click" | "section_view" | "session_start";
+export type TrackEntityType = "album" | "album_link" | "site_section" | "event" | "event_link" | "update" | "update_link";
 
 // In-memory client-side dedupe within a short window to avoid double-fires on route transitions/StrictMode
 const recentlySentEvents: Map<string, number> = new Map();

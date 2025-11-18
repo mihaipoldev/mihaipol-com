@@ -150,12 +150,12 @@ function SidebarContent() {
                   onClick={() => router.push(item.href)}
                   data-active={isActive}
                   className={cn(
-                    `peer/menu-button flex w-full items-center overflow-hidden rounded-lg px-4 py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-5`,
+                    `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-5`,
                     "[&>svg]:size-4 [&>svg]:shrink-0",
                     "[&>span:last-child]:truncate",
                     isActive
-                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary`
-                      : "text-sidebar-muted-foreground"
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
+                      : "text-sidebar-muted-foreground rounded-lg px-4"
                   )}
                 >
                   <FontAwesomeIcon icon={item.icon} />
@@ -182,12 +182,12 @@ function SidebarContent() {
                   onClick={() => router.push(item.href)}
                   data-active={isActive}
                   className={cn(
-                    `peer/menu-button flex w-full items-center overflow-hidden rounded-lg px-4 py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-1.5`,
+                    `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-1.5`,
                     "[&>svg]:size-4 [&>svg]:shrink-0",
                     "[&>span:last-child]:truncate gap-5",
                     isActive
-                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary`
-                      : "text-sidebar-muted-foreground"
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
+                      : "text-sidebar-muted-foreground rounded-lg px-4"
                   )}
                 >
                   <FontAwesomeIcon icon={item.icon} />
@@ -214,12 +214,12 @@ function SidebarContent() {
                   onClick={() => router.push(item.href)}
                   data-active={isActive}
                   className={cn(
-                    `peer/menu-button flex w-full items-center overflow-hidden rounded-lg px-4 py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-1.5`,
+                    `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-1.5`,
                     "[&>svg]:size-4 [&>svg]:shrink-0",
                     "[&>span:last-child]:truncate gap-5",
                     isActive
-                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary`
-                      : "text-sidebar-muted-foreground"
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
+                      : "text-sidebar-muted-foreground rounded-lg px-4"
                   )}
                 >
                   <FontAwesomeIcon icon={item.icon} />

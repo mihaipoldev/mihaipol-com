@@ -14,6 +14,7 @@ export type SmartLink = {
   url: string;
   platformName: string;
   platformIconUrl?: string | null;
+  platformIconHorizontalUrl?: string | null;
   ctaLabel?: string | null;
 };
 

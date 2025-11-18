@@ -5,7 +5,7 @@ export async function getAllPlatforms() {
     const { data, error } = await supabase
       .from("platforms")
       .select("*")
-      .order("display_name", { ascending: true });
+      .order("name", { ascending: true });
 
     if (error) throw error;
     return data || [];

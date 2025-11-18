@@ -9,38 +9,31 @@ type SmartLinksListProps = {
 };
 
 export default function SmartLinksList({ links, disableTracking }: SmartLinksListProps) {
-  const { cardBgColor, mutedColor } = useAlbumColors();
+  const { cardBgColor, mutedColor, colors } = useAlbumColors();
 
-  // Calculate hover color (slightly darker/lighter than card bg)
+  // Calculate subtle hover color for the row
   const getHoverColor = () => {
-    // Extract RGB from cardBgColor
-    const match = cardBgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-    if (!match) return "rgba(0, 0, 0, 0.05)";
-
-    const r = parseInt(match[1]);
-    const g = parseInt(match[2]);
-    const b = parseInt(match[3]);
-    const opacity = match[4] ? parseFloat(match[4]) : 1;
-
-    // Make it slightly darker for hover
-    const hoverR = Math.max(0, r - 10);
-    const hoverG = Math.max(0, g - 10);
-    const hoverB = Math.max(0, b - 10);
-
-    return `rgba(${hoverR}, ${hoverG}, ${hoverB}, ${opacity})`;
+    // Use a subtle overlay - balanced visibility
+    return "rgba(0, 0, 0, 0.07)";
   };
 
-  // Calculate divider color (subtle version of card bg)
+  // Calculate divider color using album colors
   const getDividerColor = () => {
-    const match = cardBgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-    if (!match) return "rgba(0, 0, 0, 0.1)";
-
+    // Use the first album color with subtle opacity for the divider
+    if (colors.length > 0) {
+      const albumColor = colors[0];
+      const match = albumColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      if (match) {
     const r = parseInt(match[1]);
     const g = parseInt(match[2]);
     const b = parseInt(match[3]);
-    const opacity = match[4] ? parseFloat(match[4]) * 0.3 : 0.3;
+        // Use a subtle opacity (0.15) to create an elegant divider
+        return `rgba(${r}, ${g}, ${b}, 0.15)`;
+      }
+    }
 
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    // Fallback to a subtle gray if no album colors available
+    return "rgba(0, 0, 0, 0.1)";
   };
 
   if (links.length === 0) {
@@ -60,12 +53,7 @@ export default function SmartLinksList({ links, disableTracking }: SmartLinksLis
           {index > 0 && <div style={{ backgroundColor: getDividerColor(), height: "1px" }} />}
           <SmartLinkItem
             link={link}
-            className="flex items-center justify-between px-6 py-4 transition-colors"
-            style={
-              {
-                "--hover-bg": getHoverColor(),
-              } as React.CSSProperties & { "--hover-bg": string }
-            }
+            className="flex items-center justify-between px-6 py-4 transition-all duration-200"
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = getHoverColor();
             }}

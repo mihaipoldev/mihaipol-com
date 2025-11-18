@@ -14,11 +14,19 @@ const AlbumColorsContext = createContext<{
   textColor: string;
   mutedColor: string;
   cardBgColor: string;
+  linkButtonBgColor: string;
+  linkHoverBgColor: string;
+  linkTextColor: string;
+  colorsReady: boolean;
 }>({
   colors: [],
   textColor: "hsl(var(--foreground))",
   mutedColor: "hsl(var(--muted-foreground))",
   cardBgColor: "hsl(var(--card))",
+  linkButtonBgColor: "rgba(0, 0, 0, 0.05)",
+  linkHoverBgColor: "rgba(0, 0, 0, 0.08)",
+  linkTextColor: "hsl(var(--foreground))",
+  colorsReady: false,
 });
 
 // Calculate relative luminance (simplified)
@@ -26,103 +34,97 @@ function getLuminance(r: number, g: number, b: number): number {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 }
 
-// Calculate appropriate text color based on album colors
-function calculateTextColor(colors: string[], isDark: boolean): string {
-  // In dark mode, always use light text since the background is dark
-  if (isDark) {
-    return "rgba(255, 255, 255, 0.9)";
-  }
-
-  // In light mode, determine based on album colors
-  if (colors.length === 0) {
-    return "rgba(0, 0, 0, 0.8)";
-  }
-
-  // Calculate average luminance of all colors
-  let totalLuminance = 0;
-  for (const color of colors) {
-    const match = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-    if (match) {
-      totalLuminance += getLuminance(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
-    }
-  }
-  const avgLuminance = totalLuminance / colors.length;
-
-  // In light mode: if album colors are very dark, use light text; otherwise use dark text
-  if (avgLuminance < 0.3) {
-    // Very dark album colors - use light text for contrast
-    return "rgba(255, 255, 255, 0.9)";
-  } else {
-    // Light or medium album colors - use dark text
-    return "rgba(0, 0, 0, 0.8)";
-  }
+// Calculate appropriate text color - always black
+function calculateTextColor(colors: string[]): string {
+  return "rgba(0, 0, 0, 0.95)";
 }
 
-// Calculate muted color (for descriptions) - a gray that goes towards the artwork
-function calculateMutedColor(colors: string[], isDark: boolean): string {
-  // In dark mode, always use light muted text
-  if (isDark) {
-    return "rgba(255, 255, 255, 0.65)";
-  }
-
-  // In light mode, create a muted color from album colors
-  if (colors.length === 0) {
-    return "rgba(0, 0, 0, 0.6)";
-  }
-
-  // Use the first color (most dominant) and desaturate it to create a muted gray
-  const rgbMatch = colors[0].match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-  if (!rgbMatch) {
-    return "rgba(0, 0, 0, 0.6)";
-  }
-
-  const r = parseInt(rgbMatch[1]);
-  const g = parseInt(rgbMatch[2]);
-  const b = parseInt(rgbMatch[3]);
-
-  // Convert to HSL
-  const hsl = rgbToHsl(r, g, b);
-
-  // Desaturate significantly (reduce saturation to 10-20%) and adjust lightness
-  // This creates a gray that still has a hint of the artwork color
-  hsl.s = Math.max(10, hsl.s * 0.15); // Keep 15% of saturation
-  hsl.l = Math.max(40, hsl.l - 10); // Adjust lightness for light mode
-
-  const mutedRgb = hslToRgb(hsl.h, hsl.s, hsl.l);
-
-  return `rgba(${Math.round(mutedRgb.r)}, ${Math.round(mutedRgb.g)}, ${Math.round(mutedRgb.b)}, 0.65)`;
+// Calculate muted color - always dark gray
+function calculateMutedColor(colors: string[]): string {
+  return "rgba(0, 0, 0, 0.7)";
 }
 
 // Calculate card background color that blends with album colors
-// Lower opacity for better blur effect (glassmorphism)
-function calculateCardBgColor(colors: string[], isDark: boolean): string {
+function calculateCardBgColor(colors: string[]): string {
   if (colors.length === 0) {
-    return isDark ? "rgba(31, 41, 55, 0.4)" : "rgba(255, 255, 255, 0.5)";
+    return "rgba(255, 255, 255, 0.5)";
   }
 
   // Use the first color and create a very subtle background
   const rgbMatch = colors[0].match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
   if (!rgbMatch) {
-    return isDark ? "rgba(31, 41, 55, 0.4)" : "rgba(255, 255, 255, 0.5)";
+    return "rgba(255, 255, 255, 0.5)";
   }
 
   const r = parseInt(rgbMatch[1]);
   const g = parseInt(rgbMatch[2]);
   const b = parseInt(rgbMatch[3]);
 
-  // Convert to HSL and adjust for background
+  // Convert to HSL and adjust for light background
   const hsl = rgbToHsl(r, g, b);
-
-  // For light theme: make it very light with low saturation
-  // For dark theme: make it darker with low saturation
   hsl.s = hsl.s * 0.1; // Very low saturation
-  hsl.l = isDark ? Math.min(15, hsl.l * 0.3) : Math.max(95, 100 - hsl.l * 0.1);
+  // Ensure it's very light (90-98% lightness)
+  hsl.l = Math.max(90, Math.min(98, hsl.l + (100 - hsl.l) * 0.7));
 
   const bgRgb = hslToRgb(hsl.h, hsl.s, hsl.l);
-  // Lower opacity for better blur visibility (glassmorphism effect)
-  const opacity = isDark ? 0.3 : 0.4;
+  const opacity = 0.4;
 
   return `rgba(${Math.round(bgRgb.r)}, ${Math.round(bgRgb.g)}, ${Math.round(bgRgb.b)}, ${opacity})`;
+}
+
+// Calculate link button background - dark grayish button
+function calculateLinkButtonBgColor(colors: string[]): string {
+  // Fallback color if no album colors
+  if (colors.length === 0) {
+    return "rgba(0, 0, 0, 0.08)";
+  }
+
+  // Get the first album color
+  const rgbMatch = colors[0].match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  if (!rgbMatch) {
+    return "rgba(0, 0, 0, 0.08)";
+  }
+
+  const r = parseInt(rgbMatch[1]);
+  const g = parseInt(rgbMatch[2]);
+  const b = parseInt(rgbMatch[3]);
+
+  // Light theme: dark grayish button (30% lightness, low saturation)
+  const hsl = rgbToHsl(r, g, b);
+  hsl.s = hsl.s * 0.1; // Very low saturation = more gray
+  hsl.l = 30; // Dark gray
+  const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
+  return `rgba(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)}, 0.15)`;
+}
+
+// Calculate link hover background - slightly darker than button
+function calculateLinkHoverBgColor(colors: string[]): string {
+  // Fallback color if no album colors
+  if (colors.length === 0) {
+    return "rgba(0, 0, 0, 0.12)";
+  }
+
+  // Get the first album color
+  const rgbMatch = colors[0].match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  if (!rgbMatch) {
+    return "rgba(0, 0, 0, 0.12)";
+  }
+
+  const r = parseInt(rgbMatch[1]);
+  const g = parseInt(rgbMatch[2]);
+  const b = parseInt(rgbMatch[3]);
+
+  // Light theme: slightly darker gray (25% lightness)
+  const hsl = rgbToHsl(r, g, b);
+  hsl.s = hsl.s * 0.1;
+  hsl.l = 25;
+  const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
+  return `rgba(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)}, 0.2)`;
+}
+
+// Calculate link text color - same as main text color
+function calculateLinkTextColor(colors: string[]): string {
+  return calculateTextColor(colors);
 }
 
 // Export hook to use album colors
@@ -245,31 +247,57 @@ export default function AlbumGradientBackground({
   coverImageUrl,
   children,
 }: AlbumGradientBackgroundProps) {
+  // Force light theme while on this page, restore original on unmount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Store original theme state
+      const wasDark = document.documentElement.classList.contains('dark');
+      
+      // Force light theme
+      document.documentElement.classList.remove('dark');
+      
+      // Prevent theme changes while on this page
+      const observer = new MutationObserver(() => {
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+        }
+      });
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+      
+      // Restore original theme when component unmounts
+      return () => {
+        observer.disconnect();
+        if (wasDark) {
+          document.documentElement.classList.add('dark');
+        }
+      };
+    }
+  }, []);
+
   const [gradientColors, setGradientColors] = useState<string[]>([]);
   const [dotColors, setDotColors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDark, setIsDark] = useState(false);
-  const [textColor, setTextColor] = useState<string>("hsl(var(--foreground))");
-  const [mutedColor, setMutedColor] = useState<string>("hsl(var(--muted-foreground))");
-  const [cardBgColor, setCardBgColor] = useState<string>("hsl(var(--card))");
-
-  // Detect dark mode - must be called before any early returns
-  useEffect(() => {
-    const checkDarkMode = () => {
-      setIsDark(document.documentElement.classList.contains("dark"));
-    };
-
-    checkDarkMode();
-
-    // Watch for theme changes
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
+  
+  // Initialize colors
+  const getInitialColors = () => ({
+    textColor: calculateTextColor([]),
+    mutedColor: calculateMutedColor([]),
+    cardBgColor: calculateCardBgColor([]),
+    linkButtonBgColor: calculateLinkButtonBgColor([]),
+    linkHoverBgColor: calculateLinkHoverBgColor([]),
+    linkTextColor: calculateLinkTextColor([]),
+  });
+  
+  const initialColors = getInitialColors();
+  const [textColor, setTextColor] = useState<string>(initialColors.textColor);
+  const [mutedColor, setMutedColor] = useState<string>(initialColors.mutedColor);
+  const [cardBgColor, setCardBgColor] = useState<string>(initialColors.cardBgColor);
+  const [linkButtonBgColor, setLinkButtonBgColor] = useState<string>(initialColors.linkButtonBgColor);
+  const [linkHoverBgColor, setLinkHoverBgColor] = useState<string>(initialColors.linkHoverBgColor);
+  const [linkTextColor, setLinkTextColor] = useState<string>(initialColors.linkTextColor);
 
   useEffect(() => {
     if (!coverImageUrl) {
@@ -286,6 +314,12 @@ export default function AlbumGradientBackground({
       ];
       setGradientColors(fallbackGradient);
       setDotColors(fallbackDots);
+      setTextColor(calculateTextColor(fallbackGradient));
+      setMutedColor(calculateMutedColor(fallbackGradient));
+      setCardBgColor(calculateCardBgColor(fallbackGradient));
+      setLinkButtonBgColor(calculateLinkButtonBgColor(fallbackGradient));
+      setLinkHoverBgColor(calculateLinkHoverBgColor(fallbackGradient));
+      setLinkTextColor(calculateLinkTextColor(fallbackGradient));
       setIsLoading(false);
       return;
     }
@@ -295,9 +329,12 @@ export default function AlbumGradientBackground({
       .then((result) => {
         setGradientColors(result.gradientColors);
         setDotColors(result.dotColors);
-        setTextColor(calculateTextColor(result.gradientColors, isDark));
-        setMutedColor(calculateMutedColor(result.gradientColors, isDark));
-        setCardBgColor(calculateCardBgColor(result.gradientColors, isDark));
+        setTextColor(calculateTextColor(result.gradientColors));
+        setMutedColor(calculateMutedColor(result.gradientColors));
+        setCardBgColor(calculateCardBgColor(result.gradientColors));
+        setLinkButtonBgColor(calculateLinkButtonBgColor(result.gradientColors));
+        setLinkHoverBgColor(calculateLinkHoverBgColor(result.gradientColors));
+        setLinkTextColor(calculateLinkTextColor(result.gradientColors));
         setIsLoading(false);
       })
       .catch((error) => {
@@ -307,25 +344,16 @@ export default function AlbumGradientBackground({
         const fallbackDots = ["rgb(99, 102, 241)", "rgb(168, 85, 247)", "rgb(236, 72, 153)"];
         setGradientColors(fallbackGradient);
         setDotColors(fallbackDots);
-        setTextColor(calculateTextColor(fallbackGradient, isDark));
-        setMutedColor(calculateMutedColor(fallbackGradient, isDark));
-        setCardBgColor(calculateCardBgColor(fallbackGradient, isDark));
+        setTextColor(calculateTextColor(fallbackGradient));
+        setMutedColor(calculateMutedColor(fallbackGradient));
+        setCardBgColor(calculateCardBgColor(fallbackGradient));
+        setLinkButtonBgColor(calculateLinkButtonBgColor(fallbackGradient));
+        setLinkHoverBgColor(calculateLinkHoverBgColor(fallbackGradient));
+        setLinkTextColor(calculateLinkTextColor(fallbackGradient));
         setIsLoading(false);
       });
-  }, [coverImageUrl, isDark]);
+  }, [coverImageUrl]);
 
-  // Default gradient while loading or if no colors
-  const defaultGradient =
-    "bg-gradient-to-br from-blue-50 via-blue-100/50 to-slate-100 dark:from-slate-900 dark:via-blue-950/30 dark:to-slate-800";
-
-  // Update colors when dark mode changes
-  useEffect(() => {
-    if (gradientColors.length > 0) {
-      setTextColor(calculateTextColor(gradientColors, isDark));
-      setMutedColor(calculateMutedColor(gradientColors, isDark));
-      setCardBgColor(calculateCardBgColor(gradientColors, isDark));
-    }
-  }, [isDark, gradientColors]);
 
   // Convert rgb to rgba helper
   const rgbToRgba = (rgb: string, opacity: number) => {
@@ -333,15 +361,12 @@ export default function AlbumGradientBackground({
   };
 
   if (isLoading || gradientColors.length === 0) {
-    const loadingTextColor = calculateTextColor([], isDark);
-    const loadingMutedColor = calculateMutedColor([], isDark);
-    const loadingCardBgColor = calculateCardBgColor([], isDark);
-    // Use fallback colors for dots while loading
-    const fallbackDots = [
-      "rgb(99, 102, 241)", // indigo-500
-      "rgb(168, 85, 247)", // purple-500
-      "rgb(236, 72, 153)", // pink-500
-    ];
+    const loadingTextColor = calculateTextColor([]);
+    const loadingMutedColor = calculateMutedColor([]);
+    const loadingCardBgColor = calculateCardBgColor([]);
+    const loadingLinkButtonBgColor = calculateLinkButtonBgColor([]);
+    const loadingLinkHoverBgColor = calculateLinkHoverBgColor([]);
+    const loadingLinkTextColor = calculateLinkTextColor([]);
     return (
       <AlbumColorsContext.Provider
         value={{
@@ -349,6 +374,10 @@ export default function AlbumGradientBackground({
           textColor: loadingTextColor,
           mutedColor: loadingMutedColor,
           cardBgColor: loadingCardBgColor,
+          linkButtonBgColor: loadingLinkButtonBgColor,
+          linkHoverBgColor: loadingLinkHoverBgColor,
+          linkTextColor: loadingLinkTextColor,
+          colorsReady: false,
         }}
       >
         {/* Blurred album cover as background - positioned outside main container */}
@@ -361,62 +390,22 @@ export default function AlbumGradientBackground({
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundRepeat: "no-repeat",
-              filter: "blur(80px) brightness(0.6)",
-              transform: "scale(1.2)", // Scale up to avoid blur edges
-              opacity: isDark ? 0.5 : 0.4,
+              filter: "blur(100px) brightness(1.5)",
+              transform: "scale(2)", // Scale up to avoid blur edges
+              opacity: 0.5,
             }}
           />
         )}
 
         <div
-          className={`fixed inset-0 z-[100] h-screen flex flex-col pt-20`}
+          className={`fixed inset-0 z-[100] h-screen flex flex-col`}
           style={{ background: "transparent" }}
         >
-          {/* Floating Background Shapes */}
-          <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 1 }}>
-            <div
-              className="absolute top-20 left-10 w-64 h-64 rounded-full blur-3xl"
-              style={{
-                backgroundColor: rgbToRgba(fallbackDots[0], 0.2),
-                animation: "float-slow 30s ease-in-out infinite",
-              }}
-            />
-            <div
-              className="absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl"
-              style={{
-                backgroundColor: rgbToRgba(fallbackDots[1], 0.2),
-                animation: "float 25s ease-in-out infinite",
-              }}
-            />
-            <div
-              className="absolute top-1/2 left-1/2 w-72 h-72 rounded-full blur-3xl"
-              style={{
-                backgroundColor: rgbToRgba(fallbackDots[2], 0.2),
-                animation: "glow-pulse 18s ease-in-out infinite",
-              }}
-            />
-          </div>
           {children}
         </div>
       </AlbumColorsContext.Provider>
     );
   }
-
-  // Create a beautiful, subtle gradient
-  // Simple linear gradient that's elegant and works for both themes
-  const createGradient = (colors: string[], isDarkMode: boolean) => {
-    // Subtle opacity - lower for dark theme to avoid being too dark
-    const baseOpacity = isDarkMode ? 0.2 : 0.25;
-
-    // Simple, elegant linear gradient
-    return `linear-gradient(to bottom, 
-      ${rgbToRgba(colors[0], baseOpacity)} 0%,
-      ${rgbToRgba(colors[1], baseOpacity * 0.9)} 50%,
-      ${rgbToRgba(colors[2], baseOpacity * 0.7)} 100%
-    )`;
-  };
-
-  const gradient = createGradient(gradientColors, isDark);
 
   return (
     <AlbumColorsContext.Provider
@@ -425,55 +414,33 @@ export default function AlbumGradientBackground({
         textColor,
         mutedColor,
         cardBgColor,
+        linkButtonBgColor,
+        linkHoverBgColor,
+        linkTextColor,
+        colorsReady: true,
       }}
     >
-      {/* Blurred album cover as background - positioned outside main container */}
-      {coverImageUrl && (
-        <div
-          className="fixed inset-0"
-          style={{
-            zIndex: 0,
-            backgroundImage: `url(${coverImageUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            filter: "blur(80px) brightness(0.6)",
-            transform: "scale(1.2)", // Scale up to avoid blur edges
-            opacity: isDark ? 0.5 : 0.4,
-          }}
-        />
-      )}
+          {/* Blurred album cover as background - positioned outside main container */}
+          {coverImageUrl && (
+            <div
+              className="fixed inset-0"
+              style={{
+                zIndex: 0,
+                backgroundImage: `url(${coverImageUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                filter: "blur(100px) brightness(1.5)",
+                transform: "scale(2)", // Scale up to avoid blur edges
+                opacity: 0.5,
+              }}
+            />
+          )}
 
       <div
-        className="fixed inset-0 z-[100] h-screen flex flex-col pt-20 transition-all duration-1000"
-        style={{
-          background: gradient,
-        }}
+        className="fixed inset-0 z-[100] h-screen flex flex-col"
+        style={{ background: "transparent" }}
       >
-        {/* Floating Background Shapes - using contrasting album colors */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 1 }}>
-          <div
-            className="absolute top-20 left-10 w-64 h-64 rounded-full blur-3xl transition-all duration-1000"
-            style={{
-              backgroundColor: rgbToRgba(dotColors[0] || gradientColors[0], 0.2),
-              animation: "float-slow 30s ease-in-out infinite",
-            }}
-          />
-          <div
-            className="absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl transition-all duration-1000"
-            style={{
-              backgroundColor: rgbToRgba(dotColors[1] || gradientColors[1], 0.2),
-              animation: "float 25s ease-in-out infinite",
-            }}
-          />
-          <div
-            className="absolute top-1/2 left-1/2 w-72 h-72 rounded-full blur-3xl transition-all duration-1000"
-            style={{
-              backgroundColor: rgbToRgba(dotColors[2] || gradientColors[2], 0.2),
-              animation: "glow-pulse 18s ease-in-out infinite",
-            }}
-          />
-        </div>
         {children}
       </div>
     </AlbumColorsContext.Provider>

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { uploadToBunny } from "@/lib/bunny";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     let fileBuffer: Buffer;
+    let urlContentType: string | null = null;
 
     // Handle file upload
     if (file) {
@@ -52,16 +53,17 @@ export async function POST(request: NextRequest) {
         }
 
         // Check content type
-        const contentType = response.headers.get("content-type")?.toLowerCase() || "";
+        urlContentType = response.headers.get("content-type")?.toLowerCase() || "";
         const isValidContentType = ALLOWED_MIME_TYPES.some((type) => {
-          const typePart = type.split("/")[1]; // e.g., "jpeg", "png"
-          return contentType.includes(typePart) || contentType.includes(type);
+          const normalizedType = type.toLowerCase();
+          // Check if content type starts with the MIME type or contains it (handles cases like "image/svg+xml; charset=utf-8")
+          return urlContentType && (urlContentType.startsWith(normalizedType) || urlContentType.includes(normalizedType));
         });
 
         if (!isValidContentType) {
           return NextResponse.json(
             {
-              error: `Invalid image type from URL. Content-Type: ${contentType}. Allowed types: ${ALLOWED_MIME_TYPES.join(", ")}`,
+              error: `Invalid image type from URL. Content-Type: ${urlContentType}. Allowed types: ${ALLOWED_MIME_TYPES.join(", ")}`,
             },
             { status: 400 }
           );
@@ -97,10 +99,103 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file or imageUrl provided" }, { status: 400 });
     }
 
-    // Generate filename with timestamp
-    // Always use .jpg extension as per requirements
+    // Generate filename with timestamp and appropriate extension
     const timestamp = Date.now();
-    const filename = `image_${timestamp}.jpg`;
+    let extension = "jpg"; // default
+    
+    // Determine extension based on file type
+    if (file) {
+      // Get extension from file name or MIME type
+      const fileName = file.name.toLowerCase();
+      if (fileName.endsWith(".svg")) {
+        extension = "svg";
+      } else if (fileName.endsWith(".png")) {
+        extension = "png";
+      } else if (fileName.endsWith(".gif")) {
+        extension = "gif";
+      } else if (fileName.endsWith(".webp")) {
+        extension = "webp";
+      } else if (file.type === "image/svg+xml") {
+        extension = "svg";
+      } else if (file.type === "image/png") {
+        extension = "png";
+      } else if (file.type === "image/gif") {
+        extension = "gif";
+      } else if (file.type === "image/webp") {
+        extension = "webp";
+      }
+    } else if (imageUrl) {
+      // Try to get extension from URL path first
+      try {
+        const url = new URL(imageUrl);
+        const pathname = url.pathname.toLowerCase();
+        if (pathname.endsWith(".svg")) {
+          extension = "svg";
+        } else if (pathname.endsWith(".png")) {
+          extension = "png";
+        } else if (pathname.endsWith(".gif")) {
+          extension = "gif";
+        } else if (pathname.endsWith(".webp")) {
+          extension = "webp";
+        } else if (urlContentType) {
+          // Use content type from the response we already fetched
+          if (urlContentType.includes("svg")) {
+            extension = "svg";
+          } else if (urlContentType.includes("png")) {
+            extension = "png";
+          } else if (urlContentType.includes("gif")) {
+            extension = "gif";
+          } else if (urlContentType.includes("webp")) {
+            extension = "webp";
+          }
+        } else {
+          // Fallback: detect from buffer signature
+          if (fileBuffer.length >= 4) {
+            // SVG: starts with <?xml or <svg
+            const start = fileBuffer.toString("utf-8", 0, Math.min(100, fileBuffer.length)).trim();
+            if (start.startsWith("<?xml") || start.startsWith("<svg")) {
+              extension = "svg";
+            }
+            // PNG: 89 50 4E 47
+            else if (fileBuffer[0] === 0x89 && fileBuffer[1] === 0x50 && fileBuffer[2] === 0x4e && fileBuffer[3] === 0x47) {
+              extension = "png";
+            }
+            // GIF: 47 49 46 38
+            else if (fileBuffer[0] === 0x47 && fileBuffer[1] === 0x49 && fileBuffer[2] === 0x46 && fileBuffer[3] === 0x38) {
+              extension = "gif";
+            }
+            // WebP: RIFF...WEBP
+            else if (fileBuffer.length >= 12) {
+              const riff = fileBuffer.toString("ascii", 0, 4);
+              const webp = fileBuffer.toString("ascii", 8, 12);
+              if (riff === "RIFF" && webp === "WEBP") {
+                extension = "webp";
+              }
+            }
+          }
+        }
+      } catch {
+        // If URL parsing fails, detect from buffer signature
+        if (fileBuffer.length >= 4) {
+          const start = fileBuffer.toString("utf-8", 0, Math.min(100, fileBuffer.length)).trim();
+          if (start.startsWith("<?xml") || start.startsWith("<svg")) {
+            extension = "svg";
+          } else if (fileBuffer[0] === 0x89 && fileBuffer[1] === 0x50 && fileBuffer[2] === 0x4e && fileBuffer[3] === 0x47) {
+            extension = "png";
+          } else if (fileBuffer[0] === 0x47 && fileBuffer[1] === 0x49 && fileBuffer[2] === 0x46 && fileBuffer[3] === 0x38) {
+            extension = "gif";
+          } else if (fileBuffer.length >= 12) {
+            const riff = fileBuffer.toString("ascii", 0, 4);
+            const webp = fileBuffer.toString("ascii", 8, 12);
+            if (riff === "RIFF" && webp === "WEBP") {
+              extension = "webp";
+            }
+          }
+        }
+      }
+    }
+    
+    const filename = `image_${timestamp}.${extension}`;
     const storagePath = `${folderPath}/${filename}`;
 
     // Upload to Bunny Storage

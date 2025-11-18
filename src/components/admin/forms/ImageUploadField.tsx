@@ -43,9 +43,9 @@ export function ImageUploadField({
   const handleFileSelect = useCallback(
     (file: File) => {
       // Validate file type
-      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
       if (!validTypes.includes(file.type)) {
-        toast.error("Invalid file type. Please upload an image file (JPG, PNG, WebP, or GIF).");
+        toast.error("Invalid file type. Please upload an image file (JPG, PNG, WebP, GIF, or SVG).");
         return;
       }
 
@@ -210,7 +210,7 @@ export function ImageUploadField({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/svg+xml"
             onChange={handleFileInputChange}
             className="hidden"
           />
@@ -243,7 +243,7 @@ export function ImageUploadField({
               <Upload className="h-3 w-3 mr-1.5" />
               Browse
             </Button>
-            <span className="text-[10px]">JPG, PNG, WebP, GIF (max 10MB)</span>
+            <span className="text-[10px]">JPG, PNG, WebP, GIF, SVG (max 10MB)</span>
           </div>
         </div>
       </div>

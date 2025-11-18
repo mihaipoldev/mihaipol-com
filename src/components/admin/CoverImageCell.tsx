@@ -7,6 +7,7 @@ type CoverImageCellProps = {
   title: string;
   showInitials?: boolean;
   className?: string;
+  horizontal?: boolean;
 };
 
 function getInitials(name: string): string {
@@ -21,6 +22,7 @@ export function CoverImageCell({
   title,
   showInitials = false,
   className,
+  horizontal = false,
 }: CoverImageCellProps) {
   const [imageError, setImageError] = React.useState(false);
   const initials = showInitials ? getInitials(title) : null;
@@ -29,10 +31,12 @@ export function CoverImageCell({
   const showInitialsFallback = (!imageUrl || imageError) && showInitials;
 
   return (
-    <TableCell className={cn("w-24 py-4 px-2", className)}>
+    <TableCell className={cn(horizontal ? "py-4 px-2" : "w-24 py-4 px-2", className)}>
       <div
         className={cn(
-          "h-12 w-12 rounded-md overflow-hidden flex items-center justify-center bg-muted",
+          horizontal
+            ? "h-8 flex items-center justify-start"
+            : "h-12 w-12 rounded-xl overflow-hidden flex items-center justify-center bg-muted",
           showInitialsFallback && "bg-primary/10 text-xs font-semibold text-muted-foreground"
         )}
       >
@@ -40,7 +44,7 @@ export function CoverImageCell({
           <img
             src={imageUrl}
             alt={title}
-            className="h-full w-full object-cover"
+            className={horizontal ? "h-full w-auto object-contain" : "h-full w-full object-cover"}
             onError={() => setImageError(true)}
           />
         ) : showInitialsFallback ? (

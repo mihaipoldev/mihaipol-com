@@ -306,7 +306,6 @@ export async function getAlbumLinks(albumId: string) {
         platforms (
           id,
           name,
-          display_name,
           icon_url
         )
       `
@@ -389,8 +388,8 @@ export async function getAlbumWithLinksBySlug(slug: string) {
           sort_order,
           platforms (
             name,
-            display_name,
-            icon_url
+            icon_url,
+            icon_horizontal_url
           )
         `
         )
@@ -400,8 +399,9 @@ export async function getAlbumWithLinksBySlug(slug: string) {
       if (!linksError && linksData) {
         links = linksData.map((link: any) => ({
           id: link.id,
-          platformName: link.platforms?.display_name || link.platforms?.name || "",
+          platformName: link.platforms?.name || "",
           platformIconUrl: link.platforms?.icon_url || null,
+          platformIconHorizontalUrl: link.platforms?.icon_horizontal_url || null,
           ctaLabel: link.cta_label || "Play",
           url: link.url || "",
         }));

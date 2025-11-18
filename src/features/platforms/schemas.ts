@@ -9,9 +9,9 @@ const urlOrEmpty = z
 export const platformCreateSchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1),
-  display_name: z.string().min(1),
   base_url: urlOrEmpty,
   icon_url: urlOrEmpty,
+  icon_horizontal_url: urlOrEmpty,
   default_cta_label: z.string().nullable().optional(),
 });
 

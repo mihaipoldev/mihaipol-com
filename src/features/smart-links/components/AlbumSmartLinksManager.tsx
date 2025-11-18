@@ -126,14 +126,13 @@ function SortableLinkItem({
   const handlePlatformCreated = (newPlatform: {
     id: string;
     name: string;
-    display_name: string;
     icon_url: string | null;
     default_cta_label: string | null;
   }) => {
     // Add new platform to the list
     const updatedPlatforms = [...platforms, newPlatform as Platform].sort((a, b) => {
-      const nameA = (a.display_name || a.name).toLowerCase();
-      const nameB = (b.display_name || b.name).toLowerCase();
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
       return nameA.localeCompare(nameB);
     });
 
@@ -160,8 +159,8 @@ function SortableLinkItem({
 
   const selectedPlatform = platforms.find((p) => p.id === selectedPlatformId);
   const sortedPlatforms = [...platforms].sort((a, b) => {
-    const nameA = (a.display_name || a.name).toLowerCase();
-    const nameB = (b.display_name || b.name).toLowerCase();
+    const nameA = a.name.toLowerCase();
+    const nameB = b.name.toLowerCase();
     return nameA.localeCompare(nameB);
   });
 
@@ -197,17 +196,15 @@ function SortableLinkItem({
                   {selectedPlatform.icon_url ? (
                     <img
                       src={selectedPlatform.icon_url}
-                      alt={selectedPlatform.display_name || selectedPlatform.name}
+                      alt={selectedPlatform.name}
                       className="w-4 h-4 object-contain shrink-0"
                     />
                   ) : (
                     <div className="w-4 h-4 rounded bg-muted flex items-center justify-center text-xs shrink-0">
-                      {(selectedPlatform.display_name || selectedPlatform.name)?.[0] || "?"}
+                      {selectedPlatform.name?.[0] || "?"}
                     </div>
                   )}
-                  <span className="truncate">
-                    {selectedPlatform.display_name || selectedPlatform.name}
-                  </span>
+                  <span className="truncate">{selectedPlatform.name}</span>
                 </div>
               ) : (
                 <SelectValue placeholder="Select platform" />
@@ -221,15 +218,15 @@ function SortableLinkItem({
                     {platform.icon_url ? (
                       <img
                         src={platform.icon_url}
-                        alt={platform.display_name || platform.name}
+                        alt={platform.name}
                         className="w-4 h-4 object-contain shrink-0"
                       />
                     ) : (
                       <div className="w-4 h-4 rounded bg-muted flex items-center justify-center text-xs shrink-0">
-                        {(platform.display_name || platform.name)?.[0] || "?"}
+                        {platform.name?.[0] || "?"}
                       </div>
                     )}
-                    <span>{platform.display_name || platform.name}</span>
+                    <span>{platform.name}</span>
                   </div>
                 </SelectItem>
               ))}

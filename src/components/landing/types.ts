@@ -6,6 +6,8 @@ export type LandingEvent = {
   country?: string | null;
   venue?: string | null;
   date: string;
+  tickets_url?: string | null;
+  ticket_label?: string | null;
 };
 
 export type LandingAlbum = {

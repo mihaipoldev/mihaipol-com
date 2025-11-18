@@ -5,26 +5,15 @@ import { AdminMetricTab } from "@/components/admin/AdminMetricTab";
 import { AnalyticsLineChart } from "@/features/smart-links/analytics/components/AnalyticsLineChart";
 import { SectionClicksChart } from "./SectionClicksChart";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import type { DashboardData } from "@/features/admin/dashboard/data";
-
-type AlbumRow = {
-  id: string;
-  title: string;
-  coverImageUrl: string | null;
-  pageViews: number;
-  clicks: number;
-  ctr: number;
-};
 
 type DashboardChartsProps = {
   data: DashboardData;
-  albumAnalytics?: {
-    perAlbumRows: AlbumRow[];
-    totalAlbumPageViews: number;
-  };
 };
 
-export function DashboardCharts({ data, albumAnalytics }: DashboardChartsProps) {
+export function DashboardCharts({ data }: DashboardChartsProps) {
   return (
     <div className="space-y-8">
       {/* Website Visits and Section Clicks Tabs */}
@@ -49,13 +38,13 @@ export function DashboardCharts({ data, albumAnalytics }: DashboardChartsProps) 
             />
             <AdminMetricTab
               value="item-visits"
-              label="Section Item Visits"
+              label="Page Visits"
               metric={data.sectionItemVisits.total}
               className="border-r border-border/30"
             />
             <AdminMetricTab
               value="sections"
-              label="Section Views"
+              label="Section Visits"
               metric={
                 data.sectionClicks.albums.reduce((s, d) => s + d.count, 0) +
                 data.sectionClicks.updates.reduce((s, d) => s + d.count, 0) +
@@ -67,38 +56,6 @@ export function DashboardCharts({ data, albumAnalytics }: DashboardChartsProps) 
           <TabsContent value="visits" className="mt-0 dark:bg-transparent">
             <div className="pr-6 pl-2 pt-10 pb-6">
               <AnalyticsLineChart data={data.websiteVisits.series} />
-            </div>
-            {/* Analysis Table */}
-            <div className="px-6 pb-6">
-              <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-              <div className="rounded-lg border border-border/50 bg-card/50 p-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Total Visits</p>
-                    <p className="text-2xl font-bold mt-1">{data.websiteVisits.total}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Last 30 Days</p>
-                    <p className="text-2xl font-bold mt-1">
-                      {data.websiteVisits.series.reduce((sum, d) => sum + d.count, 0)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Avg Daily</p>
-                    <p className="text-2xl font-bold mt-1">
-                      {Math.round(
-                        data.websiteVisits.series.reduce((sum, d) => sum + d.count, 0) / 30
-                      )}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Peak Day</p>
-                    <p className="text-2xl font-bold mt-1">
-                      {Math.max(...data.websiteVisits.series.map((d) => d.count))}
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </TabsContent>
 
@@ -116,79 +73,106 @@ export function DashboardCharts({ data, albumAnalytics }: DashboardChartsProps) 
         </Tabs>
       </div>
 
-      {/* Album Analytics Section */}
+      {/* Top Performing Pages Section */}
       <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Top Performing Albums</h2>
+        <h2 className="text-xl font-semibold">Top Performing Page</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-muted-foreground">
-                <th className="py-2 pr-4">Album</th>
+                <th className="py-2 pr-4">Page</th>
+                <th className="py-2 pr-4">Type</th>
                 <th className="py-2 pr-4 w-44">Page Views</th>
-                <th className="py-2 pr-4 w-44">Clicks</th>
-                <th className="py-2 pr-4 w-44">CTR</th>
+                <th className="py-2 pr-4 w-24">Clicks</th>
               </tr>
             </thead>
             <tbody>
-              {albumAnalytics && albumAnalytics.perAlbumRows.length > 0 ? (
-                albumAnalytics.perAlbumRows.map((row) => (
-                  <tr key={row.id} className="border-t">
-                    <td className="py-2 pr-4">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6 rounded-md">
-                          <AvatarImage src={row.coverImageUrl || undefined} alt={row.title} />
-                          <AvatarFallback className="text-[10px] bg-muted">
-                            {row.title
-                              ?.split(" ")
-                              .slice(0, 2)
-                              .map((w: string) => w[0])
-                              .join("")
-                              .toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{row.title}</span>
-                      </div>
-                    </td>
-                    <td className="py-2 pr-4 w-44">
-                      <div className="flex items-center gap-3">
-                        <span>{row.pageViews}</span>
-                        {albumAnalytics.totalAlbumPageViews > 0 ? (
+              {data.topPerformingPages && data.topPerformingPages.length > 0 ? (
+                (() => {
+                  const totalPageViews = data.topPerformingPages.reduce(
+                    (sum, p) => sum + p.pageViews,
+                    0
+                  );
+                  const getTypeColor = (type: string) => {
+                    switch (type) {
+                      case "album":
+                        return {
+                          badgeClassName: "bg-blue-500 text-white",
+                          progress: "bg-blue-500",
+                        };
+                      case "event":
+                        return {
+                          badgeClassName: "bg-orange-500 text-white",
+                          progress: "bg-orange-500",
+                        };
+                      case "update":
+                        return {
+                          badgeClassName: "bg-emerald-500 text-white",
+                          progress: "bg-emerald-500",
+                        };
+                      default:
+                        return {
+                          badgeClassName: "bg-muted text-muted-foreground",
+                          progress: "bg-primary",
+                        };
+                    }
+                  };
+
+                  return data.topPerformingPages.map((page) => {
+                    const colors = getTypeColor(page.type);
+                    return (
+                      <tr key={`${page.type}-${page.id}`} className="border-t">
+                        <td className="py-2 pr-4">
                           <div className="flex items-center gap-2">
-                            <div className="h-2 w-14 rounded-full bg-muted">
-                              <div
-                                className="h-2 rounded-full bg-primary"
-                                style={{
-                                  width: `${Math.min(
-                                    100,
-                                    (row.pageViews / albumAnalytics.totalAlbumPageViews) * 100
-                                  )}%`,
-                                }}
-                              />
-                            </div>
-                            <span className="text-[11px] text-muted-foreground">
-                              {((row.pageViews / albumAnalytics.totalAlbumPageViews) * 100).toFixed(
-                                1
-                              )}
-                              %
-                            </span>
+                            <Avatar className="h-6 w-6 rounded-md">
+                              <AvatarImage src={page.imageUrl || undefined} alt={page.title} />
+                              <AvatarFallback className="text-[10px] bg-muted">
+                                {page.title
+                                  ?.split(" ")
+                                  .slice(0, 2)
+                                  .map((w: string) => w[0])
+                                  .join("")
+                                  .toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{page.title}</span>
                           </div>
-                        ) : null}
-                      </div>
-                    </td>
-                    <td className="py-2 pr-4 w-44">{row.clicks}</td>
-                    <td className="py-2 pr-4 w-44">
-                      <div className="flex items-center gap-2">
-                        <span>{row.ctr.toFixed(1)}%</span>
-                        <div className="h-2 w-14 rounded-full bg-muted">
-                          <div
-                            className="h-2 rounded-full bg-primary"
-                            style={{ width: `${Math.min(100, row.ctr)}%` }}
-                          />
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                        </td>
+                        <td className="py-2 pr-4">
+                          <Badge variant="secondary" className={cn("capitalize", colors.badgeClassName)}>
+                            {page.type}
+                          </Badge>
+                        </td>
+                        <td className="py-2 pr-4 w-44">
+                          <div className="flex items-center gap-3">
+                            <span>{page.pageViews}</span>
+                            {totalPageViews > 0 ? (
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-14 rounded-full bg-muted">
+                                  <div
+                                    className={`h-2 rounded-full ${colors.progress}`}
+                                    style={{
+                                      width: `${Math.min(
+                                        100,
+                                        (page.pageViews / totalPageViews) * 100
+                                      )}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-[11px] text-muted-foreground">
+                                  {((page.pageViews / totalPageViews) * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                            ) : null}
+                          </div>
+                        </td>
+                        <td className="py-2 pr-4 w-24">
+                          <span className="text-sm text-muted-foreground">{page.clicks}</span>
+                        </td>
+                      </tr>
+                    );
+                  });
+                })()
               ) : (
                 <tr>
                   <td colSpan={4} className="py-6 text-center text-muted-foreground">

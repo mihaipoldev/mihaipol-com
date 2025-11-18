@@ -9,7 +9,6 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Legend,
 } from "recharts";
 import { format } from "date-fns";
 import type { SectionClicksData, SectionItemVisitsData } from "@/features/admin/dashboard/data";
@@ -142,11 +141,6 @@ export function SectionClicksChart({ data }: SectionClicksChartProps) {
                   </div>
                 ) : null
               }
-            />
-            <Legend
-              wrapperStyle={{ paddingTop: "20px" }}
-              iconType="circle"
-              formatter={(value) => <span className="text-xs text-muted-foreground">{value}</span>}
             />
             <Area
               type="monotone"

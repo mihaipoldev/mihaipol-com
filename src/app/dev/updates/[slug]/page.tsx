@@ -5,6 +5,8 @@ import { formatUpdateDate } from "@/components/landing/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import TrackView from "@/features/smart-links/analytics/components/TrackView";
+import TrackedExternalLink from "@/components/features/TrackedExternalLink";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +40,12 @@ export default async function UpdateDetailPage({ params }: UpdateDetailPageProps
 
   return (
     <div className="min-h-screen">
+      <TrackView
+        eventType="page_view"
+        entityType="update"
+        entityId={update.id}
+        metadata={{ update_slug: update.slug, path: `/dev/updates/${update.slug}` }}
+      />
       <div className="py-24 px-6">
         <div className="container mx-auto px-8 max-w-4xl">
           <div className="space-y-8">
@@ -99,10 +107,16 @@ export default async function UpdateDetailPage({ params }: UpdateDetailPageProps
                   style={{ borderRadius: "1rem" }}
                   asChild
                 >
-                  <a href={update.read_more_url} target="_blank" rel="noopener noreferrer">
+                  <TrackedExternalLink
+                    href={update.read_more_url}
+                    eventType="link_click"
+                    entityType="update_link"
+                    entityId={update.id}
+                    metadata={{ url: update.read_more_url, update_slug: update.slug }}
+                  >
                     Read more
                     <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </a>
+                  </TrackedExternalLink>
                 </Button>
               </div>
             )}

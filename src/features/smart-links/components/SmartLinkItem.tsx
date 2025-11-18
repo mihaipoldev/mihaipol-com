@@ -8,6 +8,7 @@ export type SmartLink = {
   url: string;
   platformName: string;
   platformIconUrl?: string | null;
+  platformIconHorizontalUrl?: string | null;
   ctaLabel?: string | null;
 };
 
@@ -36,7 +37,7 @@ export default function SmartLinkItem({
       href={link.url}
       externalUrl={link.url}
       entityId={link.id}
-      label={link.platformName}
+      horizontalIconUrl={link.platformIconHorizontalUrl}
       rightLabel={link.ctaLabel || "Play"}
       className={className}
       style={style}

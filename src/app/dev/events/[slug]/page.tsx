@@ -5,6 +5,8 @@ import { formatEventDate } from "@/components/landing/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import TrackView from "@/features/smart-links/analytics/components/TrackView";
+import TrackedExternalLink from "@/components/features/TrackedExternalLink";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +42,12 @@ export default async function EventPage({ params }: EventPageProps) {
 
   return (
     <div className="min-h-screen">
+      <TrackView
+        eventType="page_view"
+        entityType="event"
+        entityId={event.id}
+        metadata={{ event_slug: event.slug, path: `/dev/events/${event.slug}` }}
+      />
       <div className="py-24 px-6">
         <div className="container mx-auto px-8 max-w-5xl">
           <div className="grid lg:grid-cols-3 gap-12">
@@ -96,10 +104,16 @@ export default async function EventPage({ params }: EventPageProps) {
                     style={{ borderRadius: "1rem" }}
                     asChild
                   >
-                    <a href={event.tickets_url} target="_blank" rel="noopener noreferrer">
+                    <TrackedExternalLink
+                      href={event.tickets_url}
+                      eventType="link_click"
+                      entityType="event_link"
+                      entityId={event.id}
+                      metadata={{ url: event.tickets_url, event_slug: event.slug }}
+                    >
                       {event.ticket_label || "Get Tickets"}
                       <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </a>
+                    </TrackedExternalLink>
                   </Button>
                 </div>
               )}

@@ -58,24 +58,19 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   ]);
 
   // Totals with lightweight head requests
-  const [albumViewsHead, sectionViewsHead, linkClicksHead] = await Promise.all([
+  // Use page_view for website visits (actual page views)
+  const [pageViewsHead, linkClicksHead] = await Promise.all([
     supabase
       .from("analytics_events")
       .select("*", { count: "exact", head: true })
-      .eq("event_type", "page_view")
-      .eq("entity_type", "album"),
-    supabase
-      .from("analytics_events")
-      .select("*", { count: "exact", head: true })
-      .eq("event_type", "section_view")
-      .eq("entity_type", "site_section"),
+      .eq("event_type", "page_view"),
     supabase
       .from("analytics_events")
       .select("*", { count: "exact", head: true })
       .eq("event_type", "link_click"),
   ]);
 
-  const totalPageViews = (albumViewsHead.count || 0) + (sectionViewsHead.count || 0);
+  const totalPageViews = pageViewsHead.count || 0;
   const totalServiceClicks = linkClicksHead.count || 0;
 
   // For grouped stats, fetch a capped set and reduce in memory (MVP).
@@ -95,7 +90,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
       .range(0, MAX_ROWS - 1),
     supabase
       .from("analytics_events")
-      .select("entity_id, metadata")
+      .select("entity_id, entity_type, metadata")
       .eq("event_type", "link_click")
       .order("created_at", { ascending: false })
       .range(0, MAX_ROWS - 1),
@@ -139,11 +134,18 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   const clicksByAlbumId: CountMap = {};
   const clicksByPlatformId: CountMap = {};
   for (const ev of linkClicksSafe as any[]) {
-    const linkId = ev.entity_id as string;
-    const albumId = albumIdByLinkId.get(linkId);
-    const platformId = platformIdByLinkId.get(linkId);
-    if (albumId) clicksByAlbumId[albumId] = (clicksByAlbumId[albumId] || 0) + 1;
-    if (platformId) clicksByPlatformId[platformId] = (clicksByPlatformId[platformId] || 0) + 1;
+    const entityType = ev.entity_type as string;
+    const entityId = ev.entity_id as string;
+    
+    // Handle album_link clicks (existing logic)
+    if (entityType === "album_link") {
+      const albumId = albumIdByLinkId.get(entityId);
+      const platformId = platformIdByLinkId.get(entityId);
+      if (albumId) clicksByAlbumId[albumId] = (clicksByAlbumId[albumId] || 0) + 1;
+      if (platformId) clicksByPlatformId[platformId] = (clicksByPlatformId[platformId] || 0) + 1;
+    }
+    // Note: event_link and update_link clicks are tracked but not aggregated into album/platform stats
+    // They could be added to separate stats if needed in the future
   }
 
   const topCountries: CountryRow[] = [];
@@ -158,6 +160,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   topCountries.sort((a, b) => b.count - a.count);
 
   // Build daily series (last 30 days) for page visits and service clicks
+  // Use page_view events for visits (actual page views)
   const dayStart = new Date();
   dayStart.setUTCHours(0, 0, 0, 0);
   const startTs = dayStart.getTime() - 29 * 24 * 60 * 60 * 1000;
@@ -171,10 +174,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   for (const ev of recentEvents as any[]) {
     const key = toDayKey(ev.created_at);
     if (!(key in visitsByDay)) continue;
-    if (
-      ev.event_type === "page_view" ||
-      (ev.event_type === "section_view" && ev.entity_type === "site_section")
-    ) {
+    if (ev.event_type === "page_view") {
       visitsByDay[key] += 1;
     } else if (ev.event_type === "link_click") {
       clicksByDay[key] += 1;

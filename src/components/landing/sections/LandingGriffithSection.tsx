@@ -21,7 +21,7 @@ export default function LandingGriffithSection({
   return (
     <section id="griffith" className="py-24 px-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-background to-primary/10" />
-      <div className="container mx-auto px-8 relative">
+      <div className="container mx-auto px-0 md:px-8 relative">
         <div className="max-w-6xl mx-auto">
           <Card className="overflow-hidden shadow-card-hover border-2 border-primary/20 bg-card/80 backdrop-blur">
             <div className="grid lg:grid-cols-2 gap-0">

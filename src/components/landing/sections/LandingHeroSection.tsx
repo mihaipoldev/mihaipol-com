@@ -33,7 +33,7 @@ export default function LandingHeroSection({
 
   return (
     <section className="min-h-screen flex items-center pt-20 px-6">
-      <div className="container mx-auto px-8">
+      <div className="container mx-auto px-0 md:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
             <div className="space-y-4">

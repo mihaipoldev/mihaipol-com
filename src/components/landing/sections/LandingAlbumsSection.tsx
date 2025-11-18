@@ -12,7 +12,7 @@ type LandingAlbumsSectionProps = {
 export default function LandingAlbumsSection({ albums, fallbackImage }: LandingAlbumsSectionProps) {
   return (
     <section id="albums" className="py-24 px-6 bg-muted/30">
-      <div className="container mx-auto px-8">
+      <div className="container mx-auto px-0 md:px-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4">Albums &amp; Singles</h2>
           <p className="text-muted-foreground">Selected releases and fan favorites.</p>
