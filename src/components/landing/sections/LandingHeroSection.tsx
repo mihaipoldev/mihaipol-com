@@ -12,16 +12,9 @@ type LandingHeroSectionProps = {
 };
 
 const HERO_IMAGES = [
-  "/hero images/__B_0116.jpg",
-  "/hero images/__B_0158.jpg",
-  "/hero images/__B_0165.jpg",
-  "/hero images/__B_0242.jpg",
-  "/hero images/_93A4736.JPG",
-  "/hero images/_93A4909.JPG",
-  "/hero images/_93A4940.JPG",
-  "/hero images/_BB_9497.jpg",
-  "/hero images/_DSC3355.jpg",
-  "/hero images/DB_02521.jpg",
+  "/hero images/02__B_0116.jpg",
+  "/hero images/04__B_0242.jpg",
+  "/hero images/01_BB_9497.jpg",
 ];
 
 export default function LandingHeroSection({
@@ -41,9 +34,35 @@ export default function LandingHeroSection({
   };
   
   const [currentImageIndex, setCurrentImageIndex] = useState(() => getInitialIndex());
+  const [nextImageIndex, setNextImageIndex] = useState<number | null>(null);
   const [buttonsOpacity, setButtonsOpacity] = useState(1);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
-  const heroArtwork = HERO_IMAGES[currentImageIndex] || FALLBACK_IMAGE;
+  const autoAdvanceIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const currentImageIndexRef = useRef(currentImageIndex);
+  const isTransitioningRef = useRef(isTransitioning);
+  const currentImage = HERO_IMAGES[currentImageIndex] || FALLBACK_IMAGE;
+  const nextImage = nextImageIndex !== null ? (HERO_IMAGES[nextImageIndex] || FALLBACK_IMAGE) : null;
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    currentImageIndexRef.current = currentImageIndex;
+  }, [currentImageIndex]);
+
+  useEffect(() => {
+    isTransitioningRef.current = isTransitioning;
+  }, [isTransitioning]);
+
+  // Trigger fade transition after next image is mounted
+  useEffect(() => {
+    if (nextImageIndex !== null) {
+      // Small delay to ensure the next image is in the DOM
+      const timer = setTimeout(() => {
+        setIsTransitioning(true);
+      }, 10);
+      return () => clearTimeout(timer);
+    }
+  }, [nextImageIndex]);
 
   // Load saved index from localStorage on mount
   useEffect(() => {
@@ -57,17 +76,70 @@ export default function LandingHeroSection({
   }, []);
 
   const handlePrevious = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? HERO_IMAGES.length - 1 : prev - 1));
+    if (isTransitioningRef.current) return;
+    const currentIdx = currentImageIndexRef.current;
+    const newIndex = currentIdx === 0 ? HERO_IMAGES.length - 1 : currentIdx - 1;
+    setNextImageIndex(newIndex);
+    setIsTransitioning(false); // Start with transition false, useEffect will trigger it
+    
+    // Reset auto-advance timer after manual navigation
+    if (autoAdvanceIntervalRef.current) {
+      clearInterval(autoAdvanceIntervalRef.current);
+    }
+    autoAdvanceIntervalRef.current = setInterval(() => {
+      handleNext();
+    }, 10000);
+    
+    // After transition completes, update current and clean up
+    setTimeout(() => {
+      setCurrentImageIndex(newIndex);
+      setNextImageIndex(null);
+      setIsTransitioning(false);
+    }, 610); // Slightly longer than transition duration
   };
 
   const handleNext = () => {
-    setCurrentImageIndex((prev) => (prev === HERO_IMAGES.length - 1 ? 0 : prev + 1));
+    if (isTransitioningRef.current) return;
+    const currentIdx = currentImageIndexRef.current;
+    const newIndex = currentIdx === HERO_IMAGES.length - 1 ? 0 : currentIdx + 1;
+    setNextImageIndex(newIndex);
+    setIsTransitioning(false); // Start with transition false, useEffect will trigger it
+    
+    // Reset auto-advance timer after manual navigation
+    if (autoAdvanceIntervalRef.current) {
+      clearInterval(autoAdvanceIntervalRef.current);
+    }
+    autoAdvanceIntervalRef.current = setInterval(() => {
+      handleNext();
+    }, 10000);
+    
+    // After transition completes, update current and clean up
+    setTimeout(() => {
+      setCurrentImageIndex(newIndex);
+      setNextImageIndex(null);
+      setIsTransitioning(false);
+    }, 610); // Slightly longer than transition duration
   };
 
   // Save current image index to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('hero-carousel-index', currentImageIndex.toString());
   }, [currentImageIndex]);
+
+  // Set up auto-advance carousel
+  useEffect(() => {
+    // Start auto-advance
+    autoAdvanceIntervalRef.current = setInterval(() => {
+      handleNext();
+    }, 10000); // 10 seconds
+    
+    // Cleanup on unmount
+    return () => {
+      if (autoAdvanceIntervalRef.current) {
+        clearInterval(autoAdvanceIntervalRef.current);
+      }
+    };
+  }, []); // Only run on mount
 
   useEffect(() => {
     const handleScroll = () => {
@@ -116,15 +188,35 @@ export default function LandingHeroSection({
     <section ref={sectionRef} className="relative min-h-screen w-full overflow-hidden">
       {/* Full width image - glued to top with fade at bottom */}
       <div className="absolute inset-0 w-full h-full">
+        {/* Current image - fades out during transition */}
         <img
-          src={heroArtwork}
+          key={`current-${currentImageIndex}`}
+          src={currentImage}
           alt={releaseTitle}
-          className="w-full h-full object-cover"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity ease-in-out ${
+            isTransitioning ? 'opacity-0' : 'opacity-100'
+          }`}
           style={{
+            transitionDuration: '600ms',
             maskImage: "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.15) 80%, transparent 100%)",
             WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.15) 80%, transparent 100%)",
           }}
         />
+        {/* Next image - fades in during transition */}
+        {nextImage && (
+          <img
+            key={`next-${nextImageIndex}`}
+            src={nextImage}
+            alt={releaseTitle}
+            className="absolute inset-0 w-full h-full object-cover transition-opacity ease-in-out opacity-0"
+            style={{
+              transitionDuration: '600ms',
+              opacity: isTransitioning ? 1 : 0,
+              maskImage: "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.15) 80%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.15) 80%, transparent 100%)",
+            }}
+          />
+        )}
         {/* Logo overlay - blended as texture/shadow */}
         <div className="absolute bottom-[205px] left-[100px] pointer-events-none hidden md:block">
           <img

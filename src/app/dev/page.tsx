@@ -6,7 +6,6 @@ import { getLabelById } from "@/features/labels/data";
 
 export const dynamic = "force-dynamic";
 
-const HERO_FALLBACK = "/hero images/_93A4909.JPG";
 const GRIFFITH_LABEL_ID = "689e375f-e5eb-492c-8942-cc4723c9bc91";
 
 export default async function DevHomePage() {
@@ -18,7 +17,7 @@ export default async function DevHomePage() {
     getLabelById(GRIFFITH_LABEL_ID),
   ]);
 
-  const heroImage = "/hero images/_93A4909.JPG";
+  const heroImage = "/hero images/01_BB_9497.jpg";
   const griffithLabelSlug = griffithLabel?.slug || "griffith-records";
 
   return (
