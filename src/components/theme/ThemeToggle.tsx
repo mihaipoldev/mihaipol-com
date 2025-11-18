@@ -23,7 +23,7 @@ export default function ThemeToggle() {
       size="icon"
       aria-label="Toggle theme"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="rounded-full text-foreground/70 hover:text-foreground hover:bg-accent/50 transition-all duration-300"
+      className="rounded-full text-foreground/70 hover:text-foreground bg-transparent hover:bg-transparent transition-colors duration-300"
     >
       {mounted ? (
         isDark ? (

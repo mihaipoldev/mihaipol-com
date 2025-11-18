@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
 import { getDashboardData } from "@/features/admin/dashboard/data";
 import { DashboardCards } from "@/components/admin/DashboardCards";
 import { DashboardCharts } from "@/components/admin/DashboardCharts";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Admin Dashboard",
+};
 
 export default async function AdminDashboardPage() {
   const data = await getDashboardData();

@@ -1,10 +1,13 @@
 import { supabase } from "@/lib/supabase";
+import { getLabelBySlug } from "@/features/labels/data";
 
 type FetchAlbumsOptions = {
   limit?: number;
   order?: "asc" | "desc";
   includeUnpublished?: boolean;
   includeLabels?: boolean;
+  labelId?: string;
+  labelSlug?: string;
 };
 
 type AlbumWithLabel = {
@@ -21,21 +24,38 @@ type AlbumWithLabel = {
 };
 
 async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithLabel[]> {
-  const { limit, order = "desc", includeUnpublished = false, includeLabels = false } = options;
+  const { limit, order = "desc", includeUnpublished = false, includeLabels = false, labelId, labelSlug } = options;
 
   try {
+    // If filtering by slug, first get the label ID
+    let actualLabelId = labelId;
+    if (labelSlug && !labelId) {
+      const label = await getLabelBySlug(labelSlug);
+      if (label) {
+        actualLabelId = label.id;
+      } else {
+        // If label not found, return empty array
+        return [];
+      }
+    }
+
     // 🐛 DEBUG: Start timing
     const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
     // Select only needed columns and use join if labels are needed
     const baseColumns = `id, title, slug, cover_image_url, release_date, publish_status, label_id, catalog_number, album_type`;
-    const selectColumns = includeLabels ? `${baseColumns}, labels(id, name)` : baseColumns;
+    const selectColumns = includeLabels ? `${baseColumns}, labels(id, name, slug)` : baseColumns;
 
     let query = supabase.from("albums").select(selectColumns);
 
     // Filter by publish status
     if (!includeUnpublished) {
       query = query.eq("publish_status", "published");
+    }
+
+    // Filter by label ID if provided
+    if (actualLabelId) {
+      query = query.eq("label_id", actualLabelId);
     }
 
     // Order by release_date
@@ -114,8 +134,55 @@ export async function getHomepageAlbums(limit = 6) {
   return fetchAlbums({ limit, order: "desc", includeLabels: true });
 }
 
-export async function getAllAlbums() {
-  return fetchAlbums({ order: "desc", includeLabels: true });
+export async function getLatestAlbumByLabelId(labelId: string) {
+  try {
+    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+
+    const { data, error } = await supabase
+      .from("albums")
+      .select(
+        `id, title, slug, cover_image_url, release_date, publish_status, label_id, catalog_number, album_type, description, labels(id, name)`
+      )
+      .eq("label_id", labelId)
+      .eq("publish_status", "published")
+      .order("release_date", { ascending: false, nullsFirst: false })
+      .limit(1)
+      .single();
+
+    const queryTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
+    console.log(`🔍 [DB] latest album by label_id query completed in ${queryTime.toFixed(0)}ms`);
+
+    if (error) {
+      // If no album found, return null instead of throwing
+      if (error.code === "PGRST116") {
+        return null;
+      }
+      throw error;
+    }
+
+    if (!data) return null;
+
+    // Normalize labels: Supabase returns array even for one-to-one relationships
+    const normalizedLabel = Array.isArray(data.labels)
+      ? data.labels.length > 0
+        ? data.labels[0]
+        : null
+      : data.labels || null;
+
+    return {
+      ...data,
+      labelName: normalizedLabel?.name || null,
+      labels: normalizedLabel,
+    } as AlbumWithLabel;
+  } catch (error) {
+    console.error("Error fetching latest album by label ID:", error);
+    return null;
+  }
+}
+
+export async function getAllAlbums(labelId?: string, labelSlug?: string) {
+  return fetchAlbums({ order: "desc", includeLabels: true, labelId, labelSlug });
 }
 
 export async function getAlbumBySlug(slug: string) {

@@ -10,16 +10,18 @@ import type { LandingAlbum } from "../types";
 type LandingGriffithSectionProps = {
   featuredAlbum: LandingAlbum | null;
   fallbackImage: string;
+  griffithLabelSlug: string;
 };
 
 export default function LandingGriffithSection({
   featuredAlbum,
   fallbackImage,
+  griffithLabelSlug,
 }: LandingGriffithSectionProps) {
   const featured = featuredAlbum ?? null;
 
   return (
-    <section id="griffith" className="py-24 px-6 relative overflow-hidden">
+    <section id="griffith" className="py-12 md:py-24 px-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-background to-primary/10" />
       <div className="container mx-auto px-0 md:px-8 relative">
         <div className="max-w-6xl mx-auto">
@@ -47,28 +49,27 @@ export default function LandingGriffithSection({
                   <h2 className="text-3xl lg:text-4xl font-bold mb-4">
                     {featured?.title ?? "Horizon EP"}
                   </h2>
-                  <p className="text-muted-foreground">
-                    Four tracks exploring the space between day and night, featuring collaborators
-                    from across the globe. Crafted for twilit highways and rooftop sunsets.
-                  </p>
+                  {featured?.description && (
+                    <p className="text-muted-foreground whitespace-pre-line">{featured.description}</p>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-4">
                   <Button variant="hero" size="lg" style={{ borderRadius: "0.75rem" }} asChild>
                     <Link href={featured ? `/dev/albums/${featured.slug}` : "/dev/albums"}>
                       <Music className="w-4 h-4" />
-                      Listen on Spotify
+                      Explore the Release
                     </Link>
                   </Button>
                   <Button
                     variant="outline"
                     size="lg"
-                    className="group"
+                    className="hover:bg-transparent hover:text-foreground hover:border-border"
                     style={{ borderRadius: "0.75rem" }}
                     asChild
                   >
-                    <Link href="/dev/albums">
+                    <Link href={`/dev/albums?label=${griffithLabelSlug}`}>
                       More from Griffith
-                      <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      <ExternalLink className="w-4 h-4 ml-2" />
                     </Link>
                   </Button>
                 </div>

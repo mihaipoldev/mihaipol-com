@@ -2,9 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Fonts */
+@font-face {
+  font-family: "urw-din";
+  src: 
+    local("URW DIN"),
+    local("urw-din"),
+    url("/fonts/urw-din.woff2") format("woff2"),
+    url("/fonts/urw-din.woff") format("woff"),
+    url("/fonts/urw-din.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "euclidCircularALightWebS";
+  src: 
+    local("Euclid Circular A Light Web S"),
+    local("euclidCircularALightWebS"),
+    url("/fonts/euclidCircularALightWebS.woff2") format("woff2"),
+    url("/fonts/euclidCircularALightWebS.woff") format("woff"),
+    url("/fonts/euclidCircularALightWebS.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
 body {
   font-family:
-    var(--font-geist-sans),
+    var(--font-family-primary, var(--font-josefin-sans, var(--font-geist-sans))),
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -14,6 +41,16 @@ body {
 
 @layer base {
   :root {
+    /* Font family - Set via ACTIVE_FONT_PAIRING in src/lib/fonts.ts */
+    /* Change ACTIVE_FONT_PAIRING in src/lib/fonts.ts to switch fonts */
+    /* Currently using: Josefin Sans (Pairing 4) */
+    --font-family-primary: var(--font-roboto, var(--font-geist-sans));
+    --font-family-heading: var(--font-roboto, var(--font-geist-sans));
+    
+    /* Custom fonts */
+    --font-urw-din: "urw-din", sans-serif;
+    --font-euclid: "euclidCircularALightWebS", "euclidCircularALightWebS Fallback", sans-serif;
+    
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
@@ -104,9 +141,11 @@ body {
   }
   html {
     @apply bg-background;
+    font-family: var(--font-family-primary, var(--font-geist-sans), system-ui, sans-serif) !important;
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-family-primary, var(--font-geist-sans), system-ui, sans-serif) !important;
   }
 }
 
@@ -252,26 +291,22 @@ body {
   --brand-s: 56%;
   --brand-l: 66%;*/
 
-  /* Typography Controls */
-  /* Font Pairing 1: Roboto + Open Sans (Default) */
-  --font-heading-pairing-1: var(--font-roboto), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-body-pairing-1: var(--font-open-sans), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  
-  /* Font Pairing 2: Montserrat + EB Garamond */
-  --font-heading-pairing-2: var(--font-montserrat), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-body-pairing-2: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
-  
-  /* Font Pairing 3: Source Code Pro + Space Grotesk */
-  --font-heading-pairing-3: var(--font-source-code-pro), "Courier New", Courier, monospace;
-  --font-body-pairing-3: var(--font-space-grotesk), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  
-  /* Font Pairing 4: Josefin Sans + Lato */
-  --font-heading-pairing-4: var(--font-josefin-sans), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-body-pairing-4: var(--font-lato), ui-sans-serif, "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  
-  /* Active font family - CHANGE THESE LINES to switch fonts */
-  --font-family-primary: var(--font-body-pairing-4); /* Change pairing-1 to pairing-2, pairing-3, or pairing-4 */
-  --font-family-heading: var(--font-heading-pairing-4); /* Heading font - change pairing-1 to match body font pairing */
+  /*
+  --font-roboto
+  --font-nunito-sans  
+  --font-raleway
+  --font-dm-sans
+  --font-montserrat
+  --font-josefin-sans
+  --font-eb-garamond
+  --font-poppins
+  --font-source-code-pro
+  */
+
+  /* Active font family - Set via ACTIVE_FONT_PAIRING in src/lib/fonts.ts */
+  /* Currently using: Josefin Sans (Pairing 4) - Change ACTIVE_FONT_PAIRING in fonts.ts to switch */
+  --font-family-primary: var(--font-nunito-sans); /* Body font - set via fonts.ts */
+  --font-family-heading: var(--font-nunito-sans); /* Heading font - set via fonts.ts */
   --font-size-base: 16px;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -2351,4 +2386,184 @@ body.preset-landing-page-20 {
 
   --shadow-card: 0 4px 24px hsl(160 52% 46% / 0.2);
   --shadow-card-hover: 0 8px 32px hsl(160 52% 46% / 0.28);
+}
+
+/* THEME 21 – Griffith Orange */
+
+.preset-landing-page-21,
+body.preset-landing-page-21 {
+  --background: 220 12% 97%;
+  --foreground: 220 15% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 15% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 15% 12%;
+
+  --primary: 20 85% 56%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 20 90% 64%;
+
+  --secondary: 220 10% 32%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-glow: 220 12% 42%;
+
+  --accent: 18 40% 50%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 18 45% 58%;
+
+  --muted: 220 10% 93%;
+  --muted-foreground: 220 12% 42%;
+
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 220 12% 88%;
+  --input: 220 12% 88%;
+  --ring: 20 85% 56%;
+  --radius: 1rem;
+
+  --gradient-start: 20 85% 56%;
+  --gradient-mid: 18 40% 50%;
+  --gradient-end: 220 10% 32%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.22);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.3);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.38);
+
+  --shadow-card: 0 4px 24px hsl(20 85% 56% / 0.1);
+  --shadow-card-hover: 0 8px 32px hsl(20 85% 56% / 0.18);
+}
+
+.dark .preset-landing-page-21,
+.dark body.preset-landing-page-21 {
+  --background: 220 18% 5%;
+  --foreground: 0 0% 100%;
+  --card: 220 18% 9%;
+  --card-foreground: 0 0% 100%;
+  --popover: 220 18% 9%;
+  --popover-foreground: 0 0% 100%;
+
+  --primary: 20 90% 60%;
+  --primary-foreground: 0 0% 0%;
+  --primary-glow: 20 96% 68%;
+
+  --secondary: 220 12% 40%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-glow: 220 16% 50%;
+
+  --accent: 18 46% 54%;
+  --accent-foreground: 0 0% 0%;
+  --accent-glow: 18 52% 62%;
+
+  --muted: 220 14% 16%;
+  --muted-foreground: 0 0% 80%;
+
+  --destructive: 0 78% 58%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 220 18% 22%;
+  --input: 220 18% 22%;
+  --ring: 20 90% 60%;
+
+  --gradient-start: 20 90% 60%;
+  --gradient-mid: 18 46% 54%;
+  --gradient-end: 220 12% 40%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.34);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.44);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.54);
+
+  --shadow-card: 0 4px 24px hsl(20 90% 60% / 0.22);
+  --shadow-card-hover: 0 8px 32px hsl(20 90% 60% / 0.3);
+}
+
+/* THEME 22 – Griffith Lime */
+
+.preset-landing-page-22,
+body.preset-landing-page-22 {
+  --background: 210 10% 97%;
+  --foreground: 220 12% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 12% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 12% 12%;
+
+  /* lime logo */
+  --primary: 90 80% 56%;
+  --primary-foreground: 0 0% 8%;
+  --primary-glow: 90 88% 64%;
+
+  /* neutral / space-grey support */
+  --secondary: 210 10% 32%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-glow: 210 14% 42%;
+
+  --accent: 200 45% 50%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 200 52% 58%;
+
+  --muted: 210 10% 92%;
+  --muted-foreground: 220 10% 40%;
+
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 210 10% 86%;
+  --input: 210 10% 86%;
+  --ring: 90 80% 56%;
+  --radius: 1rem;
+
+  --gradient-start: 90 80% 56%;
+  --gradient-mid: 200 45% 50%;
+  --gradient-end: 210 10% 32%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.22);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.3);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.38);
+
+  --shadow-card: 0 4px 24px hsl(90 80% 56% / 0.1);
+  --shadow-card-hover: 0 8px 32px hsl(90 80% 56% / 0.18);
+}
+
+.dark .preset-landing-page-22,
+.dark body.preset-landing-page-22 {
+  --background: 220 15% 5%;
+  --foreground: 0 0% 100%;
+  --card: 220 15% 9%;
+  --card-foreground: 0 0% 100%;
+  --popover: 220 15% 9%;
+  --popover-foreground: 0 0% 100%;
+
+  --primary: 90 86% 60%;
+  --primary-foreground: 0 0% 6%;
+  --primary-glow: 90 94% 68%;
+
+  --secondary: 210 12% 40%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-glow: 210 16% 50%;
+
+  --accent: 200 50% 52%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 200 58% 60%;
+
+  --muted: 220 14% 16%;
+  --muted-foreground: 0 0% 80%;
+
+  --destructive: 0 78% 58%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 220 18% 22%;
+  --input: 220 18% 22%;
+  --ring: 90 86% 60%;
+
+  --gradient-start: 90 86% 60%;
+  --gradient-mid: 200 50% 52%;
+  --gradient-end: 210 12% 40%;
+
+  --glow-soft: 0 0 40px hsl(var(--primary-glow) / 0.34);
+  --glow-medium: 0 0 60px hsl(var(--primary-glow) / 0.44);
+  --glow-strong: 0 0 80px hsl(var(--accent-glow) / 0.52);
+
+  --shadow-card: 0 4px 24px hsl(90 86% 60% / 0.22);
+  --shadow-card-hover: 0 8px 32px hsl(90 86% 60% / 0.3);
 }

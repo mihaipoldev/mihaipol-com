@@ -48,7 +48,6 @@ type SortableLinkItemProps = {
   platforms: Platform[];
   onUpdate: (id: string, updates: Partial<AlbumLink>) => void;
   onDelete: (id: string) => void;
-  onPlatformsChange?: (platforms: Platform[]) => void;
   validationErrors?: { platform?: string; url?: string };
 };
 
@@ -57,7 +56,6 @@ function SortableLinkItem({
   platforms,
   onUpdate,
   onDelete,
-  onPlatformsChange,
   validationErrors,
 }: SortableLinkItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -73,15 +71,12 @@ function SortableLinkItem({
   const platform = link.platforms;
   const [url, setUrl] = useState(link.url);
   const [ctaLabel, setCtaLabel] = useState(link.cta_label || "Play");
-  const [selectedPlatformId, setSelectedPlatformId] = useState(link.platform_id || "");
-  const [isCreatePlatformModalOpen, setIsCreatePlatformModalOpen] = useState(false);
 
   // Sync with prop changes
   useEffect(() => {
     setUrl(link.url);
     setCtaLabel(link.cta_label || "Play");
-    setSelectedPlatformId(link.platform_id || "");
-  }, [link.url, link.cta_label, link.platform_id]);
+  }, [link.url, link.cta_label]);
 
   const handleUrlChange = (newUrl: string) => {
     setUrl(newUrl);
@@ -93,85 +88,13 @@ function SortableLinkItem({
     onUpdate(link.id, { cta_label: newCta });
   };
 
-  const handlePlatformChange = (platformId: string) => {
-    if (platformId === "__none__") {
-      setSelectedPlatformId("");
-      onUpdate(link.id, {
-        platform_id: null,
-        platforms: null,
-      });
-    } else if (platformId === "__create_new__") {
-      // Don't change the selected value, just open the modal
-      setIsCreatePlatformModalOpen(true);
-      // Reset the select to previous value by not updating selectedPlatformId
-      return;
-    } else {
-      setSelectedPlatformId(platformId);
-      const selectedPlatform = platforms.find((p) => p.id === platformId);
-      const updates: Partial<AlbumLink> = {
-        platform_id: platformId,
-        platforms: selectedPlatform || null,
-      };
-
-      // Populate CTA label with platform's default_cta_label if available
-      if (selectedPlatform?.default_cta_label) {
-        setCtaLabel(selectedPlatform.default_cta_label);
-        updates.cta_label = selectedPlatform.default_cta_label;
-      }
-
-      onUpdate(link.id, updates);
-    }
-  };
-
-  const handlePlatformCreated = (newPlatform: {
-    id: string;
-    name: string;
-    icon_url: string | null;
-    default_cta_label: string | null;
-  }) => {
-    // Add new platform to the list
-    const updatedPlatforms = [...platforms, newPlatform as Platform].sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
-
-    if (onPlatformsChange) {
-      onPlatformsChange(updatedPlatforms);
-    }
-
-    // Select the newly created platform
-    setSelectedPlatformId(newPlatform.id);
-    const updates: Partial<AlbumLink> = {
-      platform_id: newPlatform.id,
-      platforms: newPlatform as Platform,
-    };
-
-    // Populate CTA label with platform's default_cta_label if available
-    if (newPlatform.default_cta_label) {
-      setCtaLabel(newPlatform.default_cta_label);
-      updates.cta_label = newPlatform.default_cta_label;
-    }
-
-    onUpdate(link.id, updates);
-    setIsCreatePlatformModalOpen(false);
-  };
-
-  const selectedPlatform = platforms.find((p) => p.id === selectedPlatformId);
-  const sortedPlatforms = [...platforms].sort((a, b) => {
-    const nameA = a.name.toLowerCase();
-    const nameB = b.name.toLowerCase();
-    return nameA.localeCompare(nameB);
-  });
-
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative flex gap-3 p-4 pr-10 border rounded-lg",
-        getCardGradient(),
-        isDragging ? "shadow-lg" : ""
+        "relative flex gap-3 p-4 pr-10 border rounded-lg bg-muted/20 dark:bg-muted/10 backdrop-blur-sm",
+        isDragging ? "shadow-lg" : "shadow-sm"
       )}
     >
       {/* Drag Handle */}
@@ -185,61 +108,26 @@ function SortableLinkItem({
 
       {/* Content */}
       <div className="flex-1 space-y-3">
-        {/* Platform Select */}
+        {/* Platform Display (Read-only) */}
         <div className="space-y-1">
-          <Select value={selectedPlatformId || "__none__"} onValueChange={handlePlatformChange}>
-            <SelectTrigger
-              className={`w-full ${validationErrors?.platform ? "border-destructive" : ""}`}
-            >
-              {selectedPlatform ? (
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  {selectedPlatform.icon_url ? (
-                    <img
-                      src={selectedPlatform.icon_url}
-                      alt={selectedPlatform.name}
-                      className="w-4 h-4 object-contain shrink-0"
-                    />
-                  ) : (
-                    <div className="w-4 h-4 rounded bg-muted flex items-center justify-center text-xs shrink-0">
-                      {selectedPlatform.name?.[0] || "?"}
-                    </div>
-                  )}
-                  <span className="truncate">{selectedPlatform.name}</span>
-                </div>
+          {platform ? (
+            <div className="flex items-center gap-2">
+              {platform.icon_url ? (
+                <img
+                  src={platform.icon_url}
+                  alt={platform.name}
+                  className="w-4 h-4 object-contain shrink-0"
+                />
               ) : (
-                <SelectValue placeholder="Select platform" />
+                <div className="w-4 h-4 rounded bg-muted flex items-center justify-center text-xs shrink-0">
+                  {platform.name?.[0] || "?"}
+                </div>
               )}
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="__none__">None</SelectItem>
-              {sortedPlatforms.map((platform) => (
-                <SelectItem key={platform.id} value={platform.id}>
-                  <div className="flex items-center gap-2">
-                    {platform.icon_url ? (
-                      <img
-                        src={platform.icon_url}
-                        alt={platform.name}
-                        className="w-4 h-4 object-contain shrink-0"
-                      />
-                    ) : (
-                      <div className="w-4 h-4 rounded bg-muted flex items-center justify-center text-xs shrink-0">
-                        {platform.name?.[0] || "?"}
-                      </div>
-                    )}
-                    <span>{platform.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-              <SelectItem value="__create_new__" className="text-primary font-medium">
-                + Create New Platform
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <CreatePlatformModal
-            open={isCreatePlatformModalOpen}
-            onOpenChange={setIsCreatePlatformModalOpen}
-            onSuccess={handlePlatformCreated}
-          />
+              <span className="truncate font-medium">{platform.name}</span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">No platform selected</span>
+          )}
           {validationErrors?.platform && (
             <p className="text-xs text-destructive">{validationErrors.platform}</p>
           )}
@@ -295,6 +183,8 @@ export function AlbumSmartLinksManager({
   const [localLinks, setLocalLinks] = useState<AlbumLink[]>(
     [...links].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
   );
+  const [showPlatformSelect, setShowPlatformSelect] = useState(false);
+  const [isCreatePlatformModalOpen, setIsCreatePlatformModalOpen] = useState(false);
 
   // Sync local links when prop changes
   useEffect(() => {
@@ -306,6 +196,17 @@ export function AlbumSmartLinksManager({
     setLocalLinks(updatedLinks);
     onChange(updatedLinks);
   };
+
+  // Get available platforms (not already used in links)
+  const usedPlatformIds = new Set(
+    localLinks.filter((link) => link.platform_id).map((link) => link.platform_id)
+  );
+  const availablePlatforms = platforms.filter((platform) => !usedPlatformIds.has(platform.id));
+  const sortedAvailablePlatforms = [...availablePlatforms].sort((a, b) => {
+    const nameA = a.name.toLowerCase();
+    const nameB = b.name.toLowerCase();
+    return nameA.localeCompare(nameB);
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -349,19 +250,62 @@ export function AlbumSmartLinksManager({
     updateLinks(reorderedLinks);
   };
 
-  const handleAdd = () => {
+  const handlePlatformSelect = (platformId: string) => {
+    if (platformId === "__create_new__") {
+      setIsCreatePlatformModalOpen(true);
+      setShowPlatformSelect(false);
+      return;
+    }
+
+    const selectedPlatform = platforms.find((p) => p.id === platformId);
+    if (!selectedPlatform) return;
+
     const newLinkItem: AlbumLink = {
-      id: `temp-${Date.now()}`, // Temporary ID for new links
-      platform_id: null,
+      id: `temp-${Date.now()}`,
+      platform_id: platformId,
       url: "",
-      cta_label: "Play",
+      cta_label: selectedPlatform.default_cta_label || "Play",
       link_type: null,
       sort_order: localLinks.length,
-      platforms: null,
+      platforms: selectedPlatform,
     };
 
     const updatedLinks = [...localLinks, newLinkItem];
     updateLinks(updatedLinks);
+    setShowPlatformSelect(false);
+  };
+
+  const handlePlatformCreated = (newPlatform: {
+    id: string;
+    name: string;
+    icon_url: string | null;
+    default_cta_label: string | null;
+  }) => {
+    // Add new platform to the list
+    const updatedPlatforms = [...platforms, newPlatform as Platform].sort((a, b) => {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
+    if (onPlatformsChange) {
+      onPlatformsChange(updatedPlatforms);
+    }
+
+    // Create a new link with the newly created platform
+    const newLinkItem: AlbumLink = {
+      id: `temp-${Date.now()}`,
+      platform_id: newPlatform.id,
+      url: "",
+      cta_label: newPlatform.default_cta_label || "Play",
+      link_type: null,
+      sort_order: localLinks.length,
+      platforms: newPlatform as Platform,
+    };
+
+    const updatedLinks = [...localLinks, newLinkItem];
+    updateLinks(updatedLinks);
+    setIsCreatePlatformModalOpen(false);
   };
 
   return (
@@ -373,8 +317,7 @@ export function AlbumSmartLinksManager({
       {localLinks.length === 0 ? (
         <div
           className={cn(
-            "text-sm text-muted-foreground py-8 border rounded-lg text-center",
-            getCardGradient()
+            "text-sm text-muted-foreground py-8 border rounded-lg text-center bg-muted/20 dark:bg-muted/10 backdrop-blur-sm"
           )}
         >
           No links added yet
@@ -393,7 +336,6 @@ export function AlbumSmartLinksManager({
                   platforms={platforms}
                   onUpdate={handleUpdate}
                   onDelete={handleDelete}
-                  onPlatformsChange={onPlatformsChange}
                   validationErrors={validationErrors?.[link.id]}
                 />
               ))}
@@ -402,16 +344,78 @@ export function AlbumSmartLinksManager({
         </DndContext>
       )}
 
-      <div className="pt-2">
-        <ShadowButton
-          type="button"
-          variant="outline"
-          className="w-full justify-center border-dashed hover:border-solid transition-all"
-          onClick={handleAdd}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Link
-        </ShadowButton>
+      <div className="pt-2 space-y-2">
+        {showPlatformSelect ? (
+          <div className="space-y-2">
+            <Select
+              value=""
+              open={true}
+              onValueChange={handlePlatformSelect}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setShowPlatformSelect(false);
+                }
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a platform to add" />
+              </SelectTrigger>
+              <SelectContent>
+                {sortedAvailablePlatforms.length > 0 ? (
+                  sortedAvailablePlatforms.map((platform) => (
+                    <SelectItem key={platform.id} value={platform.id}>
+                      <div className="flex items-center gap-2">
+                        {platform.icon_url ? (
+                          <img
+                            src={platform.icon_url}
+                            alt={platform.name}
+                            className="w-4 h-4 object-contain shrink-0"
+                          />
+                        ) : (
+                          <div className="w-4 h-4 rounded bg-muted flex items-center justify-center text-xs shrink-0">
+                            {platform.name?.[0] || "?"}
+                          </div>
+                        )}
+                        <span>{platform.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="__no_platforms__" disabled>
+                    No available platforms
+                  </SelectItem>
+                )}
+                <SelectItem value="__create_new__" className="text-primary font-medium">
+                  + Create New Platform
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <ShadowButton
+              type="button"
+              variant="ghost"
+              className="w-full"
+              onClick={() => setShowPlatformSelect(false)}
+            >
+              Cancel
+            </ShadowButton>
+          </div>
+        ) : (
+          <ShadowButton
+            type="button"
+            variant="outline"
+            className="w-full justify-center border-dashed hover:border-solid transition-all"
+            onClick={() => setShowPlatformSelect(true)}
+            disabled={sortedAvailablePlatforms.length === 0 && platforms.length > 0}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Link
+          </ShadowButton>
+        )}
+        <CreatePlatformModal
+          open={isCreatePlatformModalOpen}
+          onOpenChange={setIsCreatePlatformModalOpen}
+          onSuccess={handlePlatformCreated}
+        />
       </div>
     </div>
   );

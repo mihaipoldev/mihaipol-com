@@ -23,10 +23,23 @@ export default async function UpdatesPage() {
               <p className="text-muted-foreground">No updates yet. Check back soon.</p>
             </div>
           ) : (
-            <LandingUpdatesList updates={updates} fallbackImage={FALLBACK_IMAGE} />
+            <LandingUpdatesList updates={updates} fallbackImage={FALLBACK_IMAGE} variant="compact-square" />
           )}
         </div>
       </div>
     </div>
   );
 }
+
+/* 
+
+card-badge - Original
+default - Clean vertical
+horizontal - Side-by-side
+overlay - Text on image
+compact - Smaller cards (horizontal/rectangular)
+compact-square - Smaller cards (square image)
+featured - Larger, prominent
+minimal - Minimal design
+
+*/

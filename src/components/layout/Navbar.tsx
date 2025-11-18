@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
+import { cn } from "@/lib/utils";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
 const navLinks = [
@@ -11,6 +13,8 @@ const navLinks = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
+
   return (
     <header className="sticky top-0 z-50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/50 relative">
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/30 to-transparent"></div>
@@ -25,16 +29,29 @@ export default function Navbar() {
         </Link>
         {/* Centered menu items */}
         <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-8 md:gap-10 text-base font-bold">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-foreground/70 hover:text-foreground transition-all duration-300 relative group py-2"
-            >
-              <span className="relative z-10">{link.label}</span>
-              <span className="absolute bottom-0 left-0 w-0 h-px bg-foreground/50 group-hover:w-full transition-all duration-300 ease-out"></span>
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href || (pathname?.startsWith(link.href + "/") && pathname !== link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "transition-all duration-300 relative group py-2",
+                  isActive
+                    ? "text-foreground"
+                    : "text-foreground/70 hover:text-foreground"
+                )}
+              >
+                <span className="relative z-10">{link.label}</span>
+                <span
+                  className={cn(
+                    "absolute bottom-0 left-0 h-px bg-foreground/50 transition-all duration-300 ease-out",
+                    isActive ? "w-full" : "w-0 group-hover:w-full"
+                  )}
+                />
+              </Link>
+            );
+          })}
         </nav>
         {/* Theme toggle on the right */}
         <div className="flex items-center">

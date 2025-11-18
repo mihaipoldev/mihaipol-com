@@ -3,14 +3,15 @@
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import UpdateCard, { type UpdateCardProps } from "./UpdateCard";
+import UpdateCard, { type UpdateCardProps, type UpdateCardVariant } from "./UpdateCard";
 import { cn } from "@/lib/utils";
 
 type UpdatesCarouselProps = {
   updates: UpdateCardProps[];
+  variant?: UpdateCardVariant;
 };
 
-export default function UpdatesCarousel({ updates }: UpdatesCarouselProps) {
+export default function UpdatesCarousel({ updates, variant = "default" }: UpdatesCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(3);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -57,10 +58,22 @@ export default function UpdatesCarousel({ updates }: UpdatesCarouselProps) {
     }
   };
 
+  // Get card width based on variant
+  const getCardWidth = () => {
+    switch (variant) {
+      case "compact":
+        return 256; // w-64 = 256px
+      case "featured":
+        return 384; // w-96 = 384px
+      default:
+        return 320; // w-80 = 320px
+    }
+  };
+
   // Scroll container to show current batch
   useEffect(() => {
     if (containerRef.current) {
-      const cardWidth = 320; // w-80 = 320px
+      const cardWidth = getCardWidth();
       const gap = 24; // gap-6 = 24px
       const scrollPosition = currentIndex * (cardWidth + gap);
       containerRef.current.scrollTo({
@@ -68,7 +81,7 @@ export default function UpdatesCarousel({ updates }: UpdatesCarouselProps) {
         behavior: "smooth",
       });
     }
-  }, [currentIndex, itemsPerView]);
+  }, [currentIndex, itemsPerView, variant]);
 
   if (updates.length === 0) {
     return <p className="text-muted-foreground">No updates yet.</p>;
@@ -94,7 +107,7 @@ export default function UpdatesCarousel({ updates }: UpdatesCarouselProps) {
         }}
       >
         {updates.map((update) => (
-          <UpdateCard key={update.id} {...update} className="flex-shrink-0 w-80" />
+          <UpdateCard key={update.id} {...update} variant={variant} className="flex-shrink-0" />
         ))}
       </div>
 

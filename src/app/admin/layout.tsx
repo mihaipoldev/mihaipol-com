@@ -1,14 +1,4 @@
 import type { ReactNode } from "react";
-import {
-  Roboto,
-  Open_Sans,
-  Montserrat,
-  EB_Garamond,
-  Source_Code_Pro,
-  Space_Grotesk,
-  Josefin_Sans,
-  Lato,
-} from "next/font/google";
 
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
@@ -20,66 +10,7 @@ import { AdminThemeProvider } from "@/components/theme/AdminThemeProvider";
 import { requireUserRedirect } from "@/lib/auth";
 import { getGradient, getSidebarGradient } from "@/lib/gradient-presets";
 import { headers } from "next/headers";
-
-// Font Pairing 1: Roboto + Open Sans
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-roboto",
-  display: "swap",
-});
-
-const openSans = Open_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-open-sans",
-  display: "swap",
-});
-
-// Font Pairing 2: Montserrat + EB Garamond
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-montserrat",
-  display: "swap",
-});
-
-const ebGaramond = EB_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-eb-garamond",
-  display: "swap",
-});
-
-// Font Pairing 3: Source Code Pro + Space Grotesk
-const sourceCodePro = Source_Code_Pro({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-source-code-pro",
-  display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-});
-
-// Font Pairing 4: Josefin Sans + Lato
-const josefinSans = Josefin_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-josefin-sans",
-  display: "swap",
-});
-
-const lato = Lato({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-lato",
-  display: "swap",
-});
+import { getAllFontVariables } from "@/lib/fonts";
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -107,7 +38,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
         <ColorInitializer />
         <AdminBodyClass />
         <div
-          className={`preset-balanced font-sans flex h-screen overflow-hidden flex-col ${getGradient()} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${ebGaramond.variable} ${sourceCodePro.variable} ${spaceGrotesk.variable} ${josefinSans.variable} ${lato.variable}`}
+          className={`preset-balanced font-sans flex h-screen overflow-hidden flex-col ${getGradient()} ${getAllFontVariables()}`}
         >
           <div className="flex flex-1 overflow-hidden">
             {/* Desktop Sidebar - Full Height */}

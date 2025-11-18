@@ -1,7 +1,7 @@
 "use client";
 
-import { Music } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { LandingAlbum, LandingEvent } from "../types";
 
 type LandingHeroSectionProps = {
@@ -10,6 +10,19 @@ type LandingHeroSectionProps = {
   events: LandingEvent[];
   albums: LandingAlbum[];
 };
+
+const HERO_IMAGES = [
+  "/hero images/__B_0116.jpg",
+  "/hero images/__B_0158.jpg",
+  "/hero images/__B_0165.jpg",
+  "/hero images/__B_0242.jpg",
+  "/hero images/_93A4736.JPG",
+  "/hero images/_93A4909.JPG",
+  "/hero images/_93A4940.JPG",
+  "/hero images/_BB_9497.jpg",
+  "/hero images/_DSC3355.jpg",
+  "/hero images/DB_02521.jpg",
+];
 
 export default function LandingHeroSection({
   heroImage,
@@ -20,56 +33,161 @@ export default function LandingHeroSection({
   const FALLBACK_IMAGE =
     "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1000&q=80";
 
-  const heroArtwork = heroImage || FALLBACK_IMAGE;
-  const heroDescription =
-    "Electronic music producer crafting atmospheric soundscapes that blend melodic house with ambient textures. Based in Los Angeles, touring worldwide.";
+  // Find initial index by matching filename
+  const getInitialIndex = () => {
+    const heroFilename = heroImage.split('/').pop() || '';
+    const foundIndex = HERO_IMAGES.findIndex((img) => img.includes(heroFilename));
+    return foundIndex >= 0 ? foundIndex : 0;
+  };
+  
+  const [currentImageIndex, setCurrentImageIndex] = useState(() => getInitialIndex());
+  const [buttonsOpacity, setButtonsOpacity] = useState(1);
+  const sectionRef = useRef<HTMLElement>(null);
+  const heroArtwork = HERO_IMAGES[currentImageIndex] || FALLBACK_IMAGE;
 
-  const handleSmoothScroll = (target: string) => {
-    const el = document.getElementById(target);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+  // Load saved index from localStorage on mount
+  useEffect(() => {
+    const savedIndex = localStorage.getItem('hero-carousel-index');
+    if (savedIndex !== null) {
+      const parsedIndex = parseInt(savedIndex, 10);
+      if (!isNaN(parsedIndex) && parsedIndex >= 0 && parsedIndex < HERO_IMAGES.length) {
+        setCurrentImageIndex(parsedIndex);
+      }
     }
+  }, []);
+
+  const handlePrevious = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? HERO_IMAGES.length - 1 : prev - 1));
   };
 
+  const handleNext = () => {
+    setCurrentImageIndex((prev) => (prev === HERO_IMAGES.length - 1 ? 0 : prev + 1));
+  };
+
+  // Save current image index to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('hero-carousel-index', currentImageIndex.toString());
+  }, [currentImageIndex]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+
+      const rect = sectionRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      
+      // Calculate opacity based on how much of the hero section is still visible
+      // Start fading earlier and complete faster
+      const heroBottom = rect.bottom;
+      const fadeStart = viewportHeight * 1.1; // Start fading when hero bottom is at 110% of viewport (slightly above)
+      const fadeEnd = viewportHeight * 0.7; // Fully faded when hero bottom is at 70% of viewport (smaller range = faster fade)
+      
+      let opacity = 1;
+      
+      if (heroBottom < fadeStart) {
+        // Calculate opacity: 1 at fadeStart, 0 when heroBottom reaches fadeEnd
+        const fadeRange = fadeStart - fadeEnd;
+        const scrolledPast = fadeStart - heroBottom;
+        opacity = Math.max(0, 1 - (scrolledPast / fadeRange));
+      }
+      
+      setButtonsOpacity(opacity);
+    };
+
+    handleScroll(); // Initial check
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+  const releaseTitle = featuredAlbum?.title ?? albums[0]?.title ?? "New Horizons";
+  const releaseLabel = featuredAlbum?.labelName ?? "Independent Release";
+  const releaseMeta =
+    featuredAlbum?.release_date ??
+    events[0]?.date ??
+    new Date().toISOString();
+  const formattedMeta = new Date(releaseMeta).toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
+
   return (
-    <section className="min-h-screen flex items-center pt-20 px-6">
-      <div className="container mx-auto px-0 md:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <h1 className="text-6xl lg:text-7xl font-bold text-gradient-sunset leading-tight">
-                Mihai Pol
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                Music for long drives and late sunsets.
-              </p>
-              <p className="text-base text-muted-foreground max-w-xl">{heroDescription}</p>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              <Button variant="hero" size="lg" className="group" style={{ borderRadius: "1rem" }}>
-                <Music className="w-4 h-4" />
-                Listen to latest release
-              </Button>
-              <Button
-                variant="ghost"
-                size="lg"
-                className="hover:text-accent-foreground hover:bg-accent/50"
-                style={{ borderRadius: "1rem" }}
-                onClick={() => handleSmoothScroll("albums")}
-              >
-                Explore discography
-              </Button>
+    <section ref={sectionRef} className="relative min-h-screen w-full overflow-hidden">
+      {/* Full width image - glued to top with fade at bottom */}
+      <div className="absolute inset-0 w-full h-full">
+        <img
+          src={heroArtwork}
+          alt={releaseTitle}
+          className="w-full h-full object-cover"
+          style={{
+            maskImage: "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.15) 80%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.15) 80%, transparent 100%)",
+          }}
+        />
+        {/* Logo overlay - blended as texture/shadow */}
+        <div className="absolute bottom-[205px] left-[100px] pointer-events-none hidden md:block">
+          <img
+            src="/griffithblack.svg"
+            alt="Griffith Logo"
+            className="w-[400px] h-[400px] opacity-[0.08] mix-blend-overlay"
+            style={{
+              filter: "invert(1) brightness(1.2)",
+            }}
+          />
+        </div>
+      </div>
+      
+      {/* Overlay content on top of image */}
+      <div className="relative z-10 w-full h-full min-h-screen flex flex-col">
+        {/* Container matching Navbar constraints - full height */}
+        <div className="relative flex-1 w-full max-w-[1536px] mx-auto px-6 md:px-6 lg:px-6 h-full">
+          {/* Vertical text on the right side - centered vertically */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center pr-6 md:pr-6 lg:pr-6">
+            <div className="text-[0.6rem] uppercase tracking-[0.6em] text-white/70 rotate-180 whitespace-nowrap" style={{ writingMode: "vertical-rl" }}>
+              Mihai Pol — live edits in motion
             </div>
           </div>
-          <div className="relative">
-            <div className="relative rounded-3xl overflow-hidden shadow-card-hover animate-float">
-              <img src={heroArtwork} alt="Hero artwork" className="w-full h-auto object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
+
+          {/* Text content overlay - positioned at bottom, aligned with container padding */}
+          <div className="absolute bottom-12 left-0 right-0 flex items-end px-6 md:px-6 lg:px-6">
+            {/* Release metadata */}
+            <div className="space-y-3 text-white max-w-xl">
+              <p className="text-xs uppercase tracking-[0.4em] text-white/80">
+                {releaseLabel}
+              </p>
+              <h2 className="text-3xl md:text-4xl font-semibold text-white">{releaseTitle}</h2>
+              <p className="text-sm tracking-[0.2em] uppercase text-white/70">
+                {formattedMeta}
+              </p>
             </div>
-            <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-primary/30 rounded-full blur-2xl -z-10" />
+          </div>
+
+          {/* Carousel navigation buttons - bottom right, aligned with container padding */}
+          <div 
+            className="absolute bottom-12 right-0 flex items-center gap-4 z-20 transition-opacity duration-500 pr-6 md:pr-6 lg:pr-6"
+            style={{ opacity: buttonsOpacity, pointerEvents: buttonsOpacity > 0 ? 'auto' : 'none' }}
+          >
+          <button
+            onClick={handlePrevious}
+            className="text-white/80 hover:text-white transition-colors flex items-center gap-1.5 text-sm font-medium bg-transparent border-none cursor-pointer"
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">PREV</span>
+          </button>
+          <button
+            onClick={handleNext}
+            className="text-white/80 hover:text-white transition-colors flex items-center gap-1.5 text-sm font-medium bg-transparent border-none cursor-pointer"
+            aria-label="Next image"
+          >
+            <span className="hidden md:inline">NEXT</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
           </div>
         </div>
       </div>
+      
     </section>
   );
 }

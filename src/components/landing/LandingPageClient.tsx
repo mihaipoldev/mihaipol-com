@@ -1,6 +1,7 @@
 "use client";
 
 import LandingHeroSection from "./sections/LandingHeroSection";
+import LandingFeatureMusicSection from "./sections/LandingFeatureMusicSection";
 import LandingAlbumsSection from "./sections/LandingAlbumsSection";
 import LandingEventsSection from "./sections/LandingEventsSection";
 import LandingGriffithSection from "./sections/LandingGriffithSection";
@@ -16,6 +17,7 @@ type LandingPageClientProps = {
   updates: LandingUpdate[];
   featuredAlbum: LandingAlbum | null;
   heroImage: string;
+  griffithLabelSlug: string;
 };
 
 export default function LandingPageClient({
@@ -24,6 +26,7 @@ export default function LandingPageClient({
   updates,
   featuredAlbum,
   heroImage,
+  griffithLabelSlug,
 }: LandingPageClientProps) {
   const featured = featuredAlbum ?? albums[0] ?? null;
 
@@ -40,9 +43,9 @@ export default function LandingPageClient({
 
       <LandingAlbumsSection albums={albums} fallbackImage={FALLBACK_IMAGE} />
 
-      <LandingGriffithSection featuredAlbum={featured} fallbackImage={FALLBACK_IMAGE} />
+      <LandingGriffithSection featuredAlbum={featuredAlbum} fallbackImage={FALLBACK_IMAGE} griffithLabelSlug={griffithLabelSlug} />
 
-      <LandingUpdatesSection updates={updates} fallbackImage={FALLBACK_IMAGE} />
+      <LandingUpdatesSection updates={updates} fallbackImage={FALLBACK_IMAGE} variant="compact" />
     </>
   );
 }
