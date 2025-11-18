@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import PageTransition from "@/components/layout/PageTransition";
 import LandingFooter from "@/components/landing/LandingFooter";
 import LandingHeader from "@/components/landing/LandingHeader";
-import ThemeToggle from "@/components/theme/ThemeToggle";
 
 type ConditionalDevLayoutProps = {
   children: ReactNode;
@@ -39,9 +38,6 @@ function SimpleHeader() {
         >
           Mihai Pol
         </Link>
-        <div className="relative z-10">
-          <ThemeToggle />
-        </div>
       </div>
     </header>
   );
@@ -57,7 +53,7 @@ export default function ConditionalDevLayout({ children }: ConditionalDevLayoutP
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background preset-landing-page-22 relative">
+    <div className="flex min-h-dvh flex-col bg-background preset-landing-page-22 relative">
       {/* Animated Background */}
       <div
         className="fixed inset-0 bg-gradient-sunset opacity-10 animate-gradient-shift"

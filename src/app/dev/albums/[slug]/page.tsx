@@ -4,8 +4,7 @@ import TrackView from "@/features/smart-links/analytics/components/TrackView";
 import LinksLogger from "@/components/dev/LinksLogger";
 import { SmartLinksLanding } from "@/features/smart-links";
 import AlbumGradientBackground from "@/components/landing/AlbumGradientBackground";
-import AlbumFooter from "@/components/landing/AlbumFooter";
-import React from "react";
+import AlbumFooterWithColors from "./AlbumFooterWithColors";
 
 export const dynamic = "force-dynamic";
 
@@ -33,13 +32,15 @@ export default async function AlbumDetailPage({ params }: AlbumDetailPageProps) 
         metadata={{ album_slug: album.slug, path: `/dev/albums/${album.slug}` }}
       />
       <LinksLogger value={links} label="Album links" />
-      <div className="flex-1 relative z-10 overflow-y-auto min-h-0">
-        <div className="min-h-full flex flex-col">
-          <div className="flex-1 flex items-center justify-center">
-            <SmartLinksLanding album={album} links={links} />
+      <div className="flex-1 relative z-10 min-h-0 flex flex-col">
+        <div className="flex flex-col items-center px-4 flex-1">
+          <div className="w-full max-w-sm mx-auto py-6">
+            <div className="flex flex-col">
+              <SmartLinksLanding album={album} links={links} />
+            </div>
           </div>
-          <AlbumFooter />
         </div>
+        <AlbumFooterWithColors />
       </div>
     </AlbumGradientBackground>
   );

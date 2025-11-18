@@ -10,9 +10,9 @@ export default async function UpdatesPage() {
   const updates = await getAllUpdates();
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       <div className="py-24 px-6">
-        <div className="container mx-auto px-8">
+        <div className="container mx-auto px-0 md:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">Updates</h1>
             <p className="text-muted-foreground">Latest news and announcements.</p>

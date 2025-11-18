@@ -398,7 +398,7 @@ export default function AlbumGradientBackground({
         )}
 
         <div
-          className={`fixed inset-0 z-[100] h-screen flex flex-col`}
+          className={`fixed inset-0 z-[100] h-screen flex flex-col overflow-y-auto`}
           style={{ background: "transparent" }}
         >
           {children}
@@ -430,7 +430,7 @@ export default function AlbumGradientBackground({
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
-                filter: "blur(100px) brightness(1.5)",
+                filter: "blur(60px) brightness(1.5)",
                 transform: "scale(2)", // Scale up to avoid blur edges
                 opacity: 0.5,
               }}
@@ -438,7 +438,7 @@ export default function AlbumGradientBackground({
           )}
 
       <div
-        className="fixed inset-0 z-[100] h-screen flex flex-col"
+        className="fixed inset-0 z-[100] min-h-dvh flex flex-col overflow-y-auto"
         style={{ background: "transparent" }}
       >
         {children}

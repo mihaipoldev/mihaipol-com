@@ -11,7 +11,7 @@ type LandingAlbumItemProps = {
 export default function LandingAlbumItem({ album, fallbackImage, isCircular = false }: LandingAlbumItemProps) {
   const albumType = (album.album_type ?? "Single").toUpperCase();
   const releaseInfo = album.release_date
-    ? new Intl.DateTimeFormat("en", { month: "short", year: "numeric" }).format(
+    ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(
         new Date(album.release_date)
       )
     : "Release TBA";

@@ -38,7 +38,9 @@ export type AnalyticsData = {
   topCountries: CountryRow[];
 };
 
-const MAX_ROWS = 5000;
+// Limit to last 90 days for analytics queries to improve performance
+const ANALYTICS_LOOKBACK_DAYS = 90;
+const MAX_ANALYTICS_ROWS = 10000; // Increased but with date filtering
 
 function toDayKey(d: string): string {
   const date = new Date(d);
@@ -49,16 +51,45 @@ function toDayKey(d: string): string {
 }
 
 export async function getAnalyticsData(): Promise<AnalyticsData> {
+  const startTime = performance.now();
   const supabase = getServiceSupabaseClient();
 
-  // Fetch base reference data
-  const [{ data: albums = [] }, { data: platforms = [] }] = await Promise.all([
+  // Calculate date boundaries for filtering
+  const now = new Date();
+  const lookbackDate = new Date(now.getTime() - ANALYTICS_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+  const lookbackISO = lookbackDate.toISOString();
+  
+  // For daily series, we only need last 30 days
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
+
+  console.log("[Analytics] Starting data fetch...");
+  console.log(`[Analytics] Date range: ${lookbackISO} to ${now.toISOString()}`);
+
+  // Fetch base reference data and album links in parallel
+  const refDataStart = performance.now();
+  const [
+    { data: albums = [] },
+    { data: platforms = [] },
+    { data: albumLinks = [] },
+  ] = await Promise.all([
     supabase.from("albums").select("id, title, slug, cover_image_url"),
     supabase.from("platforms").select("id, name, icon_url"),
+    supabase.from("album_links").select("id, album_id, platform_id"),
   ]);
+  const refDataTime = performance.now() - refDataStart;
+  console.log(`[Analytics] Reference data fetch: ${refDataTime.toFixed(2)}ms (albums: ${albums?.length || 0}, platforms: ${platforms?.length || 0}, links: ${albumLinks?.length || 0})`);
 
-  // Totals with lightweight head requests
-  // Use page_view for website visits (actual page views)
+  // Build album_link lookup maps early
+  const albumIdByLinkId = new Map<string, string>();
+  const platformIdByLinkId = new Map<string, string | null>();
+  for (const l of (albumLinks ?? []) as any[]) {
+    albumIdByLinkId.set(l.id, l.album_id);
+    platformIdByLinkId.set(l.id, l.platform_id);
+  }
+
+  // Totals with lightweight head requests (no date filter needed for totals)
+  const totalsStart = performance.now();
   const [pageViewsHead, linkClicksHead] = await Promise.all([
     supabase
       .from("analytics_events")
@@ -69,98 +100,127 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
       .select("*", { count: "exact", head: true })
       .eq("event_type", "link_click"),
   ]);
-
+  const totalsTime = performance.now() - totalsStart;
   const totalPageViews = pageViewsHead.count || 0;
   const totalServiceClicks = linkClicksHead.count || 0;
+  console.log(`[Analytics] Totals fetch: ${totalsTime.toFixed(2)}ms (page views: ${totalPageViews}, clicks: ${totalServiceClicks})`);
 
-  // For grouped stats, fetch a capped set and reduce in memory (MVP).
-  const sinceISO = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  // Optimized queries with date filtering and better selectivity
+  // Only fetch data from the last 90 days to reduce data transfer
+  const analyticsQueriesStart = performance.now();
   const [
     { data: albumPageViews = [] },
     { data: linkClicks = [] },
     { data: eventsForGeo = [] },
     { data: recentEvents = [] },
   ] = await Promise.all([
+    // Album page views - only last 90 days, filtered by type
     supabase
       .from("analytics_events")
       .select("entity_id")
       .eq("event_type", "page_view")
       .eq("entity_type", "album")
+      .gte("created_at", lookbackISO)
       .order("created_at", { ascending: false })
-      .range(0, MAX_ROWS - 1),
+      .limit(MAX_ANALYTICS_ROWS),
+    // Link clicks - only last 90 days
     supabase
       .from("analytics_events")
       .select("entity_id, entity_type, metadata")
       .eq("event_type", "link_click")
+      .gte("created_at", lookbackISO)
       .order("created_at", { ascending: false })
-      .range(0, MAX_ROWS - 1),
+      .limit(MAX_ANALYTICS_ROWS),
+    // Geo data - only last 90 days, only where country is not null
     supabase
       .from("analytics_events")
       .select("country")
+      .not("country", "is", null)
+      .gte("created_at", lookbackISO)
       .order("created_at", { ascending: false })
-      .range(0, MAX_ROWS - 1),
+      .limit(MAX_ANALYTICS_ROWS),
+    // Daily series data - only last 30 days, only page_view and link_click
     supabase
       .from("analytics_events")
-      .select("created_at, event_type, entity_type")
-      .gte("created_at", sinceISO)
+      .select("created_at, event_type")
+      .gte("created_at", thirtyDaysAgoISO)
+      .in("event_type", ["page_view", "link_click"])
       .order("created_at", { ascending: true })
-      .range(0, MAX_ROWS - 1),
+      .limit(MAX_ANALYTICS_ROWS),
   ]);
+  const analyticsQueriesTime = performance.now() - analyticsQueriesStart;
+  console.log(`[Analytics] Analytics queries: ${analyticsQueriesTime.toFixed(2)}ms`);
+  console.log(`[Analytics]   - Album page views: ${albumPageViews?.length || 0} rows`);
+  console.log(`[Analytics]   - Link clicks: ${linkClicks?.length || 0} rows`);
+  console.log(`[Analytics]   - Geo events: ${eventsForGeo?.length || 0} rows`);
+  console.log(`[Analytics]   - Recent events (30d): ${recentEvents?.length || 0} rows`);
 
   // Ensure non-null arrays for type safety
+  const processingStart = performance.now();
   const albumsSafe = (albums ?? []) as any[];
   const platformsSafe = (platforms ?? []) as any[];
   const albumPageViewsSafe = (albumPageViews ?? []) as any[];
   const linkClicksSafe = (linkClicks ?? []) as any[];
   const eventsForGeoSafe = (eventsForGeo ?? []) as any[];
 
-  // Build maps
+  // Build maps efficiently
+  const mapBuildingStart = performance.now();
   const viewsByAlbumId: CountMap = albumPageViewsSafe.reduce((acc: CountMap, row: any) => {
     acc[row.entity_id] = (acc[row.entity_id] || 0) + 1;
     return acc;
   }, {});
 
-  // We need to map album_link -> album_id & platform
-  const { data: albumLinks = [] } = await supabase
-    .from("album_links")
-    .select("id, album_id, platform_id");
-  const albumIdByLinkId = new Map<string, string>();
-  const platformIdByLinkId = new Map<string, string | null>();
-  for (const l of albumLinks as any[]) {
-    albumIdByLinkId.set(l.id, l.album_id);
-    platformIdByLinkId.set(l.id, l.platform_id);
-  }
-
   const clicksByAlbumId: CountMap = {};
   const clicksByPlatformId: CountMap = {};
+  let albumLinkClicksCount = 0;
+  let unmappedAlbumLinkClicks = 0;
+  const unmappedLinkIds = new Set<string>();
+  
   for (const ev of linkClicksSafe as any[]) {
     const entityType = ev.entity_type as string;
     const entityId = ev.entity_id as string;
     
     // Handle album_link clicks (existing logic)
     if (entityType === "album_link") {
+      albumLinkClicksCount++;
       const albumId = albumIdByLinkId.get(entityId);
       const platformId = platformIdByLinkId.get(entityId);
-      if (albumId) clicksByAlbumId[albumId] = (clicksByAlbumId[albumId] || 0) + 1;
-      if (platformId) clicksByPlatformId[platformId] = (clicksByPlatformId[platformId] || 0) + 1;
+      if (albumId) {
+        clicksByAlbumId[albumId] = (clicksByAlbumId[albumId] || 0) + 1;
+      } else {
+        unmappedAlbumLinkClicks++;
+        unmappedLinkIds.add(entityId);
+      }
+      if (platformId) {
+        clicksByPlatformId[platformId] = (clicksByPlatformId[platformId] || 0) + 1;
+      }
     }
     // Note: event_link and update_link clicks are tracked but not aggregated into album/platform stats
     // They could be added to separate stats if needed in the future
   }
+  const mapBuildingTime = performance.now() - mapBuildingStart;
+  console.log(`[Analytics] Map building: ${mapBuildingTime.toFixed(2)}ms`);
+  console.log(`[Analytics]   - Unique albums with views: ${Object.keys(viewsByAlbumId).length}`);
+  console.log(`[Analytics]   - Unique albums with clicks: ${Object.keys(clicksByAlbumId).length}`);
+  console.log(`[Analytics]   - Unique platforms with clicks: ${Object.keys(clicksByPlatformId).length}`);
+  console.log(`[Analytics]   - Album link clicks: ${albumLinkClicksCount} (mapped: ${albumLinkClicksCount - unmappedAlbumLinkClicks}, unmapped: ${unmappedAlbumLinkClicks})`);
+  if (unmappedAlbumLinkClicks > 0) {
+    console.log(`[Analytics]   - Unmapped link IDs (sample): ${Array.from(unmappedLinkIds).slice(0, 5).join(", ")}`);
+    console.log(`[Analytics]   - Note: Unmapped clicks may be from deleted album_links or links outside the 90-day window`);
+  }
 
-  const topCountries: CountryRow[] = [];
+  // Build country stats
   const countryMap: CountMap = {};
   for (const ev of eventsForGeoSafe as any[]) {
     const c = ev.country || "Unknown";
     countryMap[c] = (countryMap[c] || 0) + 1;
   }
-  for (const [country, count] of Object.entries(countryMap)) {
-    topCountries.push({ country, count });
-  }
-  topCountries.sort((a, b) => b.count - a.count);
+  const topCountries: CountryRow[] = Object.entries(countryMap)
+    .map(([country, count]) => ({ country, count }))
+    .sort((a, b) => b.count - a.count);
 
   // Build daily series (last 30 days) for page visits and service clicks
-  // Use page_view events for visits (actual page views)
+  const seriesStart = performance.now();
   const dayStart = new Date();
   dayStart.setUTCHours(0, 0, 0, 0);
   const startTs = dayStart.getTime() - 29 * 24 * 60 * 60 * 1000;
@@ -171,7 +231,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   }
   const visitsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
   const clicksByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
-  for (const ev of recentEvents as any[]) {
+  for (const ev of (recentEvents ?? []) as any[]) {
     const key = toDayKey(ev.created_at);
     if (!(key in visitsByDay)) continue;
     if (ev.event_type === "page_view") {
@@ -182,8 +242,11 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   }
   const visitsSeries = dayKeys.map((k) => ({ date: k, count: visitsByDay[k] || 0 }));
   const clicksSeries = dayKeys.map((k) => ({ date: k, count: clicksByDay[k] || 0 }));
+  const seriesTime = performance.now() - seriesStart;
+  console.log(`[Analytics] Daily series building: ${seriesTime.toFixed(2)}ms`);
 
   // Build per-album rows
+  const rowsStart = performance.now();
   const perAlbumRows = albumsSafe
     .map((a: any) => {
       const pv = viewsByAlbumId[a.id] || 0;
@@ -207,6 +270,16 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     .map((p: any) => ({ name: p.name, iconUrl: p.icon_url, clicks: clicksByPlatformId[p.id] || 0 }))
     .filter((r) => r.clicks > 0)
     .sort((a, b) => b.clicks - a.clicks);
+  const rowsTime = performance.now() - rowsStart;
+  console.log(`[Analytics] Row building: ${rowsTime.toFixed(2)}ms (albums: ${perAlbumRows.length}, platforms: ${perPlatformRows.length}, countries: ${topCountries.length})`);
+
+  const processingTime = performance.now() - processingStart;
+  const totalTime = performance.now() - startTime;
+  
+  console.log(`[Analytics] Data processing: ${processingTime.toFixed(2)}ms`);
+  console.log(`[Analytics] ========================================`);
+  console.log(`[Analytics] TOTAL TIME: ${totalTime.toFixed(2)}ms (${(totalTime / 1000).toFixed(2)}s)`);
+  console.log(`[Analytics] ========================================`);
 
   return {
     totalPageViews,

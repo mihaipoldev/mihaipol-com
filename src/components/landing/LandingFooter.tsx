@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const socialLinks = [
   { name: "Instagram", url: "https://www.instagram.com/mihaipol/" },
@@ -16,7 +17,7 @@ const socialLinks = [
 
 export default function LandingFooter() {
   return (
-    <footer className="relative py-12 px-6 overflow-hidden">
+    <footer id="contact" className="relative py-12 px-6 overflow-hidden">
         {/* Logo overlay - subtle texture */}
         <div className="absolute top-[-50px] left-[-40px] pointer-events-none z-0">
         <img
@@ -80,20 +81,35 @@ export default function LandingFooter() {
           {/* Divider */}
           <div className="w-16 h-px bg-border/30 mx-auto mb-6" />
           
-          <div className="flex flex-wrap gap-4 justify-center mb-8">
-            {socialLinks.map((social) => (
-              <Button
-                key={social.name}
-                variant="ghost"
-                size="sm"
-                style={{ borderRadius: "0.75rem" }}
-                asChild
-              >
-                <Link href={social.url} target="_blank" rel="noreferrer">
-                  {social.name}
-                </Link>
-              </Button>
-            ))}
+          <div className="grid grid-cols-3 md:flex md:flex-wrap gap-4 justify-items-center md:justify-center mb-8">
+            {socialLinks.map((social, index) => {
+              const isLastItem = index === socialLinks.length - 1;
+              const hasRemainder = socialLinks.length % 3 !== 0;
+              const shouldCenter = isLastItem && hasRemainder;
+              
+              return (
+                <div
+                  key={social.name}
+                  className={cn(
+                    "md:contents",
+                    shouldCenter && "col-start-2 md:col-start-auto"
+                  )}
+                  style={shouldCenter ? { gridColumnStart: 2 } : undefined}
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    style={{ borderRadius: "0.75rem" }}
+                    className="md:w-auto w-full justify-center"
+                    asChild
+                  >
+                    <Link href={social.url} target="_blank" rel="noreferrer">
+                      {social.name}
+                    </Link>
+                  </Button>
+                </div>
+              );
+            })}
           </div>
           <div className="text-center text-sm text-muted-foreground border-t border-border/50 pt-6">
             © {new Date().getFullYear()} Mihai Pol · Griffith Records

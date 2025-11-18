@@ -1,6 +1,7 @@
 import { getAllAlbums } from "@/features/albums/data";
 import { getLabelBySlug } from "@/features/labels/data";
 import LandingAlbumsList from "@/components/landing/lists/LandingAlbumsList";
+import type { LandingAlbum } from "@/components/landing/types";
 
 export const dynamic = "force-dynamic";
 
@@ -19,26 +20,64 @@ export default async function AlbumsPage({ searchParams }: AlbumsPageProps) {
   const label = labelSlug ? await getLabelBySlug(labelSlug) : null;
   const albums = await getAllAlbums(undefined, labelSlug);
 
+  // Separate albums by release date status
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Start of today for accurate comparison
+
+  const noDateAlbums: LandingAlbum[] = [];
+  const upcomingAlbums: LandingAlbum[] = [];
+  const pastAlbums: LandingAlbum[] = [];
+
+  albums.forEach((album) => {
+    if (!album.release_date) {
+      // Albums without release dates come first
+      noDateAlbums.push(album);
+    } else {
+      const releaseDate = new Date(album.release_date);
+      releaseDate.setHours(0, 0, 0, 0);
+      if (releaseDate >= today) {
+        upcomingAlbums.push(album);
+      } else {
+        pastAlbums.push(album);
+      }
+    }
+  });
+
+  // Sort upcoming albums by date ascending (earliest first)
+  upcomingAlbums.sort((a, b) => {
+    if (!a.release_date || !b.release_date) return 0;
+    return new Date(a.release_date).getTime() - new Date(b.release_date).getTime();
+  });
+
+  // Sort past albums by date descending (most recent first)
+  pastAlbums.sort((a, b) => {
+    if (!a.release_date || !b.release_date) return 0;
+    return new Date(b.release_date).getTime() - new Date(a.release_date).getTime();
+  });
+
+  // Combine: no date first, then upcoming, then past
+  const sortedAlbums = [...noDateAlbums, ...upcomingAlbums, ...pastAlbums];
+
   const pageTitle = label ? label.name : "Discography";
   const pageDescription = label 
     ? `Releases from ${label.name}.`
     : "All releases and collections.";
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       <div className="py-24 px-6">
-        <div className="container mx-auto px-8">
+        <div className="container mx-auto px-0 md:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">{pageTitle}</h1>
             <p className="text-muted-foreground">{pageDescription}</p>
           </div>
 
-          {albums.length === 0 ? (
+          {sortedAlbums.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-muted-foreground">No albums yet. Check back soon.</p>
             </div>
           ) : (
-            <LandingAlbumsList albums={albums} fallbackImage={FALLBACK_IMAGE} />
+            <LandingAlbumsList albums={sortedAlbums} fallbackImage={FALLBACK_IMAGE} columns={4} />
           )}
         </div>
       </div>

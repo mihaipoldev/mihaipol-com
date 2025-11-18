@@ -22,11 +22,83 @@ export function PerformanceMonitor() {
       originalLog(...args);
 
       const message = args.join(" ");
+      
+      // Capture [DB] query logs
       if (message.includes("[DB]")) {
         const match = message.match(/(\d+)ms/);
         if (match) {
           const duration = parseInt(match[1]);
           const name = message.split("query")[0]?.replace("🔍 [DB]", "").trim() || "Unknown";
+
+          setMetrics((prev) => [
+            ...prev.slice(-19), // Keep last 20
+            { name, duration, timestamp: Date.now() },
+          ]);
+        }
+      }
+      
+      // Capture [Analytics] performance logs
+      if (message.includes("[Analytics]") && message.includes("ms")) {
+        const match = message.match(/(\d+\.?\d*)ms/);
+        if (match) {
+          const duration = Math.round(parseFloat(match[1]));
+          let name = message.split(":")[0]?.replace("[Analytics]", "").trim() || "Analytics";
+          
+          // Extract more context for analytics logs
+          if (message.includes("TOTAL TIME")) {
+            name = "Analytics - TOTAL";
+          } else if (message.includes("Analytics queries")) {
+            name = "Analytics - Queries";
+          } else if (message.includes("Reference data")) {
+            name = "Analytics - Reference Data";
+          } else if (message.includes("Totals fetch")) {
+            name = "Analytics - Totals";
+          } else if (message.includes("Map building")) {
+            name = "Analytics - Map Building";
+          } else if (message.includes("Daily series")) {
+            name = "Analytics - Daily Series";
+          } else if (message.includes("Row building")) {
+            name = "Analytics - Row Building";
+          } else if (message.includes("Data processing")) {
+            name = "Analytics - Processing";
+          }
+
+          setMetrics((prev) => [
+            ...prev.slice(-19), // Keep last 20
+            { name, duration, timestamp: Date.now() },
+          ]);
+        }
+      }
+      
+      // Capture [Dashboard] performance logs
+      if (message.includes("[Dashboard]") && message.includes("ms")) {
+        const match = message.match(/(\d+\.?\d*)ms/);
+        if (match) {
+          const duration = Math.round(parseFloat(match[1]));
+          let name = message.split(":")[0]?.replace("[Dashboard]", "").trim() || "Dashboard";
+          
+          // Extract more context for dashboard logs
+          if (message.includes("TOTAL TIME")) {
+            name = "Dashboard - TOTAL";
+          } else if (message.includes("Top pages queries")) {
+            name = "Dashboard - Top Pages";
+          } else if (message.includes("Albums stats")) {
+            name = "Dashboard - Albums Stats";
+          } else if (message.includes("Events stats")) {
+            name = "Dashboard - Events Stats";
+          } else if (message.includes("Updates stats")) {
+            name = "Dashboard - Updates Stats";
+          } else if (message.includes("Website visits")) {
+            name = "Dashboard - Website Visits";
+          } else if (message.includes("Section item visits")) {
+            name = "Dashboard - Item Visits";
+          } else if (message.includes("Section clicks")) {
+            name = "Dashboard - Section Clicks";
+          } else if (message.includes("Entities fetch")) {
+            name = "Dashboard - Entities";
+          } else if (message.includes("Data processing")) {
+            name = "Dashboard - Processing";
+          }
 
           setMetrics((prev) => [
             ...prev.slice(-19), // Keep last 20

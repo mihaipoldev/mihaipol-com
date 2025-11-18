@@ -7,9 +7,9 @@ export default async function EventsPage() {
   const events = await getAllEvents();
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       <div className="py-24 px-6">
-        <div className="container mx-auto px-8">
+        <div className="container mx-auto px-0 md:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">Upcoming Events</h1>
             <p className="text-muted-foreground">Catch Mihai on tour.</p>

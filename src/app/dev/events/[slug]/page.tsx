@@ -41,7 +41,7 @@ export default async function EventPage({ params }: EventPageProps) {
     : null;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       <TrackView
         eventType="page_view"
         entityType="event"
@@ -49,7 +49,7 @@ export default async function EventPage({ params }: EventPageProps) {
         metadata={{ event_slug: event.slug, path: `/dev/events/${event.slug}` }}
       />
       <div className="py-24 px-6">
-        <div className="container mx-auto px-8 max-w-5xl">
+        <div className="container mx-auto px-0 md:px-8 max-w-5xl">
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">

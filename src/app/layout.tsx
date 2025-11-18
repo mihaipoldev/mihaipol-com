@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AdminColorStyle } from "@/components/admin/AdminColorStyle";
 import { InstantColorApply } from "@/components/admin/InstantColorApply";
 import { QueryProvider } from "@/components/providers/QueryProvider";
-import { PublicThemeProvider } from "@/components/theme/PublicThemeProvider";
+import ViewportFix from "@/components/ViewportFix";
 import "@/lib/fontawesome";
 
 import "./globals.css";
@@ -22,6 +22,13 @@ export const metadata: Metadata = {
   description: "Music and creative works by Mihai Pol",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+};
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -34,28 +41,19 @@ export default async function RootLayout({
   const isRootPage = pathname === "/";
 
   return (
-    <html lang="en" suppressHydrationWarning className={getAllFontVariables()}>
+    <html lang="en" suppressHydrationWarning className={`dark ${getAllFontVariables()}`}>
       <body
         className="antialiased"
         suppressHydrationWarning
       >
+        <ViewportFix />
         {/* AdminColorStyle applies server-side color IMMEDIATELY from database (runs first) */}
         {isAdminPage && <AdminColorStyle />}
         {/* InstantColorApply applies color from sessionStorage as fallback (runs after, only if AdminColorStyle didn't apply) */}
         <InstantColorApply />
         <QueryProvider>
-          {/* Root page needs PublicThemeProvider since it has no layout wrapper */}
-          {isRootPage ? (
-            <PublicThemeProvider>
-              {children}
-              <Toaster />
-            </PublicThemeProvider>
-          ) : (
-            <>
-              {children}
-              <Toaster />
-            </>
-          )}
+          {children}
+          <Toaster />
         </QueryProvider>
       </body>
     </html>

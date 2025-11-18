@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-import ThemeToggle from "@/components/theme/ThemeToggle";
 
 const navLinks = [
   { href: "/dev/events", label: "Events" },
   { href: "/dev/albums", label: "Albums" },
   { href: "/dev/updates", label: "Updates" },
+  { href: "#contact", label: "Contact", isHash: true },
 ];
 
 export default function Navbar() {
@@ -30,11 +30,20 @@ export default function Navbar() {
         {/* Centered menu items */}
         <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-8 md:gap-10 text-base font-bold">
           {navLinks.map((link) => {
-            const isActive = pathname === link.href || (pathname?.startsWith(link.href + "/") && pathname !== link.href);
+            const isActive = link.isHash ? false : (pathname === link.href || (pathname?.startsWith(link.href + "/") && pathname !== link.href));
+            const handleClick = link.isHash ? (e: React.MouseEvent<HTMLAnchorElement>) => {
+              e.preventDefault();
+              const footer = document.getElementById("contact");
+              if (footer) {
+                footer.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            } : undefined;
+            
             return (
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={handleClick}
                 className={cn(
                   "transition-all duration-300 relative group py-2",
                   isActive
@@ -53,10 +62,6 @@ export default function Navbar() {
             );
           })}
         </nav>
-        {/* Theme toggle on the right */}
-        <div className="flex items-center">
-          <ThemeToggle />
-        </div>
       </div>
     </header>
   );

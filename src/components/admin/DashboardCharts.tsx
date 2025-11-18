@@ -1,6 +1,7 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 import { AdminMetricTab } from "@/components/admin/AdminMetricTab";
 import { AnalyticsLineChart } from "@/features/smart-links/analytics/components/AnalyticsLineChart";
 import { SectionClicksChart } from "./SectionClicksChart";
@@ -17,7 +18,7 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
   return (
     <div className="space-y-8">
       {/* Website Visits and Section Clicks Tabs */}
-      <div className="relative overflow-hidden shadow-lg rounded-xl">
+      <Card className="relative overflow-hidden shadow-lg transition-all duration-300">
         {/* Decorative gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
 
@@ -71,7 +72,7 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </Card>
 
       {/* Top Performing Pages Section */}
       <section className="space-y-3">

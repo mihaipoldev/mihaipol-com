@@ -39,7 +39,7 @@ export default async function UpdateDetailPage({ params }: UpdateDetailPageProps
     : null;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       <TrackView
         eventType="page_view"
         entityType="update"
@@ -47,7 +47,7 @@ export default async function UpdateDetailPage({ params }: UpdateDetailPageProps
         metadata={{ update_slug: update.slug, path: `/dev/updates/${update.slug}` }}
       />
       <div className="py-24 px-6">
-        <div className="container mx-auto px-8 max-w-4xl">
+        <div className="container mx-auto px-0 md:px-8 max-w-4xl">
           <div className="space-y-8">
             {/* Hero Image */}
             <div className="relative rounded-3xl overflow-hidden shadow-card-hover">

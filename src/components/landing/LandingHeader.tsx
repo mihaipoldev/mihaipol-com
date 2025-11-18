@@ -6,13 +6,13 @@ import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import ThemeToggle from "@/components/theme/ThemeToggle";
 
 const navLinks = [
   { label: "Events", target: "events" },
   { label: "Discography", target: "albums" },
   { label: "Griffith", target: "griffith" },
   { label: "Updates", target: "updates" },
+  { label: "Contact", target: "contact" },
 ];
 
 export default function LandingHeader() {
@@ -64,6 +64,19 @@ export default function LandingHeader() {
 
       const firstSectionTop = firstSection.getBoundingClientRect().top;
       const viewportHeight = window.innerHeight;
+      const scrollY = window.scrollY;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // Check if we're near the bottom of the page (within 200px) or footer is visible
+      const footer = document.getElementById("contact");
+      const isNearBottom = scrollY + viewportHeight >= documentHeight - 200;
+      const isFooterVisible = footer && footer.getBoundingClientRect().top < viewportHeight * 0.7;
+
+      // If we're at the bottom or footer is visible, set contact as active
+      if (isNearBottom || isFooterVisible) {
+        setActiveSection("contact");
+        return;
+      }
 
       // If we're above the first section (in hero), no section should be active
       if (firstSectionTop > viewportHeight * 0.4) {
@@ -76,6 +89,9 @@ export default function LandingHeader() {
       let maxVisibility = 0;
 
       navLinks.forEach((link) => {
+        // Skip contact as we handle it separately above
+        if (link.target === "contact") return;
+
         const el = document.getElementById(link.target);
         if (!el) return;
 
@@ -167,9 +183,6 @@ export default function LandingHeader() {
               </Button>
             ))}
           </nav>
-          <div className="flex items-center">
-            <ThemeToggle />
-          </div>
         </div>
       </div>
     </header>

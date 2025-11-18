@@ -185,7 +185,10 @@ export default function LandingHeroSection({
   });
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen w-full overflow-hidden">
+    <section 
+      ref={sectionRef} 
+      className="relative min-h-screen w-full overflow-hidden"
+    >
       {/* Full width image - glued to top with fade at bottom */}
       <div className="absolute inset-0 w-full h-full">
         {/* Current image - fades out during transition */}

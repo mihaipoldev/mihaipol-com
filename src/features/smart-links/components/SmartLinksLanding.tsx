@@ -38,7 +38,7 @@ export default function SmartLinksLanding({
 
       <div className="w-full px-4 py-4 sm:py-6">
         <div className="w-full max-w-sm mx-auto space-y-5 sm:space-y-6">
-          <div className="relative mx-auto w-full max-w-[360px] flex-shrink-0">
+          <div className="relative mx-auto w-full max-w-[180px] sm:max-w-[260px] flex-shrink-0">
             <CoverArt title={album.title} coverImageUrl={album.coverImageUrl} />
           </div>
 

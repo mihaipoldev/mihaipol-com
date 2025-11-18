@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mihaipol.app">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        
+        <!-- Source - https://stackoverflow.com/a/59918349 -->
+        <!-- Posted by Kirguduck, modified by community. See post 'Timeline' for change history -->
+        <!-- Retrieved 2025-11-18, License - CC BY-SA 4.0 -->
+        <meta-data android:name="android.max_aspect" android:value="2.1" />
+        
+    </application>
+
+</manifest>
+

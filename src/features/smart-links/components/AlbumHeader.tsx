@@ -13,7 +13,7 @@ export default function AlbumHeader({ title, artistName, catalog_number }: Album
 
   return (
     <div className="space-y-2 text-center">
-      <h1 className="text-2xl font-bold sm:text-3xl" style={{ color: textColor }}>
+      <h1 className="text-2xl font-bold sm:text-2xl" style={{ color: textColor }}>
         {artistName ? `${artistName} - ${title}` : title}
       </h1>
       {catalog_number ? (

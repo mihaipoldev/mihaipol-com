@@ -11,7 +11,7 @@ const GRIFFITH_LABEL_ID = "689e375f-e5eb-492c-8942-cc4723c9bc91";
 export default async function DevHomePage() {
   const [events, albums, updates, griffithAlbum, griffithLabel] = await Promise.all([
     getHomepageEvents(4),
-    getHomepageAlbums(3),
+    getHomepageAlbums(6),
     getHomepageUpdates(3),
     getLatestAlbumByLabelId(GRIFFITH_LABEL_ID),
     getLabelById(GRIFFITH_LABEL_ID),

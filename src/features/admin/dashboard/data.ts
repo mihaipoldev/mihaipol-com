@@ -68,6 +68,7 @@ function toDayKey(d: string): string {
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
+  const startTime = performance.now();
   const supabase = getServiceSupabaseClient();
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
@@ -78,7 +79,10 @@ export async function getDashboardData(): Promise<DashboardData> {
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
   const twelveMonthsAgoISO = twelveMonthsAgo.toISOString().split("T")[0];
 
+  console.log("[Dashboard] Starting data fetch...");
+
   // Fetch albums stats
+  const albumsStatsStart = performance.now();
   const [
     { count: totalAlbums },
     { count: upcomingAlbums },
@@ -97,6 +101,8 @@ export async function getDashboardData(): Promise<DashboardData> {
       .lt("release_date", todayISO),
     supabase.from("albums").select("album_type"),
   ]);
+  const albumsStatsTime = performance.now() - albumsStatsStart;
+  console.log(`[Dashboard] Albums stats: ${albumsStatsTime.toFixed(2)}ms`);
 
   // Calculate albums by type
   const albumsByTypeMap: Record<string, number> = {};
@@ -115,6 +121,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   };
 
   // Fetch events stats
+  const eventsStatsStart = performance.now();
   const [{ count: pastEvents }, { count: upcomingEvents }] = await Promise.all([
     supabase
       .from("events")
@@ -126,6 +133,8 @@ export async function getDashboardData(): Promise<DashboardData> {
       .eq("event_status", "upcoming")
       .gte("date", todayISO),
   ]);
+  const eventsStatsTime = performance.now() - eventsStatsStart;
+  console.log(`[Dashboard] Events stats: ${eventsStatsTime.toFixed(2)}ms`);
 
   const eventsStats: EventsStats = {
     past: pastEvents || 0,
@@ -133,10 +142,13 @@ export async function getDashboardData(): Promise<DashboardData> {
   };
 
   // Fetch updates stats
+  const updatesStatsStart = performance.now();
   const [{ count: totalUpdates }, { data: updatesByStatus }] = await Promise.all([
     supabase.from("updates").select("*", { count: "exact", head: true }),
     supabase.from("updates").select("publish_status"),
   ]);
+  const updatesStatsTime = performance.now() - updatesStatsStart;
+  console.log(`[Dashboard] Updates stats: ${updatesStatsTime.toFixed(2)}ms`);
 
   // Calculate updates by status
   const updatesByStatusMap: Record<string, number> = {};
@@ -152,24 +164,11 @@ export async function getDashboardData(): Promise<DashboardData> {
     byStatus: updatesByStatusMap,
   };
 
-  // Fetch analytics data for website visits (last 30 days)
-  // Use session_start events for website visits (one per session)
+  // OPTIMIZED: Fetch all analytics events we need in fewer queries, then distribute in memory
   const sinceISO = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const lookbackISO = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [{ count: totalPageViews }, { data: recentSessionStarts }] = await Promise.all([
-    supabase
-      .from("analytics_events")
-      .select("*", { count: "exact", head: true })
-      .eq("event_type", "session_start"),
-    supabase
-      .from("analytics_events")
-      .select("created_at")
-      .eq("event_type", "session_start")
-      .gte("created_at", sinceISO)
-      .order("created_at", { ascending: true }),
-  ]);
-
-  // Build daily series for website visits
+  // Prepare day keys for daily series (last 30 days)
   const dayStart = new Date();
   dayStart.setUTCHours(0, 0, 0, 0);
   const startTs = dayStart.getTime() - 29 * 24 * 60 * 60 * 1000;
@@ -178,69 +177,116 @@ export async function getDashboardData(): Promise<DashboardData> {
     const d = new Date(startTs + i * 24 * 60 * 60 * 1000);
     dayKeys.push(toDayKey(d.toISOString()));
   }
-  const visitsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
 
-  if (recentSessionStarts) {
-    for (const ev of recentSessionStarts) {
-      const key = toDayKey(ev.created_at);
-      if (key in visitsByDay) {
-        visitsByDay[key] += 1;
-      }
-    }
-  }
-
-  const websiteVisitsSeries = dayKeys.map((k) => ({
-    date: k,
-    count: visitsByDay[k] || 0,
-  }));
-
-  const websiteVisits: WebsiteVisitsData = {
-    total: totalPageViews || 0,
-    series: websiteVisitsSeries,
-  };
-
-  // Fetch section item visits data (page_view events for albums, events, updates - last 30 days)
-  const [{ count: totalItemViews }, { data: recentItemViews }] = await Promise.all([
+  const analyticsQueriesStart = performance.now();
+  // Fetch all analytics events we need in parallel - one query for 30-day data, one for 90-day data
+  const [
+    { data: recentEvents30dRaw }, // All events from last 30 days
+    { data: topPagesEvents90dRaw }, // Page views and link clicks from last 90 days
+    { count: totalSessionStarts }, // Total count for website visits
+    { count: totalItemViews }, // Total count for item views
+  ] = await Promise.all([
+    // Single query for all 30-day analytics: session_start, page_view (items), section_view
+    supabase
+      .from("analytics_events")
+      .select("created_at, event_type, entity_type, entity_id")
+      .gte("created_at", sinceISO)
+      .in("event_type", ["session_start", "page_view", "section_view"])
+      .order("created_at", { ascending: true }),
+    // Single query for 90-day top pages data: page_view and link_click
+    supabase
+      .from("analytics_events")
+      .select("created_at, event_type, entity_type, entity_id")
+      .gte("created_at", lookbackISO)
+      .in("event_type", ["page_view", "link_click"])
+      .order("created_at", { ascending: false })
+      .limit(10000),
+    // Total counts (these might be slow but run in parallel)
+    supabase
+      .from("analytics_events")
+      .select("*", { count: "exact", head: true })
+      .eq("event_type", "session_start"),
     supabase
       .from("analytics_events")
       .select("*", { count: "exact", head: true })
       .eq("event_type", "page_view")
       .in("entity_type", ["album", "event", "update"]),
-    supabase
-      .from("analytics_events")
-      .select("created_at, entity_type")
-      .eq("event_type", "page_view")
-      .in("entity_type", ["album", "event", "update"])
-      .gte("created_at", sinceISO)
-      .order("created_at", { ascending: true }),
   ]);
+  
+  // Ensure arrays are never null
+  const recentEvents30d = recentEvents30dRaw ?? [];
+  const topPagesEvents90d = topPagesEvents90dRaw ?? [];
+  
+  const analyticsQueriesTime = performance.now() - analyticsQueriesStart;
+  console.log(`[Dashboard] Analytics queries (consolidated): ${analyticsQueriesTime.toFixed(2)}ms`);
+  console.log(`[Dashboard]   - 30-day events: ${recentEvents30d.length} rows`);
+  console.log(`[Dashboard]   - 90-day top pages events: ${topPagesEvents90d.length} rows`);
 
-  // Build daily series for each entity type
-  const albumsItemVisitsByDay: Record<string, number> = Object.fromEntries(
-    dayKeys.map((k) => [k, 0])
+  // Process 30-day events in memory
+  const processing30dStart = performance.now();
+  
+  // Separate events by type
+  const sessionStarts = recentEvents30d.filter((e: any) => e.event_type === "session_start");
+  const itemPageViews = recentEvents30d.filter(
+    (e: any) => e.event_type === "page_view" && ["album", "event", "update"].includes(e.entity_type)
   );
-  const eventsItemVisitsByDay: Record<string, number> = Object.fromEntries(
-    dayKeys.map((k) => [k, 0])
-  );
-  const updatesItemVisitsByDay: Record<string, number> = Object.fromEntries(
-    dayKeys.map((k) => [k, 0])
+  const sectionViews = recentEvents30d.filter(
+    (e: any) => e.event_type === "section_view" && e.entity_type === "site_section"
   );
 
-  if (recentItemViews) {
-    for (const ev of recentItemViews) {
-      const key = toDayKey(ev.created_at);
-      if (!(key in albumsItemVisitsByDay)) continue;
-
-      const entityType = ev.entity_type as string;
-      if (entityType === "album") {
-        albumsItemVisitsByDay[key] += 1;
-      } else if (entityType === "event") {
-        eventsItemVisitsByDay[key] += 1;
-      } else if (entityType === "update") {
-        updatesItemVisitsByDay[key] += 1;
-      }
+  // Build website visits series
+  const visitsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
+  for (const ev of sessionStarts) {
+    const key = toDayKey(ev.created_at);
+    if (key in visitsByDay) {
+      visitsByDay[key] += 1;
     }
   }
+  const websiteVisitsSeries = dayKeys.map((k) => ({ date: k, count: visitsByDay[k] || 0 }));
+
+  // Build section item visits series
+  const albumsItemVisitsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
+  const eventsItemVisitsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
+  const updatesItemVisitsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
+
+  for (const ev of itemPageViews) {
+    const key = toDayKey(ev.created_at);
+    if (!(key in albumsItemVisitsByDay)) continue;
+    const entityType = ev.entity_type as string;
+    if (entityType === "album") {
+      albumsItemVisitsByDay[key] += 1;
+    } else if (entityType === "event") {
+      eventsItemVisitsByDay[key] += 1;
+    } else if (entityType === "update") {
+      updatesItemVisitsByDay[key] += 1;
+    }
+  }
+
+  // Build section clicks series
+  const albumsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
+  const updatesByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
+  const eventsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
+
+  for (const ev of sectionViews) {
+    const key = toDayKey(ev.created_at);
+    if (!(key in albumsByDay)) continue;
+    const entityId = ev.entity_id as string;
+    if (entityId === "albums") {
+      albumsByDay[key] += 1;
+    } else if (entityId === "updates") {
+      updatesByDay[key] += 1;
+    } else if (entityId === "events") {
+      eventsByDay[key] += 1;
+    }
+  }
+
+  const processing30dTime = performance.now() - processing30dStart;
+  console.log(`[Dashboard] 30-day data processing: ${processing30dTime.toFixed(2)}ms`);
+
+  const websiteVisits: WebsiteVisitsData = {
+    total: totalSessionStarts || 0,
+    series: websiteVisitsSeries,
+  };
 
   const sectionItemVisits: SectionItemVisitsData = {
     total: totalItemViews || 0,
@@ -249,92 +295,45 @@ export async function getDashboardData(): Promise<DashboardData> {
     updates: dayKeys.map((k) => ({ date: k, count: updatesItemVisitsByDay[k] || 0 })),
   };
 
-  // Fetch section clicks data (last 30 days)
-  const { data: sectionViews } = await supabase
-    .from("analytics_events")
-    .select("created_at, entity_id")
-    .eq("event_type", "section_view")
-    .eq("entity_type", "site_section")
-    .in("entity_id", ["albums", "updates", "events"])
-    .gte("created_at", sinceISO)
-    .order("created_at", { ascending: true });
-
-  // Build daily series for each section
-  const albumsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
-  const updatesByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
-  const eventsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
-
-  if (sectionViews) {
-    for (const ev of sectionViews) {
-      const key = toDayKey(ev.created_at);
-      if (!(key in albumsByDay)) continue;
-
-      const entityId = ev.entity_id as string;
-      if (entityId === "albums") {
-        albumsByDay[key] += 1;
-      } else if (entityId === "updates") {
-        updatesByDay[key] += 1;
-      } else if (entityId === "events") {
-        eventsByDay[key] += 1;
-      }
-    }
-  }
-
   const sectionClicks: SectionClicksData = {
     albums: dayKeys.map((k) => ({ date: k, count: albumsByDay[k] || 0 })),
     updates: dayKeys.map((k) => ({ date: k, count: updatesByDay[k] || 0 })),
     events: dayKeys.map((k) => ({ date: k, count: eventsByDay[k] || 0 })),
   };
 
-  // Fetch top performing pages (albums, events, updates) with page views and clicks
-  const MAX_ROWS = 5000;
-  const [
-    { data: albumPageViews = [] },
-    { data: eventPageViews = [] },
-    { data: updatePageViews = [] },
-    { data: linkClicks = [] },
-  ] = await Promise.all([
-    supabase
-      .from("analytics_events")
-      .select("entity_id")
-      .eq("event_type", "page_view")
-      .eq("entity_type", "album")
-      .order("created_at", { ascending: false })
-      .range(0, MAX_ROWS - 1),
-    supabase
-      .from("analytics_events")
-      .select("entity_id")
-      .eq("event_type", "page_view")
-      .eq("entity_type", "event")
-      .order("created_at", { ascending: false })
-      .range(0, MAX_ROWS - 1),
-    supabase
-      .from("analytics_events")
-      .select("entity_id")
-      .eq("event_type", "page_view")
-      .eq("entity_type", "update")
-      .order("created_at", { ascending: false })
-      .range(0, MAX_ROWS - 1),
-    supabase
-      .from("analytics_events")
-      .select("entity_id, entity_type")
-      .eq("event_type", "link_click")
-      .order("created_at", { ascending: false })
-      .range(0, MAX_ROWS - 1),
-  ]);
+  // Process 90-day top pages events in memory (already fetched above)
+  const topPagesStart = performance.now();
+  
+  // Separate 90-day events by type
+  const albumPageViews = topPagesEvents90d.filter(
+    (e: any) => e.event_type === "page_view" && e.entity_type === "album"
+  );
+  const eventPageViews = topPagesEvents90d.filter(
+    (e: any) => e.event_type === "page_view" && e.entity_type === "event"
+  );
+  const updatePageViews = topPagesEvents90d.filter(
+    (e: any) => e.event_type === "page_view" && e.entity_type === "update"
+  );
+  const linkClicks = topPagesEvents90d.filter((e: any) => e.event_type === "link_click");
+
+  console.log(`[Dashboard] Top pages processing: ${(performance.now() - topPagesStart).toFixed(2)}ms`);
+  console.log(`[Dashboard]   - Album page views: ${albumPageViews.length} rows`);
+  console.log(`[Dashboard]   - Event page views: ${eventPageViews.length} rows`);
+  console.log(`[Dashboard]   - Update page views: ${updatePageViews.length} rows`);
+  console.log(`[Dashboard]   - Link clicks: ${linkClicks.length} rows`);
 
   // Count page views by entity ID
   const viewsByAlbumId: Record<string, number> = {};
   const viewsByEventId: Record<string, number> = {};
   const viewsByUpdateId: Record<string, number> = {};
 
-  (albumPageViews || []).forEach((ev: any) => {
+  albumPageViews.forEach((ev: any) => {
     viewsByAlbumId[ev.entity_id] = (viewsByAlbumId[ev.entity_id] || 0) + 1;
   });
-  (eventPageViews || []).forEach((ev: any) => {
+  eventPageViews.forEach((ev: any) => {
     viewsByEventId[ev.entity_id] = (viewsByEventId[ev.entity_id] || 0) + 1;
   });
-  (updatePageViews || []).forEach((ev: any) => {
+  updatePageViews.forEach((ev: any) => {
     viewsByUpdateId[ev.entity_id] = (viewsByUpdateId[ev.entity_id] || 0) + 1;
   });
 
@@ -395,6 +394,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   }
 
   // Fetch all albums, events, and updates
+  const entitiesStart = performance.now();
   const [
     { data: allAlbums = [] },
     { data: allEvents = [] },
@@ -404,6 +404,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     supabase.from("events").select("id, title, flyer_image_url"),
     supabase.from("updates").select("id, title, image_url"),
   ]);
+  const entitiesTime = performance.now() - entitiesStart;
+  console.log(`[Dashboard] Entities fetch: ${entitiesTime.toFixed(2)}ms (albums: ${allAlbums?.length || 0}, events: ${allEvents?.length || 0}, updates: ${allUpdates?.length || 0})`);
 
   // Build top performing pages array
   const topPerformingPages: TopPerformingPage[] = [];
@@ -457,8 +459,16 @@ export async function getDashboardData(): Promise<DashboardData> {
   });
 
   // Sort by page views descending and limit to top 20
+  const processingStart = performance.now();
   topPerformingPages.sort((a, b) => b.pageViews - a.pageViews);
   const topPerformingPagesLimited = topPerformingPages.slice(0, 20);
+  const processingTime = performance.now() - processingStart;
+  
+  const totalTime = performance.now() - startTime;
+  console.log(`[Dashboard] Data processing: ${processingTime.toFixed(2)}ms`);
+  console.log(`[Dashboard] ========================================`);
+  console.log(`[Dashboard] TOTAL TIME: ${totalTime.toFixed(2)}ms (${(totalTime / 1000).toFixed(2)}s)`);
+  console.log(`[Dashboard] ========================================`);
 
   return {
     albums: albumsStats,

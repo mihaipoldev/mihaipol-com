@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Moon, Sun, Monitor, Palette, Plus, Edit2, Trash2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -170,9 +171,51 @@ export function AppearanceSettings() {
     setShowColorModal(true);
   };
 
-  // Wait for color to be loaded and mounted before showing to prevent color flash
-  if (!mounted || !colorMounted || colorLoading) {
-    return null;
+  // Show loading skeleton while data is loading
+  if (!mounted || !colorMounted || colorLoading || loadingColors) {
+    return (
+      <div className="space-y-6">
+        <Card className="relative overflow-hidden shadow-lg">
+          {/* Decorative gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
+
+          {/* Sparkle decorations */}
+          <div className="absolute top-4 right-4 w-2 h-2 bg-primary/20 rounded-full blur-sm animate-pulse" />
+          <div
+            className="absolute top-12 right-12 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm animate-pulse"
+            style={{ animationDelay: "300ms" }}
+          />
+
+          <CardHeader className="relative">
+            <Skeleton className="h-8 w-48" />
+          </CardHeader>
+          <CardContent className="space-y-6 relative">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-48" />
+              </div>
+              <Skeleton className="h-10 w-[180px]" />
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <Skeleton className="h-32 w-full rounded-xl" />
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-28" />
+                <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-8 gap-3">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                    <Skeleton key={i} className="aspect-square rounded-xl" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
