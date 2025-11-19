@@ -94,11 +94,6 @@ export default function ConditionalDevLayout({ children }: ConditionalDevLayoutP
     };
   }, [isAlbumSlugPage]);
 
-  if (isAlbumSlugPage) {
-    // Album pages use their own AlbumHeader component with album colors
-    return <>{children}</>;
-  }
-
   useEffect(() => {
     if (isAlbumSlugPage) return;
 
@@ -138,6 +133,12 @@ export default function ConditionalDevLayout({ children }: ConditionalDevLayoutP
       body.style.removeProperty('-webkit-overflow-scrolling');
     };
   }, [isAlbumSlugPage]);
+
+  // Early return must come AFTER all hooks are called
+  if (isAlbumSlugPage) {
+    // Album pages use their own AlbumHeader component with album colors
+    return <>{children}</>;
+  }
 
   return (
     <div 
