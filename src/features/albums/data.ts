@@ -1,5 +1,7 @@
 import { supabase } from "@/lib/supabase";
+import { getSupabaseServer } from "@/lib/supabase-ssr";
 import { getLabelBySlug } from "@/features/labels/data";
+import { getSitePreferenceNumber } from "@/features/settings/data";
 
 type FetchAlbumsOptions = {
   limit?: number;
@@ -24,9 +26,19 @@ type AlbumWithLabel = {
 };
 
 async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithLabel[]> {
-  const { limit, order = "desc", includeUnpublished = false, includeLabels = false, labelId, labelSlug } = options;
+  const {
+    limit,
+    order = "desc",
+    includeUnpublished = false,
+    includeLabels = false,
+    labelId,
+    labelSlug,
+  } = options;
 
   try {
+    // Use server client for proper RLS handling in server components
+    const supabaseClient = await getSupabaseServer();
+
     // If filtering by slug, first get the label ID
     let actualLabelId = labelId;
     if (labelSlug && !labelId) {
@@ -43,22 +55,24 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
     const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
     // Select only needed columns and use join if labels are needed
-    const baseColumns = `id, title, slug, cover_image_url, release_date, publish_status, label_id, catalog_number, album_type`;
+    const baseColumns = `id, title, slug, cover_image_url, release_date, publish_status, label_id, catalog_number, album_type, format_type`;
     const selectColumns = includeLabels ? `${baseColumns}, labels(id, name, slug)` : baseColumns;
 
-    let query = supabase.from("albums").select(selectColumns);
+    let query = supabaseClient.from("albums").select(selectColumns);
 
-    // Filter by publish status
+    // Filter by publish status first (matches index column order)
+    // Uses: idx_albums_publish_status_release_date (DESC) or idx_albums_publish_status_release_date_asc (ASC)
+    // If labelId is provided, uses: idx_albums_label_id_publish_status_release_date
     if (!includeUnpublished) {
       query = query.eq("publish_status", "published");
     }
 
-    // Filter by label ID if provided
+    // Filter by label ID if provided (must come after publish_status for composite index)
     if (actualLabelId) {
       query = query.eq("label_id", actualLabelId);
     }
 
-    // Order by release_date
+    // Order by release_date (matches index ordering)
     query = query.order("release_date", { ascending: order === "asc", nullsFirst: false });
 
     // Apply limit
@@ -80,7 +94,17 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
       console.warn(`⚠️ [DB] SLOW QUERY: albums fetch took ${queryTime.toFixed(0)}ms`);
     }
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error in albums query:", error);
+      console.error("Query details:", {
+        limit,
+        order,
+        includeUnpublished,
+        includeLabels,
+        labelId: actualLabelId,
+      });
+      throw error;
+    }
 
     // If labels are requested and we used a join, map the label name
     if (includeLabels && albums && albums.length > 0) {
@@ -123,25 +147,38 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
     }
 
     return [];
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching albums:", error);
+    console.error("Error details:", {
+      message: error?.message,
+      code: error?.code,
+      details: error?.details,
+      hint: error?.hint,
+    });
     return [];
   }
 }
 
 // Public data fetching functions
-export async function getHomepageAlbums(limit = 6) {
-  return fetchAlbums({ limit, order: "desc", includeLabels: true });
+export async function getHomepageAlbums(limit?: number) {
+  const defaultLimit = await getSitePreferenceNumber("albums_homepage_limit", 6);
+  const actualLimit = limit ?? defaultLimit;
+  return fetchAlbums({ limit: actualLimit, order: "desc", includeLabels: true });
 }
 
 export async function getLatestAlbumByLabelId(labelId: string) {
   try {
+    // Use server client for proper RLS handling in server components
+    const supabaseClient = await getSupabaseServer();
+
     const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
-    const { data, error } = await supabase
+    // Query structure optimized for: idx_albums_label_id_publish_status_release_date
+    // Filter order: label_id -> publish_status -> order by release_date DESC
+    const { data, error } = await supabaseClient
       .from("albums")
       .select(
-        `id, title, slug, cover_image_url, release_date, publish_status, label_id, catalog_number, album_type, description, labels(id, name)`
+        `id, title, slug, cover_image_url, release_date, publish_status, label_id, catalog_number, album_type, format_type, description, labels(id, name)`
       )
       .eq("label_id", labelId)
       .eq("publish_status", "published")
@@ -187,12 +224,16 @@ export async function getAllAlbums(labelId?: string, labelSlug?: string) {
 
 export async function getAlbumBySlug(slug: string) {
   try {
+    // Use server client for proper RLS handling in server components
+    const supabaseClient = await getSupabaseServer();
+
     const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
-    const { data, error } = await supabase
+    // Query optimized for: idx_albums_slug_publish_status (partial index on published)
+    const { data, error } = await supabaseClient
       .from("albums")
       .select(
-        "id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, description"
+        "id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description"
       )
       .eq("slug", slug)
       .eq("publish_status", "published")
@@ -206,7 +247,10 @@ export async function getAlbumBySlug(slug: string) {
       console.warn(`⚠️ [DB] SLOW QUERY: album by slug took ${queryTime.toFixed(0)}ms`);
     }
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error fetching album by slug:", error);
+      throw error;
+    }
     return data || null;
   } catch (error) {
     console.error("Error fetching album by slug:", error);
@@ -278,7 +322,7 @@ export async function getAlbumById(id: string) {
       .from("albums")
       .select(
         `
-        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, description,
+        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description,
         labels (
           id,
           name
@@ -325,7 +369,7 @@ export async function getAlbumBySlugAdmin(slug: string) {
       .from("albums")
       .select(
         `
-        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, description,
+        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description,
         labels (
           id,
           name
@@ -365,6 +409,7 @@ export async function getAlbumLinks(albumId: string) {
   try {
     const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
+    // Query optimized for: idx_album_links_album_id_sort_order
     const { data, error } = await supabase
       .from("album_links")
       .select(
@@ -406,16 +451,68 @@ export async function getAlbumLinks(albumId: string) {
   }
 }
 
+export async function getAlbumArtists(albumId: string) {
+  try {
+    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
+    const supabase = getServiceSupabaseClient();
+
+    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+
+    // Query optimized for: idx_album_artists_album_id_sort_order
+    const { data, error } = await supabase
+      .from("album_artists")
+      .select(
+        `
+        id, artist_id, role, sort_order,
+        artists (
+          id,
+          name,
+          profile_image_url
+        )
+      `
+      )
+      .eq("album_id", albumId)
+      .order("sort_order", { ascending: true });
+
+    const queryTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
+    console.log(`🔍 [DB] album artists query completed in ${queryTime.toFixed(0)}ms`);
+
+    if (error) throw error;
+
+    // Normalize artists: Supabase returns array even for one-to-one relationships
+    if (data) {
+      return data.map((aa: any) => ({
+        ...aa,
+        artist: Array.isArray(aa.artists)
+          ? aa.artists.length > 0
+            ? aa.artists[0]
+            : null
+          : aa.artists || null,
+      }));
+    }
+
+    return [];
+  } catch (error) {
+    console.error("Error fetching album artists:", error);
+    return [];
+  }
+}
+
 export async function getAlbumWithLinksBySlug(slug: string) {
   try {
+    // Use server client for proper RLS handling in server components
+    const supabaseClient = await getSupabaseServer();
+
     // Fetch album
     const album = await getAlbumBySlug(slug);
     if (!album) return null;
 
     // Fetch all artists for this album via album_artists join table
+    // Query optimized for: idx_album_artists_album_id_sort_order
     let artistName: string | null = null;
     try {
-      const { data: albumArtistsData, error: albumArtistsError } = await supabase
+      const { data: albumArtistsData, error: albumArtistsError } = await supabaseClient
         .from("album_artists")
         .select(
           `
@@ -444,9 +541,10 @@ export async function getAlbumWithLinksBySlug(slug: string) {
     }
 
     // Fetch album_links with platform information
+    // Query optimized for: idx_album_links_album_id_sort_order
     let links: any[] = [];
     try {
-      const { data: linksData, error: linksError } = await supabase
+      const { data: linksData, error: linksError } = await supabaseClient
         .from("album_links")
         .select(
           `

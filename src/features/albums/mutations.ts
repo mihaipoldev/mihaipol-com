@@ -5,6 +5,7 @@ export async function createAlbum(albumData: {
   slug: string;
   catalog_number?: string | null;
   album_type?: string | null;
+  format_type?: string | null;
   description?: string | null;
   cover_image_url?: string | null;
   release_date?: string | null;
@@ -197,6 +198,96 @@ export async function batchUpdateAlbumLinks(
     return true;
   } catch (error) {
     console.error("Error batch updating album links:", error);
+    throw error;
+  }
+}
+
+export async function batchUpdateAlbumArtists(
+  albumId: string,
+  artists: Array<{
+    id?: string; // If id exists, update; if not, create new
+    artist_id: string;
+    role: "primary" | "featured" | "remixer";
+    sort_order: number;
+  }>
+) {
+  try {
+    const supabase = getServiceSupabaseClient();
+
+    // Get existing album_artists for this album
+    const { data: existingArtists, error: fetchError } = await supabase
+      .from("album_artists")
+      .select("id")
+      .eq("album_id", albumId);
+
+    if (fetchError) throw fetchError;
+
+    const existingArtistIds = new Set(existingArtists?.map((aa) => aa.id) || []);
+    const newArtistIds = new Set(artists.filter((aa) => aa.id).map((aa) => aa.id!));
+
+    // Find album_artists to delete (exist in DB but not in new list)
+    const artistsToDelete = existingArtistIds
+      ? Array.from(existingArtistIds).filter((id) => !newArtistIds.has(id))
+      : [];
+
+    // Delete removed album_artists
+    if (artistsToDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from("album_artists")
+        .delete()
+        .in("id", artistsToDelete);
+
+      if (deleteError) throw deleteError;
+    }
+
+    // Process each album_artist: update existing or create new
+    const updates: Promise<any>[] = [];
+    const creates: any[] = [];
+
+    for (const artist of artists) {
+      if (artist.id && existingArtistIds.has(artist.id)) {
+        // Update existing album_artist
+        updates.push(
+          Promise.resolve(
+            supabase
+              .from("album_artists")
+              .update({
+                artist_id: artist.artist_id,
+                role: artist.role,
+                sort_order: artist.sort_order,
+              })
+              .eq("id", artist.id)
+          ).then(({ error }) => {
+            if (error) throw error;
+            return true;
+          })
+        );
+      } else {
+        // Create new album_artist
+        creates.push({
+          album_id: albumId,
+          artist_id: artist.artist_id,
+          role: artist.role,
+          sort_order: artist.sort_order,
+        });
+      }
+    }
+
+    // Execute all updates
+    if (updates.length > 0) {
+      await Promise.all(updates);
+    }
+
+    // Create new album_artists
+    if (creates.length > 0) {
+      const { error: createError } = await supabase.from("album_artists").insert(creates);
+
+      if (createError) throw createError;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error batch updating album artists:", error);
     throw error;
   }
 }

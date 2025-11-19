@@ -1,14 +1,16 @@
 import { supabase } from "@/lib/supabase";
+import { getSitePreferenceNumber } from "@/features/settings/data";
 
 type FetchEventsOptions = {
   status?: "upcoming" | "past" | "all";
   limit?: number;
   order?: "asc" | "desc";
   includeUnpublished?: boolean;
+  startDate?: string;
 };
 
 async function fetchEvents(options: FetchEventsOptions = {}) {
-  const { status = "all", limit, order = "asc", includeUnpublished = false } = options;
+  const { status = "all", limit, order = "asc", includeUnpublished = false, startDate } = options;
 
   try {
     // 🐛 DEBUG: Start timing
@@ -21,12 +23,20 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
         "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, tickets_url, ticket_label"
       );
 
-    // Filter by publish status
+    // Filter by publish status first (matches index column order)
+    // Uses: idx_events_publish_status_date when status="all"
+    // Uses: idx_events_status_date when status="upcoming" or "past"
     if (!includeUnpublished) {
       query = query.eq("publish_status", "published");
     }
 
-    // Filter by event status and date
+    // Filter by start date if provided (for last 2 weeks)
+    if (startDate) {
+      query = query.gte("date", startDate);
+      console.log(`🔍 [DB] Applying date filter: date >= ${startDate}`);
+    }
+
+    // Filter by event status and date (optimized for idx_events_status_date)
     if (status === "upcoming") {
       query = query
         .eq("event_status", "upcoming")
@@ -36,7 +46,7 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
       query = query.or(`event_status.eq.past,date.lt.${today}`);
     }
 
-    // Order by date
+    // Order by date (matches index ordering)
     query = query.order("date", { ascending: order === "asc" });
 
     // Apply limit
@@ -66,10 +76,48 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
   }
 }
 
-export async function getHomepageEvents(limit = 6) {
-  // Original behavior: fetch all published events ordered by date ascending
-  // This shows upcoming events first naturally due to ordering
-  return fetchEvents({ status: "all", limit, order: "asc" });
+export async function getHomepageEvents(limit?: number) {
+  // Get preferences for events
+  const daysBack = await getSitePreferenceNumber("events_homepage_days_back", 14);
+  const defaultLimit = await getSitePreferenceNumber("events_homepage_limit", 4);
+  const actualLimit = limit ?? defaultLimit;
+
+  // Get events from the specified days back to future
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Start of today
+
+  const startDate = new Date(today);
+  startDate.setDate(startDate.getDate() - daysBack);
+  startDate.setHours(0, 0, 0, 0); // Ensure it's at start of day
+  const startDateISO = startDate.toISOString().split("T")[0];
+
+  // Debug logging
+  console.log(
+    `📅 [Events] Filtering events from ${startDateISO} onwards (${daysBack} days ago from today)`
+  );
+
+  // Fetch events from specified days back onwards, ordered by date ascending
+  const events = await fetchEvents({
+    status: "all",
+    limit: actualLimit,
+    order: "asc",
+    startDate: startDateISO,
+  });
+
+  // Additional client-side filter as safety check
+  const filteredEvents = events.filter((event) => {
+    if (!event.date) return false;
+    const eventDate = new Date(event.date);
+    return eventDate >= startDate;
+  });
+
+  if (filteredEvents.length !== events.length) {
+    console.warn(
+      `⚠️ [Events] Filtered out ${events.length - filteredEvents.length} events that were outside the ${daysBack}-day window`
+    );
+  }
+
+  return filteredEvents;
 }
 
 export async function getAllEvents() {
@@ -80,6 +128,7 @@ export async function getEventBySlug(slug: string) {
   try {
     const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
+    // Query optimized for: idx_events_slug_publish_status (partial index on published)
     const { data, error } = await supabase
       .from("events")
       .select(

@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/svg+xml",
+];
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,10 +45,13 @@ export async function POST(request: NextRequest) {
         // Check if content type starts with the MIME type or contains it
         return contentType.startsWith(normalizedType) || contentType.includes(normalizedType);
       });
-      
+
       if (!contentType || !isValidContentType) {
         return NextResponse.json(
-          { valid: false, error: `Invalid content type: ${contentType || "unknown"}. Expected one of: ${ALLOWED_MIME_TYPES.join(", ")}` },
+          {
+            valid: false,
+            error: `Invalid content type: ${contentType || "unknown"}. Expected one of: ${ALLOWED_MIME_TYPES.join(", ")}`,
+          },
           { status: 200 }
         );
       }

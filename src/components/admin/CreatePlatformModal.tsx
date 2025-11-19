@@ -184,7 +184,10 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
           toast.error(uploadError.message || "Failed to upload horizontal image");
           return;
         }
-      } else if (newHorizontalImageUrl && !newHorizontalImageUrl.includes("mihaipol-com.b-cdn.net")) {
+      } else if (
+        newHorizontalImageUrl &&
+        !newHorizontalImageUrl.includes("mihaipol-com.b-cdn.net")
+      ) {
         const validation = await validateImageUrl(newHorizontalImageUrl);
         if (!validation.valid) {
           toast.error(
@@ -285,7 +288,11 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
       }
 
       // Move horizontal icon from temp to permanent if needed
-      if (finalHorizontalImageUrl && finalHorizontalImageUrl.includes("/platforms/temp/") && created?.id) {
+      if (
+        finalHorizontalImageUrl &&
+        finalHorizontalImageUrl.includes("/platforms/temp/") &&
+        created?.id
+      ) {
         try {
           const moveResponse = await fetch("/api/admin/upload/move", {
             method: "POST",
@@ -308,7 +315,11 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
       }
 
       // Update both icons if any were moved
-      if ((updatedIconUrl !== finalImageUrl || updatedHorizontalIconUrl !== finalHorizontalImageUrl) && created?.id) {
+      if (
+        (updatedIconUrl !== finalImageUrl ||
+          updatedHorizontalIconUrl !== finalHorizontalImageUrl) &&
+        created?.id
+      ) {
         try {
           await fetch("/api/admin/platforms", {
             method: "PUT",
@@ -316,8 +327,8 @@ export function CreatePlatformModal({ open, onOpenChange, onSuccess }: CreatePla
               "Content-Type": "application/json",
               ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
             },
-            body: JSON.stringify({ 
-              id: created.id, 
+            body: JSON.stringify({
+              id: created.id,
               icon_url: updatedIconUrl,
               icon_horizontal_url: updatedHorizontalIconUrl,
             }),

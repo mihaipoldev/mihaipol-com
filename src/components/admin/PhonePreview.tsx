@@ -101,7 +101,10 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
           style={{ transform: "scale(0.6)", transformOrigin: "top center", marginTop: "-14px" }}
         >
           {/* Phone Frame */}
-          <div className="relative mx-auto border-radius-full" style={{ width: "430px", height: "880px" }}>
+          <div
+            className="relative mx-auto border-radius-full"
+            style={{ width: "430px", height: "880px" }}
+          >
             <img
               src="/phone.png"
               alt="Phone frame"
@@ -169,11 +172,11 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
               </div>
 
               {/* Screen Content */}
-              <div
-                className="absolute top-[118px] left-0 right-0 bottom-0"
-                style={{ zIndex: 1 }}
-              >
-                <AlbumGradientBackground coverImageUrl={album.cover_image_url || null} useAbsolutePositioning={true}>
+              <div className="absolute top-[118px] left-0 right-0 bottom-0" style={{ zIndex: 1 }}>
+                <AlbumGradientBackground
+                  coverImageUrl={album.cover_image_url || null}
+                  useAbsolutePositioning={true}
+                >
                   <div className="flex-1 relative z-10 min-h-0 flex flex-col">
                     <div className="flex flex-col items-center px-4 flex-1">
                       <div className="w-full max-w-sm mx-auto py-6">
@@ -193,7 +196,8 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
                                 url: link.url,
                                 platformName: link.platforms?.name || "Unknown",
                                 platformIconUrl: link.platforms?.icon_url || null,
-                                platformIconHorizontalUrl: link.platforms?.icon_horizontal_url || null,
+                                platformIconHorizontalUrl:
+                                  link.platforms?.icon_horizontal_url || null,
                                 ctaLabel: link.cta_label || null,
                               })
                             )}

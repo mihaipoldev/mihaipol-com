@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,25 +17,24 @@ interface NewButtonProps {
   options?: Array<{
     label: string;
     icon?: React.ReactNode;
-    onClick: () => void;
+    href: string;
   }>;
 }
 
 export function NewButton({ className, options = [] }: NewButtonProps) {
   const buttonRef = React.useRef<HTMLButtonElement>(null);
-  const router = useRouter();
 
   // Default options if none provided
   const defaultOptions =
     options.length > 0
       ? options
       : [
-          { label: "Album", onClick: () => router.push("/admin/albums/new/edit") },
-          { label: "Artist", onClick: () => router.push("/admin/artists/new/edit") },
-          { label: "Event", onClick: () => router.push("/admin/events/new/edit") },
-          { label: "Label", onClick: () => router.push("/admin/labels/new/edit") },
-          { label: "Update", onClick: () => router.push("/admin/updates/new/edit") },
-          { label: "Platform", onClick: () => router.push("/admin/platforms/new/edit") },
+          { label: "Album", href: "/admin/albums/new/edit" },
+          { label: "Artist", href: "/admin/artists/new/edit" },
+          { label: "Event", href: "/admin/events/new/edit" },
+          { label: "Label", href: "/admin/labels/new/edit" },
+          { label: "Update", href: "/admin/updates/new/edit" },
+          { label: "Platform", href: "/admin/platforms/new/edit" },
         ];
 
   return (
@@ -80,13 +79,14 @@ export function NewButton({ className, options = [] }: NewButtonProps) {
         </TooltipProvider>
         <DropdownMenuContent align="end" className="bg-background border border-border">
           {defaultOptions.map((option, index) => (
-            <DropdownMenuItem
-              key={index}
-              onClick={option.onClick}
-              className="hover:bg-accent hover:text-accent-foreground cursor-pointer"
-            >
-              {option.icon && <span className="mr-2">{option.icon}</span>}
-              {option.label}
+            <DropdownMenuItem key={index} asChild>
+              <Link
+                href={option.href}
+                className="hover:bg-accent hover:text-accent-foreground cursor-pointer"
+              >
+                {option.icon && <span className="mr-2">{option.icon}</span>}
+                {option.label}
+              </Link>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

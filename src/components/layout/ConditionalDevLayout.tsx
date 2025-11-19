@@ -54,19 +54,19 @@ export default function ConditionalDevLayout({ children }: ConditionalDevLayoutP
     // Simple solution: Just ensure the background covers extra scrollable space
     // Use a debounced update to avoid performance issues
     let timeoutId: NodeJS.Timeout;
-    
+
     const updateBackgroundHeight = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
         const viewportHeight = window.innerHeight;
-        
+
         // Only extend height if document is taller than viewport + extra space
         // This preserves the original appearance when not needed
         if (scrollHeight > viewportHeight + 100) {
           const extraSpace = 150; // Cover the ~80px extra scrollable space + buffer
           const totalHeight = scrollHeight + extraSpace;
-          
+
           // Only set height on gradient background, NOT on shapes container
           // Shapes container should stay viewport-sized so shapes stay visible
           if (gradientBgRef.current) {
@@ -76,7 +76,7 @@ export default function ConditionalDevLayout({ children }: ConditionalDevLayoutP
         } else {
           // Reset to default (minHeight: 100vh handles it)
           if (gradientBgRef.current) {
-            gradientBgRef.current.style.height = '';
+            gradientBgRef.current.style.height = "";
           }
         }
       }, 100);
@@ -84,7 +84,7 @@ export default function ConditionalDevLayout({ children }: ConditionalDevLayoutP
 
     // Initial update
     updateBackgroundHeight();
-    
+
     // Only update on resize, not on scroll (better performance)
     window.addEventListener("resize", updateBackgroundHeight);
 
@@ -100,37 +100,39 @@ export default function ConditionalDevLayout({ children }: ConditionalDevLayoutP
     // Enable smooth scrolling and overscroll for landing page
     const html = document.documentElement;
     const body = document.body;
-    
+
     // Save original values
     const originalHtmlOverscroll = html.style.overscrollBehaviorY;
     const originalBodyOverscroll = body.style.overscrollBehaviorY;
     const originalHtmlOverscrollBehavior = html.style.overscrollBehavior;
     const originalBodyOverscrollBehavior = body.style.overscrollBehavior;
-    
+
     // Enable smooth scrolling and bounce
-    html.style.setProperty('overscroll-behavior-y', 'auto', 'important');
-    html.style.setProperty('overscroll-behavior', 'auto', 'important');
-    body.style.setProperty('overscroll-behavior-y', 'auto', 'important');
-    body.style.setProperty('overscroll-behavior', 'auto', 'important');
-    html.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
-    body.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+    html.style.setProperty("overscroll-behavior-y", "auto", "important");
+    html.style.setProperty("overscroll-behavior", "auto", "important");
+    body.style.setProperty("overscroll-behavior-y", "auto", "important");
+    body.style.setProperty("overscroll-behavior", "auto", "important");
+    html.style.setProperty("-webkit-overflow-scrolling", "touch", "important");
+    body.style.setProperty("-webkit-overflow-scrolling", "touch", "important");
 
     return () => {
       // Restore original values
       if (originalHtmlOverscroll) html.style.overscrollBehaviorY = originalHtmlOverscroll;
-      else html.style.removeProperty('overscroll-behavior-y');
-      
+      else html.style.removeProperty("overscroll-behavior-y");
+
       if (originalBodyOverscroll) body.style.overscrollBehaviorY = originalBodyOverscroll;
-      else body.style.removeProperty('overscroll-behavior-y');
-      
-      if (originalHtmlOverscrollBehavior) html.style.overscrollBehavior = originalHtmlOverscrollBehavior;
-      else html.style.removeProperty('overscroll-behavior');
-      
-      if (originalBodyOverscrollBehavior) body.style.overscrollBehavior = originalBodyOverscrollBehavior;
-      else body.style.removeProperty('overscroll-behavior');
-      
-      html.style.removeProperty('-webkit-overflow-scrolling');
-      body.style.removeProperty('-webkit-overflow-scrolling');
+      else body.style.removeProperty("overscroll-behavior-y");
+
+      if (originalHtmlOverscrollBehavior)
+        html.style.overscrollBehavior = originalHtmlOverscrollBehavior;
+      else html.style.removeProperty("overscroll-behavior");
+
+      if (originalBodyOverscrollBehavior)
+        body.style.overscrollBehavior = originalBodyOverscrollBehavior;
+      else body.style.removeProperty("overscroll-behavior");
+
+      html.style.removeProperty("-webkit-overflow-scrolling");
+      body.style.removeProperty("-webkit-overflow-scrolling");
     };
   }, [isAlbumSlugPage]);
 
@@ -141,10 +143,10 @@ export default function ConditionalDevLayout({ children }: ConditionalDevLayoutP
   }
 
   return (
-    <div 
-      className="flex min-h-dvh flex-col bg-background preset-landing-page-13 relative"
+    <div
+      className="flex min-h-dvh flex-col bg-background preset-landing-page-22 relative"
       style={{
-        scrollBehavior: 'smooth',
+        scrollBehavior: "smooth",
       }}
     >
       {/* Animated Background */}

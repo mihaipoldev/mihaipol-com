@@ -22,3 +22,13 @@ export interface UserColor {
   created_at: string;
   updated_at: string;
 }
+
+export type SitePreference = {
+  id: string;
+  key: string;
+  value: any;
+  description: string | null;
+  category: "events" | "albums" | "updates" | "general";
+  created_at: string;
+  updated_at: string;
+};

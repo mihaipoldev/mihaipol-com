@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { getServiceSupabaseClient } from "@/lib/supabase/server";
+import { getSitePreferenceNumber } from "@/features/settings/data";
 
 type FetchUpdatesOptions = {
   limit?: number;
@@ -19,12 +20,13 @@ async function fetchUpdates(options: FetchUpdatesOptions = {}) {
       .from("updates")
       .select("id, title, slug, date, publish_status, image_url, description");
 
-    // Filter by publish status
+    // Filter by publish status (matches index column order)
+    // Uses: idx_updates_publish_status_date (DESC) for order="desc"
     if (!includeUnpublished) {
       query = query.eq("publish_status", "published");
     }
 
-    // Order by date
+    // Order by date (matches index ordering - DESC NULLS LAST)
     query = query.order("date", { ascending: order === "asc", nullsFirst: false });
 
     // Apply limit
@@ -54,8 +56,10 @@ async function fetchUpdates(options: FetchUpdatesOptions = {}) {
   }
 }
 
-export async function getHomepageUpdates(limit = 6) {
-  return fetchUpdates({ limit, order: "desc" });
+export async function getHomepageUpdates(limit?: number) {
+  const defaultLimit = await getSitePreferenceNumber("updates_homepage_limit", 3);
+  const actualLimit = limit ?? defaultLimit;
+  return fetchUpdates({ limit: actualLimit, order: "desc" });
 }
 
 export async function getAllUpdates() {
@@ -66,6 +70,7 @@ export async function getUpdateBySlug(slug: string) {
   try {
     const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
+    // Query optimized for: idx_updates_slug_publish_status (partial index on published)
     const { data, error } = await supabase
       .from("updates")
       .select("id, title, slug, date, publish_status, image_url, description, read_more_url")

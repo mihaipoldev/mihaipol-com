@@ -94,7 +94,7 @@ function calculateLinkButtonBgColor(colors: string[], isDark: boolean): string {
   const hsl = rgbToHsl(r, g, b);
   hsl.s = hsl.s * 0.1; // Very low saturation = more gray
   hsl.l = 30; // Dark gray
-  
+
   const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
   return `rgba(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)}, 0.15)`;
 }
@@ -120,7 +120,7 @@ function calculateLinkHoverBgColor(colors: string[], isDark: boolean): string {
   const hsl = rgbToHsl(r, g, b);
   hsl.s = hsl.s * 0.1;
   hsl.l = 25;
-  
+
   const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
   return `rgba(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)}, 0.2)`;
 }
@@ -254,7 +254,7 @@ export default function AlbumGradientBackground({
   const [gradientColors, setGradientColors] = useState<string[]>([]);
   const [dotColors, setDotColors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Initialize colors - always use light theme values
   const getInitialColors = () => ({
     textColor: calculateTextColor([], false),
@@ -264,12 +264,14 @@ export default function AlbumGradientBackground({
     linkHoverBgColor: calculateLinkHoverBgColor([], false),
     linkTextColor: calculateLinkTextColor([], false),
   });
-  
+
   const initialColors = getInitialColors();
   const [textColor, setTextColor] = useState<string>(initialColors.textColor);
   const [mutedColor, setMutedColor] = useState<string>(initialColors.mutedColor);
   const [cardBgColor, setCardBgColor] = useState<string>(initialColors.cardBgColor);
-  const [linkButtonBgColor, setLinkButtonBgColor] = useState<string>(initialColors.linkButtonBgColor);
+  const [linkButtonBgColor, setLinkButtonBgColor] = useState<string>(
+    initialColors.linkButtonBgColor
+  );
   const [linkHoverBgColor, setLinkHoverBgColor] = useState<string>(initialColors.linkHoverBgColor);
   const [linkTextColor, setLinkTextColor] = useState<string>(initialColors.linkTextColor);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -344,21 +346,21 @@ export default function AlbumGradientBackground({
         document.body.style.setProperty("max-height", `${vh}px`, "important");
         document.body.style.setProperty("margin", "0", "important");
         document.body.style.setProperty("padding", "0", "important");
-        
+
         // Set the scroll container height to exact viewport height
         if (scrollContainerRef.current) {
           scrollContainerRef.current.style.height = `${vh}px`;
           scrollContainerRef.current.style.maxHeight = `${vh}px`;
         }
       };
-      
+
       // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
         setStyles();
       });
-      
+
       window.addEventListener("resize", setStyles);
-      
+
       return () => {
         // Restore scrolling when component unmounts
         window.removeEventListener("resize", setStyles);
@@ -405,21 +407,21 @@ export default function AlbumGradientBackground({
         }}
       >
         {/* Blurred album cover as background - positioned outside main container */}
-          {coverImageUrl && (
-            <div
-              className={useAbsolutePositioning ? "absolute inset-0" : "fixed inset-0"}
-              style={{
-                zIndex: 0,
-                backgroundImage: `url(${coverImageUrl})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                filter: "blur(100px) brightness(1.5)",
-                transform: "scale(2)", // Scale up to avoid blur edges
-                opacity: 0.5,
-              }}
-            />
-          )}
+        {coverImageUrl && (
+          <div
+            className={useAbsolutePositioning ? "absolute inset-0" : "fixed inset-0"}
+            style={{
+              zIndex: 0,
+              backgroundImage: `url(${coverImageUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              filter: "blur(100px) brightness(1.5)",
+              transform: "scale(2)", // Scale up to avoid blur edges
+              opacity: 0.5,
+            }}
+          />
+        )}
 
         {/* White base layer with gradient */}
         <div
@@ -433,7 +435,11 @@ export default function AlbumGradientBackground({
 
         <div
           ref={scrollContainerRef}
-          className={useAbsolutePositioning ? "absolute inset-0 z-[100] flex flex-col" : "fixed inset-0 z-[100] flex flex-col overflow-y-auto"}
+          className={
+            useAbsolutePositioning
+              ? "absolute inset-0 z-[100] flex flex-col"
+              : "fixed inset-0 z-[100] flex flex-col overflow-y-auto"
+          }
           style={{ background: "transparent" }}
         >
           {children}
@@ -455,38 +461,43 @@ export default function AlbumGradientBackground({
         colorsReady: true,
       }}
     >
-          {/* Blurred album cover as background - positioned outside main container */}
-          {coverImageUrl && (
-            <div
-              className={useAbsolutePositioning ? "absolute inset-0" : "fixed inset-0"}
-              style={{
-                zIndex: 0,
-                backgroundImage: `url(${coverImageUrl})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                filter: "blur(60px) brightness(1.5)",
-                transform: "scale(2)", // Scale up to avoid blur edges
-                opacity: 0.9,
-              }}
-            />
-          )}
+      {/* Blurred album cover as background - positioned outside main container */}
+      {coverImageUrl && (
+        <div
+          className={useAbsolutePositioning ? "absolute inset-0" : "fixed inset-0"}
+          style={{
+            zIndex: 0,
+            backgroundImage: `url(${coverImageUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            filter: "blur(60px) brightness(1.5)",
+            transform: "scale(2)", // Scale up to avoid blur edges
+            opacity: 0.9,
+          }}
+        />
+      )}
 
-          {/* White base layer with gradient */}
-          <div
-            className={useAbsolutePositioning ? "absolute inset-0" : "fixed inset-0"}
-            style={{
-              zIndex: 1,
-              background: gradientColors.length >= 3
-                ? `linear-gradient(135deg, ${rgbToRgba(gradientColors[0], 0.3)} 0%, ${rgbToRgba(gradientColors[1], 0.2)} 50%, ${rgbToRgba(gradientColors[2], 0.3)} 100%), white`
-                : "white",
-              opacity: 0.5,
-            }}
-          />
+      {/* White base layer with gradient */}
+      <div
+        className={useAbsolutePositioning ? "absolute inset-0" : "fixed inset-0"}
+        style={{
+          zIndex: 1,
+          background:
+            gradientColors.length >= 3
+              ? `linear-gradient(135deg, ${rgbToRgba(gradientColors[0], 0.3)} 0%, ${rgbToRgba(gradientColors[1], 0.2)} 50%, ${rgbToRgba(gradientColors[2], 0.3)} 100%), white`
+              : "white",
+          opacity: 0.5,
+        }}
+      />
 
       <div
         ref={scrollContainerRef}
-        className={useAbsolutePositioning ? "absolute inset-0 z-[100] flex flex-col" : "fixed inset-0 z-[100] flex flex-col overflow-y-auto"}
+        className={
+          useAbsolutePositioning
+            ? "absolute inset-0 z-[100] flex flex-col"
+            : "fixed inset-0 z-[100] flex flex-col overflow-y-auto"
+        }
         style={{ background: "transparent" }}
       >
         {children}

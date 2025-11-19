@@ -2,7 +2,14 @@ import { getServiceSupabaseClient } from "@/lib/supabase/server";
 
 export type TrackEventInput = {
   event_type: "page_view" | "link_click" | "section_view" | "session_start";
-  entity_type: "album" | "album_link" | "site_section" | "event" | "event_link" | "update" | "update_link";
+  entity_type:
+    | "album"
+    | "album_link"
+    | "site_section"
+    | "event"
+    | "event_link"
+    | "update"
+    | "update_link";
   entity_id: string;
   session_id?: string | null;
   user_agent?: string | null;
@@ -71,7 +78,7 @@ export async function trackEvent(input: TrackEventInput) {
     referrer: input.referrer ?? null,
     metadata: input.metadata ?? null,
   });
-  
+
   if (error) {
     // Log error in development to help debug
     if (process.env.NODE_ENV === "development") {

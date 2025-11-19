@@ -11,7 +11,7 @@ export default function AnalyticsLoading() {
           description="View and analyze your smart links performance, click-through rates, and engagement metrics."
         />
       </div>
-      
+
       <div className="mx-auto w-full max-w-6xl space-y-8">
         {/* Metrics Card Skeleton */}
         <div className="rounded-xl overflow-hidden bg-card/50 shadow-lg">
@@ -84,4 +84,3 @@ export default function AnalyticsLoading() {
     </>
   );
 }
-

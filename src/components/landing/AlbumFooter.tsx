@@ -13,9 +13,9 @@ export default function AlbumFooter() {
     >
       <div>© {new Date().getFullYear()} Mihai Pol · Griffith Records</div>
       <div>
-        <Link 
-          href="https://mihaipol.com" 
-          target="_blank" 
+        <Link
+          href="https://mihaipol.com"
+          target="_blank"
           rel="noreferrer"
           className="hover:opacity-80 transition-opacity"
           style={{ color: textColor }}

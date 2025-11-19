@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const updateSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -58,6 +59,7 @@ type EditUpdateFormProps = {
 
 export function EditUpdateForm({ id, isNew, initialUpdate }: EditUpdateFormProps) {
   const router = useRouter();
+  const isMobile = useIsMobile();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const normalizedInitialStatus = (() => {
     const s = (initialUpdate?.publish_status as any)?.toString?.().trim?.().toLowerCase?.();
@@ -351,7 +353,7 @@ export function EditUpdateForm({ id, isNew, initialUpdate }: EditUpdateFormProps
 
   return (
     <div className="w-full max-w-7xl relative">
-      <div className="mb-10 relative">
+      <div className="mb-6 md:mb-10 relative">
         <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/20 via-primary/10 to-transparent rounded-full" />
         <div className="flex items-start justify-between gap-4">
           <AdminPageTitle
@@ -388,20 +390,24 @@ export function EditUpdateForm({ id, isNew, initialUpdate }: EditUpdateFormProps
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 relative">
-        <Card className={cn("relative overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl group")}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative">
+        <Card
+          className={cn(
+            "relative overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl group"
+          )}
+        >
           {/* Decorative gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
-          
+
           {/* Sparkle decorations */}
           <div className="absolute top-4 right-4 w-2 h-2 bg-primary/20 rounded-full blur-sm animate-pulse" />
           <div
             className="absolute top-12 right-12 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm animate-pulse"
             style={{ animationDelay: "300ms" }}
           />
-          
-          <div className="p-6 space-y-6 relative">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <div className="p-6 space-y-4 md:space-y-6 relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <FormField label="Title" required error={errors.title?.message}>
                 <ShadowInput {...register("title")} placeholder="Update title" />
               </FormField>
@@ -419,7 +425,7 @@ export function EditUpdateForm({ id, isNew, initialUpdate }: EditUpdateFormProps
               <Textarea {...register("description")} placeholder="Update description" rows={6} />
             </FormField>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <FormField label="Date" error={errors.date?.message}>
                 <ShadowInput type="datetime-local" {...register("date")} />
               </FormField>
@@ -450,12 +456,13 @@ export function EditUpdateForm({ id, isNew, initialUpdate }: EditUpdateFormProps
           <ShadowButton
             type="button"
             variant="outline"
+            size={isMobile ? "lg" : undefined}
             onClick={() => router.push("/admin/updates")}
           >
             Cancel
           </ShadowButton>
-          <ShadowButton type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : isNew ? "Create" : "Save"}
+          <ShadowButton type="submit" size={isMobile ? "lg" : undefined} disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : isNew ? "Create" : "Save Changes"}
           </ShadowButton>
         </div>
       </form>

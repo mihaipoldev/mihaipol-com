@@ -8,6 +8,7 @@ export const albumCreateSchema = z.object({
   label_id: z.union([z.string().uuid(), z.null()]).optional(),
   catalog_number: z.string().nullable().optional(),
   album_type: z.string().nullable().optional(),
+  format_type: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   publish_status: z.enum(["draft", "scheduled", "published", "archived"]).optional(),
 });

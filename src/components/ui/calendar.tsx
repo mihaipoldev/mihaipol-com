@@ -25,7 +25,8 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "bg-background group/calendar p-3 [--cell-size:2rem] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
+        "bg-background/50 backdrop-blur-md group/calendar p-3 [--cell-size:2rem] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-background/50 [[data-slot=popover-content]_&]:backdrop-blur-md",
+        "shadow-[0px_1px_1px_0px_rgba(16,17,26,0.08)] dark:shadow-[0px_1px_1px_0px_rgba(255,255,255,0.08)]",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
@@ -36,7 +37,7 @@ function Calendar({
         ...formatters,
       }}
       classNames={{
-        root: cn("w-fit", defaultClassNames.root),
+        root: cn("w-fit rounded-[10px] overflow-hidden", defaultClassNames.root),
         months: cn("relative flex flex-col gap-4 md:flex-row", defaultClassNames.months),
         month: cn("flex w-full flex-col gap-4", defaultClassNames.month),
         nav: cn(

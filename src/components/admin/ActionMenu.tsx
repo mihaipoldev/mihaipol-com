@@ -1,7 +1,7 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Trash2, ExternalLink } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { MoreHorizontal, Pencil, Trash2, ExternalLink, BarChart3 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -28,6 +28,7 @@ type ActionMenuProps = {
   onDelete?: (id: string) => Promise<void>;
   editHref?: string;
   openPageHref?: string;
+  statsHref?: string;
   deleteLabel?: string;
 };
 
@@ -37,20 +38,11 @@ export function ActionMenu({
   onDelete,
   editHref,
   openPageHref,
+  statsHref,
   deleteLabel = "this item",
 }: ActionMenuProps) {
-  const router = useRouter();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleEdit = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if (onEdit) {
-      onEdit();
-    } else if (editHref) {
-      router.push(editHref);
-    }
-  };
 
   const handleOpenPage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -95,10 +87,29 @@ export function ActionMenu({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
+            {onEdit ? (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                className="cursor-pointer"
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+            ) : editHref ? (
+              <DropdownMenuItem asChild>
+                <Link
+                  href={editHref}
+                  className="cursor-pointer"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
             {openPageHref && (
               <>
                 <DropdownMenuItem onClick={handleOpenPage} className="cursor-pointer">
@@ -106,6 +117,18 @@ export function ActionMenu({
                   Open Page
                 </DropdownMenuItem>
               </>
+            )}
+            {statsHref && (
+              <DropdownMenuItem asChild>
+                <Link
+                  href={statsHref}
+                  className="cursor-pointer"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Stats
+                </Link>
+              </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem

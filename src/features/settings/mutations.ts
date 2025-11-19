@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { hexToHsl } from "@/lib/colorUtils";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import type { UserColor } from "./types";
 
 /**
@@ -132,6 +133,38 @@ export async function deleteUserColor(userId: string, colorId: string): Promise<
     if (error) throw error;
   } catch (error) {
     console.error("Error deleting user color:", error);
+    throw error;
+  }
+}
+
+/**
+ * Update a site preference (admin only)
+ */
+export async function updateSitePreference(key: string, value: any): Promise<void> {
+  try {
+    const supabaseClient = getServiceSupabaseClient();
+
+    // Check if preference exists
+    const { data: existing } = await supabaseClient
+      .from("site_preferences")
+      .select("key")
+      .eq("key", key)
+      .maybeSingle();
+
+    if (existing) {
+      // Update existing preference
+      const { error } = await supabaseClient
+        .from("site_preferences")
+        .update({ value })
+        .eq("key", key);
+
+      if (error) throw error;
+    } else {
+      // Preference doesn't exist, cannot create via this function
+      throw new Error(`Preference with key "${key}" does not exist`);
+    }
+  } catch (error) {
+    console.error("Error updating site preference:", error);
     throw error;
   }
 }

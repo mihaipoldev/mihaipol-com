@@ -2,14 +2,14 @@ import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
-export type UpdateCardVariant = 
-  | "default"      // Vertical stack: image on top, content below
-  | "horizontal"   // Image on left, content on right
-  | "overlay"      // Text overlaid on image with gradient
-  | "compact"      // Smaller, more condensed (horizontal/rectangular)
+export type UpdateCardVariant =
+  | "default" // Vertical stack: image on top, content below
+  | "horizontal" // Image on left, content on right
+  | "overlay" // Text overlaid on image with gradient
+  | "compact" // Smaller, more condensed (horizontal/rectangular)
   | "compact-square" // Smaller, more condensed (square image)
-  | "featured"     // Larger image with prominent text
-  | "minimal";     // Very clean, minimal design
+  | "featured" // Larger image with prominent text
+  | "minimal"; // Very clean, minimal design
 
 export type UpdateCardProps = {
   id: string;
@@ -109,9 +109,7 @@ export default function UpdateCard({
                   <span className="relative z-10">{title}</span>
                   <span className="absolute bottom-0 left-0 w-0 h-px bg-white group-hover:w-full transition-all duration-300 ease-out"></span>
                 </h3>
-                {description && (
-                  <p className="text-sm text-white/90 line-clamp-2">{description}</p>
-                )}
+                {description && <p className="text-sm text-white/90 line-clamp-2">{description}</p>}
               </div>
             </div>
           ) : (
@@ -204,13 +202,17 @@ export default function UpdateCard({
             </div>
           )}
           <div className="py-5 flex-1 flex flex-col px-4">
-            {date && <p className="text-sm text-muted-foreground mb-2 font-medium">{formatDate(date)}</p>}
+            {date && (
+              <p className="text-sm text-muted-foreground mb-2 font-medium">{formatDate(date)}</p>
+            )}
             <h3 className="font-bold text-xl mb-3 relative inline-block">
               <span className="relative z-10">{title}</span>
               <span className="absolute bottom-0 left-0 w-0 h-px bg-foreground/50 group-hover:w-full transition-all duration-300 ease-out"></span>
             </h3>
             {description && (
-              <p className="text-base text-muted-foreground line-clamp-4 leading-relaxed">{description}</p>
+              <p className="text-base text-muted-foreground line-clamp-4 leading-relaxed">
+                {description}
+              </p>
             )}
           </div>
         </div>
@@ -233,13 +235,19 @@ export default function UpdateCard({
             </div>
           )}
           <div className="py-4 flex-1 flex flex-col px-4">
-            {date && <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wide">{formatDate(date)}</p>}
+            {date && (
+              <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wide">
+                {formatDate(date)}
+              </p>
+            )}
             <h3 className="font-medium text-base mb-3 leading-tight relative inline-block group/title">
               <span className="relative z-10">{title}</span>
               <span className="absolute bottom-0 left-0 w-0 h-px bg-foreground/50 group-hover/title:w-full transition-all duration-300 ease-out"></span>
             </h3>
             {description && (
-              <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">{description}</p>
+              <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                {description}
+              </p>
             )}
           </div>
         </div>

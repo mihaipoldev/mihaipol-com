@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   AdminTable,
   TableHeader,
@@ -43,7 +43,6 @@ function generateSlug(name: string): string {
 }
 
 export function PlatformsList({ initialPlatforms }: PlatformsListProps) {
-  const router = useRouter();
   const [platforms, setPlatforms] = useState<Platform[]>(initialPlatforms);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -80,31 +79,33 @@ export function PlatformsList({ initialPlatforms }: PlatformsListProps) {
 
   return (
     <div className="w-full">
-      <div className="mb-6 relative">
+      <div className="mb-6 md:mb-8 relative">
         <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/20 via-primary/10 to-transparent rounded-full" />
         <AdminPageTitle
           title="Platforms"
           description="Manage music streaming platforms and distribution channels where your music is available."
         />
       </div>
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         <AdminToolbar
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
           searchPlaceholder="Search platforms..."
         >
           <Button
-            onClick={() => router.push("/admin/platforms/new/edit")}
+            asChild
+            variant="ghost"
             className="rounded-full w-10 h-10 p-0 bg-transparent text-muted-foreground hover:text-primary hover:bg-transparent border-0 shadow-none transition-colors"
             title="New Platform"
-            variant="ghost"
           >
-            <FontAwesomeIcon icon={faPlus} className="h-5 w-5" />
+            <Link href="/admin/platforms/new/edit">
+              <FontAwesomeIcon icon={faPlus} className="h-5 w-5" />
+            </Link>
           </Button>
         </AdminToolbar>
 
         <AdminTable>
-          <TableHeader>
+          <TableHeader className="hidden md:table-header-group">
             <TableRow>
               <TableHead className="pl-4 w-24">Cover</TableHead>
               <TableHead className="w-64">Name</TableHead>
@@ -124,39 +125,123 @@ export function PlatformsList({ initialPlatforms }: PlatformsListProps) {
               filteredPlatforms.map((platform) => {
                 const platformSlug = platform.slug || generateSlug(platform.name);
                 return (
-                  <TableRow
-                    key={platform.id}
-                    onClick={() => router.push(`/admin/platforms/${platformSlug}/edit`)}
-                    className="group cursor-pointer hover:bg-muted/50"
-                  >
-                    <CoverImageCell
-                      imageUrl={platform.icon_url}
-                      title={platform.name}
-                      showInitials={true}
-                      className="pl-4"
-                    />
-                    <TableTitleCell
-                      title={platform.name}
-                      imageUrl={undefined}
-                      showInitials={false}
-                      className="w-64"
-                    />
-                    <CoverImageCell
-                      imageUrl={platform.icon_horizontal_url}
-                      title={platform.name}
-                      showInitials={true}
-                      horizontal={true}
-                    />
-                    <TableCell>{platform.default_cta_label || "-"}</TableCell>
-                    <TableCell className="text-right pr-4">
-                      <ActionMenu
-                        itemId={platform.id}
-                        editHref={`/admin/platforms/${platformSlug}/edit`}
-                        onDelete={handleDelete}
-                        deleteLabel={`platform "${platform.name}"`}
-                      />
-                    </TableCell>
-                  </TableRow>
+                  <>
+                    {/* Mobile Layout */}
+                    <TableRow
+                      key={`${platform.id}-mobile`}
+                      className="md:hidden group cursor-pointer hover:bg-muted/50 border-b border-border/50"
+                      onMouseDown={(e) => {
+                        if (e.button === 1) {
+                          e.preventDefault();
+                          window.open(`/admin/platforms/${platformSlug}/edit`, "_blank");
+                        }
+                      }}
+                    >
+                      <Link
+                        href={`/admin/platforms/${platformSlug}/edit`}
+                        className="contents"
+                        onClick={(e) => {
+                          if ((e.target as HTMLElement).closest("[data-action-menu]")) {
+                            e.preventDefault();
+                          }
+                        }}
+                      >
+                        <TableCell className="px-3 md:pl-4 md:pr-4 py-4" colSpan={5}>
+                          <div className="flex items-start gap-3 md:gap-4">
+                            <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-muted shadow-md flex-shrink-0">
+                              {platform.icon_url ? (
+                                <img
+                                  src={platform.icon_url}
+                                  alt={platform.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-xs font-semibold text-muted-foreground">
+                                  {platform.name
+                                    .split(/\s+/)
+                                    .map((w) => w[0])
+                                    .join("")
+                                    .substring(0, 2)
+                                    .toUpperCase()}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-base mb-1.5 break-words">
+                                {platform.name}
+                              </div>
+                              <div className="text-sm text-muted-foreground space-y-0.5">
+                                {platform.default_cta_label && (
+                                  <div className="truncate">CTA: {platform.default_cta_label}</div>
+                                )}
+                                {platform.base_url && (
+                                  <div className="truncate text-xs">{platform.base_url}</div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex-shrink-0 ml-2" data-action-menu>
+                              <ActionMenu
+                                itemId={platform.id}
+                                editHref={`/admin/platforms/${platformSlug}/edit`}
+                                onDelete={handleDelete}
+                                deleteLabel={`platform "${platform.name}"`}
+                              />
+                            </div>
+                          </div>
+                        </TableCell>
+                      </Link>
+                    </TableRow>
+
+                    {/* Desktop Layout */}
+                    <TableRow
+                      key={`${platform.id}-desktop`}
+                      className="hidden md:table-row group cursor-pointer hover:bg-muted/50"
+                      onMouseDown={(e) => {
+                        if (e.button === 1) {
+                          e.preventDefault();
+                          window.open(`/admin/platforms/${platformSlug}/edit`, "_blank");
+                        }
+                      }}
+                    >
+                      <Link
+                        href={`/admin/platforms/${platformSlug}/edit`}
+                        className="contents"
+                        onClick={(e) => {
+                          if ((e.target as HTMLElement).closest("[data-action-menu]")) {
+                            e.preventDefault();
+                          }
+                        }}
+                      >
+                        <CoverImageCell
+                          imageUrl={platform.icon_url}
+                          title={platform.name}
+                          showInitials={true}
+                          className="pl-4"
+                        />
+                        <TableTitleCell
+                          title={platform.name}
+                          imageUrl={undefined}
+                          showInitials={false}
+                          className="w-64"
+                        />
+                        <CoverImageCell
+                          imageUrl={platform.icon_horizontal_url}
+                          title={platform.name}
+                          showInitials={true}
+                          horizontal={true}
+                        />
+                        <TableCell>{platform.default_cta_label || "-"}</TableCell>
+                        <TableCell className="text-right pr-4" data-action-menu>
+                          <ActionMenu
+                            itemId={platform.id}
+                            editHref={`/admin/platforms/${platformSlug}/edit`}
+                            onDelete={handleDelete}
+                            deleteLabel={`platform "${platform.name}"`}
+                          />
+                        </TableCell>
+                      </Link>
+                    </TableRow>
+                  </>
                 );
               })
             )}

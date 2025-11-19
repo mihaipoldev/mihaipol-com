@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { format } from "date-fns";
 import {
   AdminTable,
@@ -30,7 +30,6 @@ type AlbumsListProps = {
 };
 
 export function AlbumsList({ initialAlbums }: AlbumsListProps) {
-  const router = useRouter();
   const [albums, setAlbums] = useState<Album[]>(initialAlbums);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -71,7 +70,7 @@ export function AlbumsList({ initialAlbums }: AlbumsListProps) {
 
   return (
     <div className="w-full">
-      <div className="mb-8 relative">
+      <div className="mb-6 md:mb-8 relative">
         <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/20 via-primary/10 to-transparent rounded-full" />
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-3 mb-2">
@@ -85,24 +84,26 @@ export function AlbumsList({ initialAlbums }: AlbumsListProps) {
           </p>
         </div>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         <AdminToolbar
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
           searchPlaceholder="Search albums..."
         >
           <Button
-            onClick={() => router.push("/admin/albums/new/edit")}
+            asChild
+            variant="ghost"
             className="rounded-full w-10 h-10 p-0 bg-transparent text-muted-foreground hover:text-primary hover:bg-transparent border-0 shadow-none transition-colors"
             title="New Album"
-            variant="ghost"
           >
-            <FontAwesomeIcon icon={faPlus} className="h-5 w-5" />
+            <Link href="/admin/albums/new/edit">
+              <FontAwesomeIcon icon={faPlus} className="h-5 w-5" />
+            </Link>
           </Button>
         </AdminToolbar>
 
         <AdminTable>
-          <TableHeader>
+          <TableHeader className="hidden md:table-header-group">
             <TableRow>
               <TableHead className="pl-4 w-24">Cover</TableHead>
               <TableHead className="w-64 max-w-64">Title</TableHead>
@@ -122,48 +123,137 @@ export function AlbumsList({ initialAlbums }: AlbumsListProps) {
               </TableRow>
             ) : (
               filteredAlbums.map((album) => (
-                <TableRow
-                  key={album.id}
-                  onClick={() => router.push(`/admin/albums/${album.slug}/edit`)}
-                  className="group cursor-pointer hover:bg-muted/50"
-                >
-                  <CoverImageCell
-                    imageUrl={album.cover_image_url}
-                    title={album.title}
-                    showInitials={true}
-                    className="pl-4"
-                  />
-                  <TableTitleCell
-                    title={album.title}
-                    imageUrl={undefined}
-                    showInitials={false}
-                    href={`/dev/albums/${album.slug}`}
-                    className="w-64 max-w-64"
-                  />
-                  <TableCell className="text-muted-foreground w-32 max-w-32">
-                    <span className="block truncate" title={album.catalog_number || undefined}>
-                      {album.catalog_number || "-"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {album.labels?.name || "-"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {album.release_date ? format(new Date(album.release_date), "MMM d, yyyy") : "-"}
-                  </TableCell>
-                  <TableCell>
-                    <StateBadge state={album.publish_status} />
-                  </TableCell>
-                  <TableCell className="text-right pr-4">
-                    <ActionMenu
-                      itemId={album.id}
-                      editHref={`/admin/albums/${album.slug}/edit`}
-                      openPageHref={`/dev/albums/${album.slug}`}
-                      onDelete={handleDelete}
-                      deleteLabel={`album "${album.title}"`}
-                    />
-                  </TableCell>
-                </TableRow>
+                <>
+                  {/* Mobile Layout */}
+                  <TableRow
+                    key={`${album.id}-mobile`}
+                    className="md:hidden group cursor-pointer hover:bg-muted/50 border-b border-border/50"
+                    onMouseDown={(e) => {
+                      if (e.button === 1) {
+                        e.preventDefault();
+                        window.open(`/admin/albums/${album.slug}/edit`, "_blank");
+                      }
+                    }}
+                  >
+                    <Link
+                      href={`/admin/albums/${album.slug}/edit`}
+                      className="contents"
+                      onClick={(e) => {
+                        if ((e.target as HTMLElement).closest("[data-action-menu]")) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      <TableCell className="px-3 md:pl-4 md:pr-4 py-4" colSpan={7}>
+                        <div className="flex items-start gap-3 md:gap-4">
+                          <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-muted shadow-md flex-shrink-0">
+                            {album.cover_image_url ? (
+                              <img
+                                src={album.cover_image_url}
+                                alt={album.title}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-xs font-semibold text-muted-foreground">
+                                {album.title
+                                  .split(/\s+/)
+                                  .map((w) => w[0])
+                                  .join("")
+                                  .substring(0, 2)
+                                  .toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-base mb-1.5 break-words">
+                              {album.title}
+                            </div>
+                            <div className="text-sm text-muted-foreground space-y-0.5">
+                              {album.release_date && (
+                                <div>{format(new Date(album.release_date), "MMM d, yyyy")}</div>
+                              )}
+                            </div>
+                            <div className="mt-2">
+                              <StateBadge state={album.publish_status} />
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0 ml-2" data-action-menu>
+                            <ActionMenu
+                              itemId={album.id}
+                              editHref={`/admin/albums/${album.slug}/edit`}
+                              openPageHref={`/dev/albums/${album.slug}`}
+                              statsHref={`/admin/albums/${album.slug}/stats`}
+                              onDelete={handleDelete}
+                              deleteLabel={`album "${album.title}"`}
+                            />
+                          </div>
+                        </div>
+                      </TableCell>
+                    </Link>
+                  </TableRow>
+
+                  {/* Desktop Layout */}
+                  <TableRow
+                    key={`${album.id}-desktop`}
+                    className="hidden md:table-row group cursor-pointer hover:bg-muted/50"
+                    onMouseDown={(e) => {
+                      if (e.button === 1) {
+                        e.preventDefault();
+                        window.open(`/admin/albums/${album.slug}/edit`, "_blank");
+                      }
+                    }}
+                  >
+                    <Link
+                      href={`/admin/albums/${album.slug}/edit`}
+                      className="contents"
+                      onClick={(e) => {
+                        if ((e.target as HTMLElement).closest("[data-action-menu]")) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      <CoverImageCell
+                        imageUrl={album.cover_image_url}
+                        title={album.title}
+                        showInitials={true}
+                        className="pl-4"
+                      />
+                      <TableTitleCell
+                        title={album.title}
+                        imageUrl={undefined}
+                        showInitials={false}
+                        href={`/dev/albums/${album.slug}`}
+                        className="w-64 max-w-64"
+                      />
+                      <TableCell className="text-muted-foreground w-32 max-w-32">
+                        <span className="block truncate" title={album.catalog_number || undefined}>
+                          {album.catalog_number || "-"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {album.labels?.name || "-"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {album.release_date
+                          ? format(new Date(album.release_date), "MMM d, yyyy")
+                          : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <StateBadge state={album.publish_status} />
+                      </TableCell>
+                      <TableCell className="text-right pr-4" data-action-menu>
+                        <ActionMenu
+                          itemId={album.id}
+                          editHref={`/admin/albums/${album.slug}/edit`}
+                          openPageHref={`/dev/albums/${album.slug}`}
+                          statsHref={`/admin/albums/${album.slug}/stats`}
+                          onDelete={handleDelete}
+                          deleteLabel={`album "${album.title}"`}
+                        />
+                      </TableCell>
+                    </Link>
+                  </TableRow>
+                </>
               ))
             )}
           </TableBody>

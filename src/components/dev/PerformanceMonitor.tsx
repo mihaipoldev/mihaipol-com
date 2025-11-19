@@ -22,7 +22,7 @@ export function PerformanceMonitor() {
       originalLog(...args);
 
       const message = args.join(" ");
-      
+
       // Capture [DB] query logs
       if (message.includes("[DB]")) {
         const match = message.match(/(\d+)ms/);
@@ -36,14 +36,14 @@ export function PerformanceMonitor() {
           ]);
         }
       }
-      
+
       // Capture [Analytics] performance logs
       if (message.includes("[Analytics]") && message.includes("ms")) {
         const match = message.match(/(\d+\.?\d*)ms/);
         if (match) {
           const duration = Math.round(parseFloat(match[1]));
           let name = message.split(":")[0]?.replace("[Analytics]", "").trim() || "Analytics";
-          
+
           // Extract more context for analytics logs
           if (message.includes("TOTAL TIME")) {
             name = "Analytics - TOTAL";
@@ -69,14 +69,14 @@ export function PerformanceMonitor() {
           ]);
         }
       }
-      
+
       // Capture [Dashboard] performance logs
       if (message.includes("[Dashboard]") && message.includes("ms")) {
         const match = message.match(/(\d+\.?\d*)ms/);
         if (match) {
           const duration = Math.round(parseFloat(match[1]));
           let name = message.split(":")[0]?.replace("[Dashboard]", "").trim() || "Dashboard";
-          
+
           // Extract more context for dashboard logs
           if (message.includes("TOTAL TIME")) {
             name = "Dashboard - TOTAL";

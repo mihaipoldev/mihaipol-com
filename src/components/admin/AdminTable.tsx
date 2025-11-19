@@ -19,11 +19,11 @@ export function AdminTable({ children, className }: AdminTableProps) {
   return (
     <div
       className={cn(
-        "w-full overflow-x-auto rounded-xl bg-card/50 text-card-foreground dark:bg-card/30 shadow-lg transition-all duration-300 hover:shadow-xl",
+        "w-full overflow-x-auto md:overflow-x-auto rounded-xl bg-card/50 text-card-foreground dark:bg-card/30 shadow-lg transition-all duration-300 hover:shadow-xl",
         getCardGradient()
       )}
     >
-      <Table className={className}>{children}</Table>
+      <Table className={cn("min-w-0", className)}>{children}</Table>
     </div>
   );
 }

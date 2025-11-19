@@ -73,11 +73,7 @@ export default function TrackedLink({
     >
       {horizontalIconUrl && (
         <div className="h-8 flex items-center">
-          <img 
-            src={horizontalIconUrl} 
-            alt=""
-            className="h-9 w-auto object-contain"
-          />
+          <img src={horizontalIconUrl} alt="" className="h-9 w-auto object-contain" />
         </div>
       )}
       <span
@@ -85,7 +81,7 @@ export default function TrackedLink({
         style={{
           backgroundColor: "transparent",
           color: linkTextColor,
-          border: 'none',
+          border: "none",
         }}
       >
         {rightLabel || "Open"}

@@ -21,10 +21,9 @@ export default function LandingGriffithSection({
   const featured = featuredAlbum ?? null;
 
   return (
-    <section id="griffith" className="py-12 md:py-24 px-6 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-background to-primary/10" />
+    <section id="griffith" className="py-8 md:py-16 px-6 relative overflow-hidden">
       <div className="container mx-auto px-0 md:px-8 relative">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-[1200px] mx-auto">
           <Card className="overflow-hidden shadow-card-hover border-2 border-primary/20 bg-card/80 backdrop-blur">
             <div className="grid lg:grid-cols-2 gap-0">
               <div className="relative aspect-square lg:aspect-auto">
@@ -38,7 +37,7 @@ export default function LandingGriffithSection({
                   Featured Release
                 </Badge>
               </div>
-              <div className="p-8 lg:p-12 flex flex-col justify-center space-y-6">
+              <div className="p-6 lg:p-10 flex flex-col justify-center space-y-6">
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <Disc3 className="w-5 h-5 text-primary" />
@@ -50,7 +49,9 @@ export default function LandingGriffithSection({
                     {featured?.title ?? "Horizon EP"}
                   </h2>
                   {featured?.description && (
-                    <p className="text-muted-foreground whitespace-pre-line">{featured.description}</p>
+                    <p className="text-muted-foreground whitespace-pre-line">
+                      {featured.description}
+                    </p>
                   )}
                 </div>
                 <div className="flex flex-wrap gap-4">

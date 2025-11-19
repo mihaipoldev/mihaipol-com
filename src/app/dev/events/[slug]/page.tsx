@@ -41,7 +41,7 @@ export default async function EventPage({ params }: EventPageProps) {
     : null;
 
   return (
-    <div className="min-h-dvh">
+    <>
       <TrackView
         eventType="page_view"
         entityType="event"
@@ -172,6 +172,6 @@ export default async function EventPage({ params }: EventPageProps) {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

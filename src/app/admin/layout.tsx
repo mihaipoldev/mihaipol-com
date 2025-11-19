@@ -51,7 +51,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
               <div className="mx-auto w-full max-w-[1400px] flex flex-col">
                 <AdminHeader />
                 <AdminPageTransition>
-                  <div className="flex flex-col py-6 pb-4 md:pb-8 px-4 md:px-10 lg:px-12 space-y-6">
+                  <div className="flex flex-col py-6 pb-4 md:pb-8 px-4 md:px-10 lg:px-12 space-y-4 md:space-y-6">
                     {children}
                   </div>
                 </AdminPageTransition>

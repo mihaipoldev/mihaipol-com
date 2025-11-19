@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Camera, Crown, Save } from "lucide-react";
+import { Camera, Crown, Save, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField } from "@/components/admin/forms/FormField";
 import { ShadowInput } from "@/components/admin/ShadowInput";
@@ -29,7 +29,10 @@ export function AccountSettings() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Account Settings</CardTitle>
+          <CardTitle className="text-2xl flex items-center gap-2">
+            <User className="h-6 w-6 text-primary" />
+            Account Settings
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">

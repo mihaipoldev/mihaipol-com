@@ -19,14 +19,12 @@ export const metadata: Metadata = {
     default: "Mihai Pol",
     template: "%s - Mihai Pol",
   },
-  description: "Music and creative works by Mihai Pol",
+  description: "Electronic music artist. Music and creative works by Mihai Pol",
 };
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default async function RootLayout({
@@ -42,10 +40,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning className={`dark ${getAllFontVariables()}`}>
-      <body
-        className="antialiased"
-        suppressHydrationWarning
-      >
+      <body className="antialiased" suppressHydrationWarning>
         <ViewportFix />
         {/* AdminColorStyle applies server-side color IMMEDIATELY from database (runs first) */}
         {isAdminPage && <AdminColorStyle />}

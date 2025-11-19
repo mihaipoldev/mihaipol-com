@@ -8,12 +8,8 @@ export default async function EventsPage() {
   const events = await getAllEvents();
 
   return (
-    <div className="min-h-dvh">
-      <TrackView
-        eventType="section_view"
-        entityType="site_section"
-        entityId="events"
-      />
+    <>
+      <TrackView eventType="section_view" entityType="site_section" entityId="events" />
       <div className="py-24 px-6">
         <div className="container mx-auto px-0 md:px-8">
           <div className="text-center mb-12">
@@ -27,10 +23,10 @@ export default async function EventsPage() {
               <p className="text-muted-foreground">No events yet. Check back soon.</p>
             </div>
           ) : (
-            <LandingEventsList events={events} />
+            <LandingEventsList events={events} showPastStrikethrough={true} />
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

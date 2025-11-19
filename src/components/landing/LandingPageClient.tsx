@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useLayoutEffect } from "react";
+import { usePathname } from "next/navigation";
 import LandingHeroSection from "./sections/LandingHeroSection";
 import LandingFeatureMusicSection from "./sections/LandingFeatureMusicSection";
 import LandingAlbumsSection from "./sections/LandingAlbumsSection";
@@ -18,6 +20,9 @@ type LandingPageClientProps = {
   featuredAlbum: LandingAlbum | null;
   heroImage: string;
   griffithLabelSlug: string;
+  showPastStrikethrough: boolean;
+  albumsHomepageColumns: number;
+  updatesHomepageColumns: number;
 };
 
 export default function LandingPageClient({
@@ -27,8 +32,156 @@ export default function LandingPageClient({
   featuredAlbum,
   heroImage,
   griffithLabelSlug,
+  showPastStrikethrough,
+  albumsHomepageColumns,
+  updatesHomepageColumns,
 }: LandingPageClientProps) {
   const featured = featuredAlbum ?? albums[0] ?? null;
+  const pathname = usePathname();
+
+  // Prevent scroll to top on mount if we have a hash - run immediately before paint
+  useLayoutEffect(() => {
+    if (pathname !== "/dev") return;
+
+    // If we have a hash, try to scroll immediately
+    const hash = window.location.hash;
+    if (hash) {
+      const sectionId = hash.substring(1);
+      const section = document.getElementById(sectionId);
+      if (section) {
+        // Section exists, scroll immediately without smooth behavior
+        const headerHeight = 64;
+        const rect = section.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const sectionTop = rect.top + scrollTop - headerHeight;
+        window.scrollTo({ top: Math.max(0, sectionTop), behavior: "auto" });
+      }
+    }
+  }, [pathname]);
+
+  // Restore scroll position when coming back from navigation
+  useEffect(() => {
+    if (pathname !== "/dev") return;
+
+    const scrollToSection = (sectionId: string, immediate = false) => {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        const headerHeight = 64;
+        const rect = section.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const sectionTop = rect.top + scrollTop - headerHeight;
+
+        // Ensure we don't scroll to negative values
+        const targetTop = Math.max(0, sectionTop);
+
+        window.scrollTo({
+          top: targetTop,
+          behavior: immediate ? "auto" : "smooth",
+        });
+
+        // Update URL hash after scrolling
+        if (!window.location.hash || window.location.hash !== `#${sectionId}`) {
+          window.history.replaceState(null, "", `#${sectionId}`);
+        }
+        return true;
+      }
+      return false;
+    };
+
+    // Function to try scrolling with retries
+    const tryScrollToSection = (sectionId: string, maxAttempts = 30, immediate = false) => {
+      let attempts = 0;
+      const tryScroll = () => {
+        attempts++;
+        const section = document.getElementById(sectionId);
+        if (section) {
+          // Check if the section is actually rendered and has dimensions
+          const rect = section.getBoundingClientRect();
+          if (rect.height > 0 || attempts >= maxAttempts) {
+            scrollToSection(sectionId, immediate);
+            return;
+          }
+        }
+        if (attempts < maxAttempts) {
+          // Try again after a short delay
+          setTimeout(() => {
+            requestAnimationFrame(tryScroll);
+          }, 50);
+        }
+      };
+      // Start immediately or after a delay
+      if (immediate) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(tryScroll);
+        });
+      } else {
+        // Start after a delay to ensure page is rendered
+        // Also wait for window load if page is still loading
+        if (document.readyState === "complete") {
+          setTimeout(() => {
+            requestAnimationFrame(tryScroll);
+          }, 100);
+        } else {
+          window.addEventListener(
+            "load",
+            () => {
+              setTimeout(() => {
+                requestAnimationFrame(tryScroll);
+              }, 100);
+            },
+            { once: true }
+          );
+        }
+      }
+    };
+
+    // Check if we have a stored section to scroll to (from "View all" links)
+    const storedSection = sessionStorage.getItem("landingPageScrollSection");
+    if (storedSection) {
+      // Clear it so it only happens once
+      sessionStorage.removeItem("landingPageScrollSection");
+
+      // Clear any existing hash in the URL to prevent browser from scrolling to it
+      if (window.location.hash) {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+
+      // Wait for the page to render, then scroll to the section
+      tryScrollToSection(storedSection);
+    } else {
+      // If there's a hash in the URL (from direct navigation or browser back), scroll to it
+      const hash = window.location.hash;
+      if (hash) {
+        const sectionId = hash.substring(1); // Remove the #
+        // Try immediately first, then with retries if needed
+        const section = document.getElementById(sectionId);
+        if (section && section.getBoundingClientRect().height > 0) {
+          // Section is ready, scroll immediately
+          scrollToSection(sectionId, true);
+        } else {
+          // Section not ready yet, use retry mechanism
+          tryScrollToSection(sectionId, 30, true);
+        }
+      }
+    }
+
+    // Handle hash changes (e.g., when clicking nav links)
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const sectionId = hash.substring(1);
+        // Small delay to ensure any previous scroll has finished
+        setTimeout(() => {
+          scrollToSection(sectionId);
+        }, 100);
+      }
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, [pathname]);
 
   return (
     <>
@@ -39,13 +192,26 @@ export default function LandingPageClient({
         albums={albums}
       />
 
-      <LandingEventsSection events={events} />
+      <LandingEventsSection events={events} showPastStrikethrough={showPastStrikethrough} />
 
-      <LandingAlbumsSection albums={albums} fallbackImage={FALLBACK_IMAGE} />
+      <LandingAlbumsSection
+        albums={albums}
+        fallbackImage={FALLBACK_IMAGE}
+        columns={albumsHomepageColumns as 3 | 4 | 5}
+      />
 
-      <LandingGriffithSection featuredAlbum={featuredAlbum} fallbackImage={FALLBACK_IMAGE} griffithLabelSlug={griffithLabelSlug} />
+      <LandingGriffithSection
+        featuredAlbum={featuredAlbum}
+        fallbackImage={FALLBACK_IMAGE}
+        griffithLabelSlug={griffithLabelSlug}
+      />
 
-      <LandingUpdatesSection updates={updates} fallbackImage={FALLBACK_IMAGE} variant="compact" />
+      <LandingUpdatesSection
+        updates={updates}
+        fallbackImage={FALLBACK_IMAGE}
+        variant="compact"
+        columns={updatesHomepageColumns as 3 | 4 | 5}
+      />
     </>
   );
 }

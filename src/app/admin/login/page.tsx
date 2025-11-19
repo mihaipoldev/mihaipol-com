@@ -42,10 +42,12 @@ export default function AdminLoginPage() {
           </div>
 
           {/* Login card */}
-          <div className={`relative overflow-hidden rounded-xl border border-border shadow-lg ${getCardGradient()}`}>
+          <div
+            className={`relative overflow-hidden rounded-xl border border-border shadow-lg ${getCardGradient()}`}
+          >
             {/* Decorative gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
-            
+
             {/* Sparkle decorations */}
             <div className="absolute top-4 right-4 w-2 h-2 bg-primary/20 rounded-full blur-sm animate-pulse" />
             <div

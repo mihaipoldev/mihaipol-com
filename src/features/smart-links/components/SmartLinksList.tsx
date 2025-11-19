@@ -24,9 +24,9 @@ export default function SmartLinksList({ links, disableTracking }: SmartLinksLis
       const albumColor = colors[0];
       const match = albumColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
       if (match) {
-    const r = parseInt(match[1]);
-    const g = parseInt(match[2]);
-    const b = parseInt(match[3]);
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
         // Use a subtle opacity (0.15) to create an elegant divider
         return `rgba(${r}, ${g}, ${b}, 0.15)`;
       }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChartLine,
@@ -28,6 +28,7 @@ import { useState, useEffect } from "react";
 import { UserMenu } from "./UserMenu";
 import { getSidebarGradient, getSidebarAccentGradient } from "@/lib/gradient-presets";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { usePrimaryColor } from "@/hooks/use-primary-color";
 
 const overviewItems = [
   {
@@ -86,9 +87,14 @@ const settingsItems = [
   },
 ];
 
-function MusicCollapsible({ onNavigate }: { onNavigate?: () => void }) {
+function MusicCollapsible({
+  onNavigate,
+  isMobile = false,
+}: {
+  onNavigate?: () => void;
+  isMobile?: boolean;
+}) {
   const pathname = usePathname();
-  const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
   const [mounted, setMounted] = useState(false);
   const sidebarAccentGradient = getSidebarAccentGradient();
@@ -97,8 +103,7 @@ function MusicCollapsible({ onNavigate }: { onNavigate?: () => void }) {
     .map((cls) => `hover:${cls}`)
     .join(" ");
 
-  const handleNavigation = (href: string) => {
-    router.push(href);
+  const handleLinkClick = () => {
     onNavigate?.();
   };
 
@@ -128,20 +133,27 @@ function MusicCollapsible({ onNavigate }: { onNavigate?: () => void }) {
         type="button"
         data-active={isMusicActive}
         className={cn(
-          `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-5`,
-          "[&>svg]:size-4 [&>svg]:shrink-0",
+          `peer/menu-button flex w-full items-center overflow-hidden text-left font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary`,
+          isMobile
+            ? "py-3 text-[17px] h-12 gap-6 [&>svg]:size-5"
+            : "py-2.5 text-[15px] h-10 gap-5 [&>svg]:size-4",
+          "[&>svg]:shrink-0",
           "[&>span:last-child]:truncate",
           isMusicActive
-            ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
-            : "text-sidebar-muted-foreground rounded-lg px-4"
+            ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+            : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
         )}
       >
         <FontAwesomeIcon icon={faMusic} />
         <span className="flex-1">Music</span>
         <FontAwesomeIcon
           icon={faChevronDown}
-          className="transition-transform duration-200"
-          style={{ fontSize: '0.75rem', width: '0.75rem', height: '0.75rem' }}
+          className={cn("transition-transform duration-200", isMobile ? "!w-3 !h-3" : "")}
+          style={
+            isMobile
+              ? { fontSize: "0.625rem", width: "0.75rem", height: "0.75rem" }
+              : { fontSize: "0.75rem", width: "0.75rem", height: "0.75rem" }
+          }
         />
       </button>
     );
@@ -154,45 +166,55 @@ function MusicCollapsible({ onNavigate }: { onNavigate?: () => void }) {
           type="button"
           data-active={isMusicActive}
           className={cn(
-            `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-5`,
-            "[&>svg]:size-4 [&>svg]:shrink-0",
+            `peer/menu-button flex w-full items-center overflow-hidden text-left font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary`,
+            isMobile
+              ? "py-3 text-[17px] h-12 gap-6 [&>svg]:size-5"
+              : "py-2.5 text-[15px] h-10 gap-5 [&>svg]:size-4",
+            "[&>svg]:shrink-0",
             "[&>span:last-child]:truncate",
             isMusicActive
-              ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
-              : "text-sidebar-muted-foreground rounded-lg px-4"
+              ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+              : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
           )}
         >
           <FontAwesomeIcon icon={faMusic} />
           <span className="flex-1">Music</span>
           <FontAwesomeIcon
             icon={isOpen ? faChevronDown : faChevronLeft}
-            className="transition-transform duration-200"
-            style={{ fontSize: '0.75rem', width: '0.75rem', height: '0.75rem' }}
+            className={cn("transition-transform duration-200", isMobile ? "!w-3 !h-3" : "")}
+            style={
+              isMobile
+                ? { fontSize: "0.625rem", width: "0.75rem", height: "0.75rem" }
+                : { fontSize: "0.75rem", width: "0.75rem", height: "0.75rem" }
+            }
           />
         </button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="mt-0.5">
-        <div className="flex flex-col gap-0.5 pl-9">
+      <CollapsibleContent className={cn("mt-0.5", isMobile && "mt-1")}>
+        <div className={cn("flex flex-col gap-0.5", isMobile ? "pl-11" : "pl-9")}>
           {musicItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
-              <button
+              <Link
                 key={item.href}
-                type="button"
-                onClick={() => handleNavigation(item.href)}
+                href={item.href}
+                onClick={handleLinkClick}
                 data-active={isActive}
                 className={cn(
-                  `peer/menu-button flex w-full items-center overflow-hidden py-2 text-left text-[14px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-9 gap-3`,
-                  "[&>svg]:size-3 [&>svg]:shrink-0",
+                  `peer/menu-button flex w-full items-center overflow-hidden text-left font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary`,
+                  isMobile
+                    ? "py-2.5 text-[16px] h-11 gap-4 [&>svg]:size-4"
+                    : "py-2 text-[14px] h-9 gap-3 [&>svg]:size-3",
+                  "[&>svg]:shrink-0",
                   "[&>span:last-child]:truncate",
                   isActive
-                    ? `${getSidebarAccentGradient()} relative font-semibold hover:font-semibold text-primary rounded-r-lg rounded-l-none pl-5 pr-3`
-                    : "text-sidebar-muted-foreground rounded-lg px-3"
+                    ? `${getSidebarAccentGradient()} relative font-semibold hover:font-semibold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-6 pr-4" : "pl-5 pr-3"}`
+                    : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-4" : "px-3"}`
                 )}
               >
                 <FontAwesomeIcon icon={item.icon} />
                 <span>{item.title}</span>
-              </button>
+              </Link>
             );
           })}
         </div>
@@ -201,17 +223,24 @@ function MusicCollapsible({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarContent({
+  onNavigate,
+  isMobile = false,
+}: {
+  onNavigate?: () => void;
+  isMobile?: boolean;
+}) {
   const pathname = usePathname();
-  const router = useRouter();
+  // Use the hook directly to trigger re-render when color changes
+  const { primaryColor } = usePrimaryColor();
+
   const sidebarAccentGradient = getSidebarAccentGradient();
   const hoverGradientClasses = sidebarAccentGradient
     .split(" ")
     .map((cls) => `hover:${cls}`)
     .join(" ");
 
-  const handleNavigation = (href: string) => {
-    router.push(href);
+  const handleLinkClick = () => {
     onNavigate?.();
   };
 
@@ -225,12 +254,27 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <div className="sparkle" style={{ top: "35%", left: "15%", animationDelay: "7s" }} />
       </div>
       {/* Logo/Brand */}
-      <div className="flex h-16 items-center justify-between px-6 mt-2 mb-2">
+      <div
+        className={cn(
+          "flex items-center justify-between",
+          isMobile ? "h-20 px-6 mt-2 mb-2" : "h-16 px-6 mt-2 mb-2"
+        )}
+      >
         <Link href="/admin" className="flex flex-col group">
-          <span className="text-2xl font-bold text-sidebar-foreground leading-tight uppercase tracking-tight transition-colors group-hover:text-primary">
+          <span
+            className={cn(
+              "font-bold text-sidebar-foreground leading-tight uppercase tracking-tight transition-colors group-hover:text-primary",
+              isMobile ? "text-2xl" : "text-2xl"
+            )}
+          >
             Mihai Pol
           </span>
-          <span className="text-xs text-sidebar-foreground/60 leading-tight -mt-0.5 font-medium">
+          <span
+            className={cn(
+              "text-sidebar-foreground/60 leading-tight -mt-0.5 font-medium",
+              isMobile ? "text-xs" : "text-xs"
+            )}
+          >
             Artist Portal
           </span>
         </Link>
@@ -238,22 +282,38 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-11 w-11 rounded-xl bg-primary/5 text-primary border border-primary/20 hover:bg-primary/15 hover:border-primary/30 hover:scale-105 transition-all duration-200 !shadow-none dark:!shadow-none hover:!shadow-none dark:hover:!shadow-none ring-0 focus-visible:ring-0 group/button"
+            className={cn(
+              "rounded-full bg-primary/5 text-primary border border-primary/20 hover:bg-primary/15 hover:border-primary/30 hover:scale-105 transition-all duration-200 !shadow-none dark:!shadow-none hover:!shadow-none dark:hover:!shadow-none ring-0 focus-visible:ring-0 group/button flex-shrink-0",
+              isMobile ? "h-12 w-12 !h-12 !w-12" : "h-9 w-9"
+            )}
+            style={
+              isMobile
+                ? { height: "3rem", width: "3rem", minHeight: "3rem", minWidth: "3rem" }
+                : undefined
+            }
             aria-label="Go to website"
           >
             <FontAwesomeIcon
               icon={faGlobe}
-              className="h-5 w-5 transition-transform duration-200 group-hover/button:rotate-12"
+              className={cn(
+                "transition-transform duration-200 group-hover/button:rotate-12",
+                isMobile ? "h-7 w-7" : "h-6 w-6"
+              )}
             />
           </Button>
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-7 p-5 pt-6">
+      <nav className={cn("flex-1", isMobile ? "space-y-9 px-6 py-7 pt-8" : "space-y-7 p-5 pt-6")}>
         {/* Overview Category */}
-        <div className="space-y-2.5">
-          <div className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider px-3 mb-1">
+        <div className={cn("space-y-2.5", isMobile && "space-y-3 mt-0")}>
+          <div
+            className={cn(
+              "font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-1",
+              isMobile ? "text-xs" : "text-xs px-3"
+            )}
+          >
             Overview
           </div>
           <div className="flex flex-col gap-0.5">
@@ -266,49 +326,61 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   : pathname === item.href || pathname.startsWith(item.href + "/");
 
               return (
-                <button
+                <Link
                   key={item.href}
-                  type="button"
-                  onClick={() => handleNavigation(item.href)}
+                  href={item.href}
+                  onClick={handleLinkClick}
                   data-active={isActive}
                   className={cn(
-                    `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-5`,
-                    "[&>svg]:size-4 [&>svg]:shrink-0",
+                    `peer/menu-button flex w-full items-center overflow-hidden text-left font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary`,
+                    isMobile
+                      ? "py-3 text-[17px] h-12 gap-6 [&>svg]:size-5"
+                      : "py-2.5 text-[15px] h-10 gap-5 [&>svg]:size-4",
+                    "[&>svg]:shrink-0",
                     "[&>span:last-child]:truncate",
                     isActive
-                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
-                      : "text-sidebar-muted-foreground rounded-lg px-4"
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+                      : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
                   )}
                 >
                   <FontAwesomeIcon icon={item.icon} />
                   <span>{item.title}</span>
-                </button>
+                </Link>
               );
             })}
-            <MusicCollapsible onNavigate={onNavigate} />
-            <button
-              type="button"
-              onClick={() => handleNavigation(updatesItem.href)}
-              data-active={pathname === updatesItem.href || pathname.startsWith(updatesItem.href + "/")}
+            <MusicCollapsible onNavigate={onNavigate} isMobile={isMobile} />
+            <Link
+              href={updatesItem.href}
+              onClick={handleLinkClick}
+              data-active={
+                pathname === updatesItem.href || pathname.startsWith(updatesItem.href + "/")
+              }
               className={cn(
-                `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-5`,
-                "[&>svg]:size-4 [&>svg]:shrink-0",
+                `peer/menu-button flex w-full items-center overflow-hidden text-left font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary`,
+                isMobile
+                  ? "py-3 text-[17px] h-12 gap-6 [&>svg]:size-5"
+                  : "py-2.5 text-[15px] h-10 gap-5 [&>svg]:size-4",
+                "[&>svg]:shrink-0",
                 "[&>span:last-child]:truncate",
                 pathname === updatesItem.href || pathname.startsWith(updatesItem.href + "/")
-                  ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
-                  : "text-sidebar-muted-foreground rounded-lg px-4"
+                  ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+                  : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
               )}
             >
               <FontAwesomeIcon icon={updatesItem.icon} />
               <span>{updatesItem.title}</span>
-            </button>
+            </Link>
           </div>
         </div>
 
-
         {/* Settings Category */}
-        <div className="space-y-2.5">
-          <div className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider px-3 mb-1">
+        <div className={cn("space-y-2.5", isMobile ? "space-y-3 mt-8" : "mt-0")}>
+          <div
+            className={cn(
+              "font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-1",
+              isMobile ? "text-xs" : "text-xs px-3"
+            )}
+          >
             Settings
           </div>
           <div className="flex flex-col gap-0.5">
@@ -316,23 +388,26 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
 
               return (
-                <button
+                <Link
                   key={item.href}
-                  type="button"
-                  onClick={() => handleNavigation(item.href)}
+                  href={item.href}
+                  onClick={handleLinkClick}
                   data-active={isActive}
                   className={cn(
-                    `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-1.5`,
-                    "[&>svg]:size-4 [&>svg]:shrink-0",
-                    "[&>span:last-child]:truncate gap-5",
+                    `peer/menu-button flex w-full items-center overflow-hidden text-left font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary`,
+                    isMobile
+                      ? "py-3 text-[17px] h-12 gap-6 [&>svg]:size-5"
+                      : "py-2.5 text-[15px] h-10 gap-1.5 [&>svg]:size-4",
+                    "[&>svg]:shrink-0",
+                    "[&>span:last-child]:truncate",
                     isActive
-                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
-                      : "text-sidebar-muted-foreground rounded-lg px-4"
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+                      : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
                   )}
                 >
                   <FontAwesomeIcon icon={item.icon} />
                   <span>{item.title}</span>
-                </button>
+                </Link>
               );
             })}
           </div>
@@ -352,6 +427,49 @@ export function AdminSidebar() {
 export function AdminSidebarMobile() {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  // Use the hook directly to trigger re-render when color changes
+  const { primaryColor } = usePrimaryColor();
+  const [cssVars, setCssVars] = useState<Record<string, string>>({});
+
+  // Update CSS variables when color changes or sheet opens
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const root = document.documentElement;
+    const computedStyle = getComputedStyle(root);
+
+    const vars = {
+      "--brand-h":
+        computedStyle.getPropertyValue("--brand-h").trim() ||
+        root.style.getPropertyValue("--brand-h").trim(),
+      "--brand-s":
+        computedStyle.getPropertyValue("--brand-s").trim() ||
+        root.style.getPropertyValue("--brand-s").trim(),
+      "--brand-l":
+        computedStyle.getPropertyValue("--brand-l").trim() ||
+        root.style.getPropertyValue("--brand-l").trim(),
+      "--primary":
+        computedStyle.getPropertyValue("--primary").trim() ||
+        root.style.getPropertyValue("--primary").trim(),
+    };
+
+    setCssVars(vars);
+
+    // Also apply directly to SheetContent if it's open
+    if (open) {
+      const sheetContent = document.querySelector("[data-radix-dialog-content]") as HTMLElement;
+      if (sheetContent) {
+        Object.entries(vars).forEach(([key, value]) => {
+          if (value) {
+            sheetContent.style.setProperty(key, value, "important");
+          }
+        });
+      }
+    }
+  }, [primaryColor, open]);
+
+  // Recalculate gradient on each render to ensure it picks up CSS variable changes
+  const sidebarGradient = getSidebarGradient();
 
   if (!isMobile) return null;
 
@@ -362,9 +480,14 @@ export function AdminSidebarMobile() {
           <FontAwesomeIcon icon={faBars} className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className={`w-64 p-0 ${getSidebarGradient()}`} hideCloseButton>
+      <SheetContent
+        side="left"
+        className={`w-[272px] p-0 ${sidebarGradient}`}
+        hideCloseButton
+        style={cssVars as React.CSSProperties}
+      >
         <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-        <SidebarContent onNavigate={() => setOpen(false)} />
+        <SidebarContent onNavigate={() => setOpen(false)} isMobile={true} />
       </SheetContent>
     </Sheet>
   );

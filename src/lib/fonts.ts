@@ -235,4 +235,3 @@ export const getActiveFontCSSVariables = () => {
 //      Pairing 5: --font-inter (heading), --font-poppins (body)
 //      Pairing 6: --font-raleway (heading), --font-nunito-sans (body)
 // 3. Restart your dev server
-

@@ -27,9 +27,9 @@ export function AdminBodyClass() {
       document.body.style.setProperty("padding", "0", "important");
       document.body.style.setProperty("position", "relative", "important");
     };
-    
+
     setStyles();
-    
+
     // Also set on resize to prevent any height changes
     window.addEventListener("resize", setStyles);
 

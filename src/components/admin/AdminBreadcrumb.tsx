@@ -54,12 +54,13 @@ export function AdminBreadcrumb() {
   const relevantSegments = adminIndex >= 0 ? segments.slice(adminIndex + 1) : segments;
 
   const isEditPage = relevantSegments.length >= 3 && relevantSegments[2] === "edit";
+  const isStatsPage = relevantSegments.length >= 3 && relevantSegments[2] === "stats";
   const resource = relevantSegments[0] || null;
-  const itemSlug = isEditPage ? relevantSegments[1] : null;
+  const itemSlug = isEditPage || isStatsPage ? relevantSegments[1] : null;
 
-  // Fetch item name for edit pages
+  // Fetch item name for edit and stats pages
   useEffect(() => {
-    if (isEditPage && resource && itemSlug) {
+    if ((isEditPage || isStatsPage) && resource && itemSlug) {
       setIsLoading(true);
       fetchItemName(resource, itemSlug)
         .then((name) => {
@@ -72,7 +73,7 @@ export function AdminBreadcrumb() {
     } else {
       setItemName(null);
     }
-  }, [isEditPage, resource, itemSlug]);
+  }, [isEditPage, isStatsPage, resource, itemSlug]);
 
   // Handle dashboard page
   if (!resource || resource === "") {
@@ -105,7 +106,7 @@ export function AdminBreadcrumb() {
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          {isEditPage ? (
+          {isEditPage || isStatsPage ? (
             <BreadcrumbLink asChild>
               <Link href={`/admin/${resource}`}>{pageName}</Link>
             </BreadcrumbLink>
@@ -118,6 +119,22 @@ export function AdminBreadcrumb() {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage>{isLoading ? "Loading..." : itemName || "Edit"}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </>
+        )}
+        {isStatsPage && (
+          <>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href={`/admin/${resource}/${itemSlug}/edit`}>
+                  {isLoading ? "Loading..." : itemName || "Item"}
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Stats</BreadcrumbPage>
             </BreadcrumbItem>
           </>
         )}

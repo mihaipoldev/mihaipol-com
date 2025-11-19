@@ -43,6 +43,7 @@ export type SectionItemVisitsData = {
 export type TopPerformingPage = {
   id: string;
   title: string;
+  slug: string;
   type: "album" | "event" | "update";
   pageViews: number;
   clicks: number;
@@ -67,19 +68,55 @@ function toDayKey(d: string): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
+function getWeekNumber(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+}
+
+function toWeekKey(d: string): string {
+  const date = new Date(d);
+  const year = date.getUTCFullYear();
+  const week = getWeekNumber(date);
+  return `${year}-W${String(week).padStart(2, "0")}`;
+}
+
+function toMonthKey(d: string): string {
+  const date = new Date(d);
+  const yyyy = date.getUTCFullYear();
+  const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+  return `${yyyy}-${mm}`;
+}
+
+export async function getDashboardData(scope: string = "30"): Promise<DashboardData> {
   const startTime = performance.now();
   const supabase = getServiceSupabaseClient();
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
   const todayISO = today.toISOString().split("T")[0];
 
-  // Calculate 12 months ago
+  // Calculate lookback date based on scope
+  let lookbackDate: Date;
+  if (scope === "all") {
+    // Use a very old date for "all"
+    lookbackDate = new Date(0);
+  } else {
+    const days = parseInt(scope, 10);
+    lookbackDate = new Date(today);
+    lookbackDate.setDate(lookbackDate.getDate() - days);
+  }
+  const lookbackISO = lookbackDate.toISOString();
+
+  // Calculate 12 months ago (for albums stats, not affected by scope)
   const twelveMonthsAgo = new Date(today);
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
   const twelveMonthsAgoISO = twelveMonthsAgo.toISOString().split("T")[0];
 
-  console.log("[Dashboard] Starting data fetch...");
+  console.log(
+    `[Dashboard] Starting data fetch with scope: ${scope} days (lookback: ${lookbackISO})...`
+  );
 
   // Fetch albums stats
   const albumsStatsStart = performance.now();
@@ -165,35 +202,47 @@ export async function getDashboardData(): Promise<DashboardData> {
   };
 
   // OPTIMIZED: Fetch all analytics events we need in fewer queries, then distribute in memory
-  const sinceISO = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const lookbackISO = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  // Use scope-based lookback for analytics queries
+  // For daily series, use the full scope
+  let seriesDays: number;
 
-  // Prepare day keys for daily series (last 30 days)
+  if (scope === "all") {
+    // For "all", show last 365 days (1 year) for reasonable performance
+    seriesDays = 365;
+  } else {
+    seriesDays = parseInt(scope, 10);
+  }
+
+  // Calculate lookback for series (use full scope)
+  const seriesLookbackDate = new Date(today.getTime() - seriesDays * 24 * 60 * 60 * 1000);
+  const sinceISO = seriesLookbackDate.toISOString();
+
+  // Prepare day keys for series
   const dayStart = new Date();
   dayStart.setUTCHours(0, 0, 0, 0);
-  const startTs = dayStart.getTime() - 29 * 24 * 60 * 60 * 1000;
+  const startTs = dayStart.getTime() - (seriesDays - 1) * 24 * 60 * 60 * 1000;
   const dayKeys: string[] = [];
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < seriesDays; i++) {
     const d = new Date(startTs + i * 24 * 60 * 60 * 1000);
     dayKeys.push(toDayKey(d.toISOString()));
   }
 
   const analyticsQueriesStart = performance.now();
-  // Fetch all analytics events we need in parallel - one query for 30-day data, one for 90-day data
+  // Fetch all analytics events we need in parallel - filtered by scope
   const [
-    { data: recentEvents30dRaw }, // All events from last 30 days
-    { data: topPagesEvents90dRaw }, // Page views and link clicks from last 90 days
-    { count: totalSessionStarts }, // Total count for website visits
-    { count: totalItemViews }, // Total count for item views
+    { data: recentEventsRaw }, // All events for daily series (session_start, page_view, section_view)
+    { data: topPagesEventsRaw }, // Page views and link clicks for top pages (filtered by scope)
+    { count: totalSessionStarts }, // Total count for website visits (filtered by scope)
+    { count: totalItemViews }, // Total count for item views (filtered by scope)
   ] = await Promise.all([
-    // Single query for all 30-day analytics: session_start, page_view (items), section_view
+    // Single query for daily series analytics: session_start, page_view (items), section_view
     supabase
       .from("analytics_events")
       .select("created_at, event_type, entity_type, entity_id")
       .gte("created_at", sinceISO)
       .in("event_type", ["session_start", "page_view", "section_view"])
       .order("created_at", { ascending: true }),
-    // Single query for 90-day top pages data: page_view and link_click
+    // Single query for top pages data: page_view and link_click (using scope-based lookback)
     supabase
       .from("analytics_events")
       .select("created_at, event_type, entity_type, entity_id")
@@ -201,36 +250,38 @@ export async function getDashboardData(): Promise<DashboardData> {
       .in("event_type", ["page_view", "link_click"])
       .order("created_at", { ascending: false })
       .limit(10000),
-    // Total counts (these might be slow but run in parallel)
+    // Total counts filtered by scope (these might be slow but run in parallel)
     supabase
       .from("analytics_events")
       .select("*", { count: "exact", head: true })
-      .eq("event_type", "session_start"),
+      .eq("event_type", "session_start")
+      .gte("created_at", lookbackISO),
     supabase
       .from("analytics_events")
       .select("*", { count: "exact", head: true })
       .eq("event_type", "page_view")
-      .in("entity_type", ["album", "event", "update"]),
+      .in("entity_type", ["album", "event", "update"])
+      .gte("created_at", lookbackISO),
   ]);
-  
+
   // Ensure arrays are never null
-  const recentEvents30d = recentEvents30dRaw ?? [];
-  const topPagesEvents90d = topPagesEvents90dRaw ?? [];
-  
+  const recentEvents = recentEventsRaw ?? [];
+  const topPagesEvents = topPagesEventsRaw ?? [];
+
   const analyticsQueriesTime = performance.now() - analyticsQueriesStart;
   console.log(`[Dashboard] Analytics queries (consolidated): ${analyticsQueriesTime.toFixed(2)}ms`);
-  console.log(`[Dashboard]   - 30-day events: ${recentEvents30d.length} rows`);
-  console.log(`[Dashboard]   - 90-day top pages events: ${topPagesEvents90d.length} rows`);
+  console.log(`[Dashboard]   - Daily series events: ${recentEvents.length} rows`);
+  console.log(`[Dashboard]   - Top pages events: ${topPagesEvents.length} rows`);
 
-  // Process 30-day events in memory
-  const processing30dStart = performance.now();
-  
+  // Process events in memory
+  const processingStart = performance.now();
+
   // Separate events by type
-  const sessionStarts = recentEvents30d.filter((e: any) => e.event_type === "session_start");
-  const itemPageViews = recentEvents30d.filter(
+  const sessionStarts = recentEvents.filter((e: any) => e.event_type === "session_start");
+  const itemPageViews = recentEvents.filter(
     (e: any) => e.event_type === "page_view" && ["album", "event", "update"].includes(e.entity_type)
   );
-  const sectionViews = recentEvents30d.filter(
+  const sectionViews = recentEvents.filter(
     (e: any) => e.event_type === "section_view" && e.entity_type === "site_section"
   );
 
@@ -245,9 +296,15 @@ export async function getDashboardData(): Promise<DashboardData> {
   const websiteVisitsSeries = dayKeys.map((k) => ({ date: k, count: visitsByDay[k] || 0 }));
 
   // Build section item visits series
-  const albumsItemVisitsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
-  const eventsItemVisitsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
-  const updatesItemVisitsByDay: Record<string, number> = Object.fromEntries(dayKeys.map((k) => [k, 0]));
+  const albumsItemVisitsByDay: Record<string, number> = Object.fromEntries(
+    dayKeys.map((k) => [k, 0])
+  );
+  const eventsItemVisitsByDay: Record<string, number> = Object.fromEntries(
+    dayKeys.map((k) => [k, 0])
+  );
+  const updatesItemVisitsByDay: Record<string, number> = Object.fromEntries(
+    dayKeys.map((k) => [k, 0])
+  );
 
   for (const ev of itemPageViews) {
     const key = toDayKey(ev.created_at);
@@ -280,8 +337,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     }
   }
 
-  const processing30dTime = performance.now() - processing30dStart;
-  console.log(`[Dashboard] 30-day data processing: ${processing30dTime.toFixed(2)}ms`);
+  const processingTime = performance.now() - processingStart;
+  console.log(`[Dashboard] Daily series data processing: ${processingTime.toFixed(2)}ms`);
 
   const websiteVisits: WebsiteVisitsData = {
     total: totalSessionStarts || 0,
@@ -301,22 +358,24 @@ export async function getDashboardData(): Promise<DashboardData> {
     events: dayKeys.map((k) => ({ date: k, count: eventsByDay[k] || 0 })),
   };
 
-  // Process 90-day top pages events in memory (already fetched above)
+  // Process top pages events in memory (already fetched above)
   const topPagesStart = performance.now();
-  
-  // Separate 90-day events by type
-  const albumPageViews = topPagesEvents90d.filter(
+
+  // Separate events by type
+  const albumPageViews = topPagesEvents.filter(
     (e: any) => e.event_type === "page_view" && e.entity_type === "album"
   );
-  const eventPageViews = topPagesEvents90d.filter(
+  const eventPageViews = topPagesEvents.filter(
     (e: any) => e.event_type === "page_view" && e.entity_type === "event"
   );
-  const updatePageViews = topPagesEvents90d.filter(
+  const updatePageViews = topPagesEvents.filter(
     (e: any) => e.event_type === "page_view" && e.entity_type === "update"
   );
-  const linkClicks = topPagesEvents90d.filter((e: any) => e.event_type === "link_click");
+  const linkClicks = topPagesEvents.filter((e: any) => e.event_type === "link_click");
 
-  console.log(`[Dashboard] Top pages processing: ${(performance.now() - topPagesStart).toFixed(2)}ms`);
+  console.log(
+    `[Dashboard] Top pages processing: ${(performance.now() - topPagesStart).toFixed(2)}ms`
+  );
   console.log(`[Dashboard]   - Album page views: ${albumPageViews.length} rows`);
   console.log(`[Dashboard]   - Event page views: ${eventPageViews.length} rows`);
   console.log(`[Dashboard]   - Update page views: ${updatePageViews.length} rows`);
@@ -338,9 +397,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   });
 
   // Map link clicks to albums via album_links
-  const { data: albumLinks = [] } = await supabase
-    .from("album_links")
-    .select("id, album_id");
+  const { data: albumLinks = [] } = await supabase.from("album_links").select("id, album_id");
   const albumIdByLinkId = new Map<string, string>();
   for (const l of albumLinks as any[]) {
     albumIdByLinkId.set(String(l.id), String(l.album_id));
@@ -356,8 +413,14 @@ export async function getDashboardData(): Promise<DashboardData> {
       const sampleClick = albumLinkClicks[0];
       console.log("[Dashboard] Sample album link click entity_id:", sampleClick.entity_id);
       console.log("[Dashboard] Sample album link ID from DB:", albumLinksArray[0]?.id);
-      console.log("[Dashboard] Mapping result:", albumIdByLinkId.get(String(sampleClick.entity_id)));
-      console.log("[Dashboard] All album link IDs in map:", Array.from(albumIdByLinkId.keys()).slice(0, 5));
+      console.log(
+        "[Dashboard] Mapping result:",
+        albumIdByLinkId.get(String(sampleClick.entity_id))
+      );
+      console.log(
+        "[Dashboard] All album link IDs in map:",
+        Array.from(albumIdByLinkId.keys()).slice(0, 5)
+      );
     }
   }
 
@@ -395,17 +458,16 @@ export async function getDashboardData(): Promise<DashboardData> {
 
   // Fetch all albums, events, and updates
   const entitiesStart = performance.now();
-  const [
-    { data: allAlbums = [] },
-    { data: allEvents = [] },
-    { data: allUpdates = [] },
-  ] = await Promise.all([
-    supabase.from("albums").select("id, title, cover_image_url"),
-    supabase.from("events").select("id, title, flyer_image_url"),
-    supabase.from("updates").select("id, title, image_url"),
-  ]);
+  const [{ data: allAlbums = [] }, { data: allEvents = [] }, { data: allUpdates = [] }] =
+    await Promise.all([
+      supabase.from("albums").select("id, title, slug, cover_image_url"),
+      supabase.from("events").select("id, title, slug, flyer_image_url"),
+      supabase.from("updates").select("id, title, slug, image_url"),
+    ]);
   const entitiesTime = performance.now() - entitiesStart;
-  console.log(`[Dashboard] Entities fetch: ${entitiesTime.toFixed(2)}ms (albums: ${allAlbums?.length || 0}, events: ${allEvents?.length || 0}, updates: ${allUpdates?.length || 0})`);
+  console.log(
+    `[Dashboard] Entities fetch: ${entitiesTime.toFixed(2)}ms (albums: ${allAlbums?.length || 0}, events: ${allEvents?.length || 0}, updates: ${allUpdates?.length || 0})`
+  );
 
   // Build top performing pages array
   const topPerformingPages: TopPerformingPage[] = [];
@@ -418,6 +480,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       topPerformingPages.push({
         id: album.id,
         title: album.title,
+        slug: album.slug,
         type: "album",
         pageViews,
         clicks,
@@ -434,6 +497,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       topPerformingPages.push({
         id: event.id,
         title: event.title,
+        slug: event.slug,
         type: "event",
         pageViews,
         clicks,
@@ -450,6 +514,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       topPerformingPages.push({
         id: update.id,
         title: update.title,
+        slug: update.slug,
         type: "update",
         pageViews,
         clicks,
@@ -459,15 +524,17 @@ export async function getDashboardData(): Promise<DashboardData> {
   });
 
   // Sort by page views descending and limit to top 20
-  const processingStart = performance.now();
+  const sortingStart = performance.now();
   topPerformingPages.sort((a, b) => b.pageViews - a.pageViews);
   const topPerformingPagesLimited = topPerformingPages.slice(0, 20);
-  const processingTime = performance.now() - processingStart;
-  
+  const sortingTime = performance.now() - sortingStart;
+
   const totalTime = performance.now() - startTime;
-  console.log(`[Dashboard] Data processing: ${processingTime.toFixed(2)}ms`);
+  console.log(`[Dashboard] Top pages sorting: ${sortingTime.toFixed(2)}ms`);
   console.log(`[Dashboard] ========================================`);
-  console.log(`[Dashboard] TOTAL TIME: ${totalTime.toFixed(2)}ms (${(totalTime / 1000).toFixed(2)}s)`);
+  console.log(
+    `[Dashboard] TOTAL TIME: ${totalTime.toFixed(2)}ms (${(totalTime / 1000).toFixed(2)}s)`
+  );
   console.log(`[Dashboard] ========================================`);
 
   return {

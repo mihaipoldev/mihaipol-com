@@ -74,9 +74,13 @@ export function TableTitleCell({
         <div className="flex flex-col gap-0 flex-1 min-w-0">
           <div className="flex items-center gap-2 font-bold min-w-0">
             <span className="truncate">{titleContent}</span>
-            {metadata && <span className="text-xs text-muted-foreground/70 flex-shrink-0">[{metadata}]</span>}
+            {metadata && (
+              <span className="text-xs text-muted-foreground/70 flex-shrink-0">[{metadata}]</span>
+            )}
           </div>
-          {description && <span className="text-xs text-muted-foreground truncate">{description}</span>}
+          {description && (
+            <span className="text-xs text-muted-foreground truncate">{description}</span>
+          )}
         </div>
       </div>
     </TableCell>

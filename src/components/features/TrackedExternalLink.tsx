@@ -23,7 +23,11 @@ const TrackedExternalLink = React.forwardRef<HTMLAnchorElement, TrackedExternalL
       const now = Date.now();
       if (now - lastClickAtRef.current < 800) {
         if (process.env.NODE_ENV === "development") {
-          console.log("TrackedExternalLink: Skipping duplicate click", { eventType, entityType, entityId });
+          console.log("TrackedExternalLink: Skipping duplicate click", {
+            eventType,
+            entityType,
+            entityId,
+          });
         }
         return;
       }
@@ -31,9 +35,14 @@ const TrackedExternalLink = React.forwardRef<HTMLAnchorElement, TrackedExternalL
 
       // Track the click (non-blocking)
       if (process.env.NODE_ENV === "development") {
-        console.log("TrackedExternalLink: Tracking click", { eventType, entityType, entityId, href });
+        console.log("TrackedExternalLink: Tracking click", {
+          eventType,
+          entityType,
+          entityId,
+          href,
+        });
       }
-      
+
       trackView(eventType, entityType, entityId, {
         url: href,
         ...metadata,
@@ -62,4 +71,3 @@ const TrackedExternalLink = React.forwardRef<HTMLAnchorElement, TrackedExternalL
 TrackedExternalLink.displayName = "TrackedExternalLink";
 
 export default TrackedExternalLink;
-

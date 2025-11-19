@@ -16,19 +16,35 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [scrollY, setScrollY] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
   const isLandingPage = pathname === "/dev";
 
+  // Initialize viewport height and track scroll
   useEffect(() => {
-    if (!isLandingPage) return;
+    const updateViewportHeight = () => {
+      setViewportHeight(window.innerHeight);
+    };
 
+    updateViewportHeight();
+    window.addEventListener("resize", updateViewportHeight, { passive: true });
+
+    return () => window.removeEventListener("resize", updateViewportHeight);
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => {
-      const headerOffset = 100;
       const scrollY = window.scrollY;
+      setScrollY(scrollY);
+
+      if (!isLandingPage) return;
+
+      const headerOffset = 100;
 
       // Get all sections with their positions, ordered by their position in the DOM
       const sections = navLinks
-        .filter(link => link.sectionId)
-        .map(link => {
+        .filter((link) => link.sectionId)
+        .map((link) => {
           const element = document.getElementById(link.sectionId!);
           if (!element) return null;
           const rect = element.getBoundingClientRect();
@@ -53,13 +69,13 @@ export default function Navbar() {
       // Check each section to see if we're in it or just passed it
       for (let i = 0; i < sections.length; i++) {
         const section = sections[i];
-        
+
         // If we're within this section
         if (currentPosition >= section.top && currentPosition < section.bottom) {
           activeSection = section.id;
           break;
         }
-        
+
         // If we've passed this section but haven't reached the next one
         if (i < sections.length - 1) {
           const nextSection = sections[i + 1];
@@ -90,17 +106,39 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isLandingPage]);
 
+  // Calculate logo color based on scroll position
+  // On hero section (top): white text for visibility on dark images
+  // After scrolling past hero: use mix-blend-difference for dynamic inversion
+  const isOnHero = isLandingPage && viewportHeight > 0 && scrollY < viewportHeight * 0.8;
+  const shouldInvert = isLandingPage && viewportHeight > 0 && scrollY > viewportHeight * 0.8;
+
   return (
     <header className="sticky top-0 z-50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/50 relative">
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/30 to-transparent"></div>
-      <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center justify-between px-10 md:px-16 lg:px-28">
+      <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between px-10 md:px-16 lg:px-28">
         {/* Logo on the left */}
         <Link
           href="/dev"
-          className="text-2xl sm:text-3xl font-bold tracking-widest uppercase text-foreground hover:text-foreground/80 transition-colors duration-300 relative group"
+          className={cn(
+            "text-2xl sm:text-3xl font-bold tracking-widest uppercase transition-all duration-500 relative group",
+            isOnHero
+              ? "text-white hover:text-white/80"
+              : shouldInvert
+                ? "text-background mix-blend-difference"
+                : "text-foreground hover:text-foreground/80"
+          )}
         >
           <span className="relative z-10">Mihai Pol</span>
-          <span className="absolute bottom-0 left-0 w-0 h-px bg-foreground/30 group-hover:w-full transition-all duration-500 ease-out"></span>
+          <span
+            className={cn(
+              "absolute bottom-0 left-0 h-px transition-all duration-500 ease-out",
+              isOnHero
+                ? "w-0 bg-white/30 group-hover:w-full"
+                : shouldInvert
+                  ? "w-full bg-background/30"
+                  : "w-0 bg-foreground/30 group-hover:w-full"
+            )}
+          ></span>
         </Link>
         {/* Centered menu items */}
         <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-8 md:gap-10 text-base font-bold">
@@ -110,7 +148,10 @@ export default function Navbar() {
             if (isLandingPage && link.sectionId) {
               isActive = activeSection === link.sectionId;
             } else {
-              isActive = link.isHash ? false : (pathname === link.href || (pathname?.startsWith(link.href + "/") && pathname !== link.href));
+              isActive = link.isHash
+                ? false
+                : pathname === link.href ||
+                  (pathname?.startsWith(link.href + "/") && pathname !== link.href);
             }
 
             const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -119,18 +160,23 @@ export default function Navbar() {
                 const section = document.getElementById(link.sectionId);
                 if (section) {
                   const headerHeight = 64;
-                  const sectionTop = section.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+                  const sectionTop =
+                    section.getBoundingClientRect().top + window.pageYOffset - headerHeight;
                   window.scrollTo({ top: sectionTop, behavior: "smooth" });
+                  // Update URL hash without triggering scroll
+                  window.history.replaceState(null, "", `#${link.sectionId}`);
                 }
               } else if (link.isHash) {
-              e.preventDefault();
-              const footer = document.getElementById("contact");
-              if (footer) {
-                footer.scrollIntoView({ behavior: "smooth", block: "start" });
-              }
+                e.preventDefault();
+                const footer = document.getElementById("contact");
+                if (footer) {
+                  footer.scrollIntoView({ behavior: "smooth", block: "start" });
+                  // Update URL hash without triggering scroll
+                  window.history.replaceState(null, "", "#contact");
+                }
               }
             };
-            
+
             return (
               <Link
                 key={link.href}
@@ -138,15 +184,20 @@ export default function Navbar() {
                 onClick={handleClick}
                 className={cn(
                   "transition-all duration-300 relative group py-2",
-                  isActive
-                    ? "text-foreground"
-                    : "text-foreground/70 hover:text-foreground"
+                  isOnHero
+                    ? isActive
+                      ? "text-white"
+                      : "text-white/70 hover:text-white"
+                    : isActive
+                      ? "text-foreground"
+                      : "text-foreground/70 hover:text-foreground"
                 )}
               >
                 <span className="relative z-10">{link.label}</span>
                 <span
                   className={cn(
-                    "absolute bottom-0 left-0 h-px bg-foreground/50 transition-all duration-300 ease-out",
+                    "absolute bottom-0 left-0 h-px transition-all duration-300 ease-out",
+                    isOnHero ? "bg-white/50" : "bg-foreground/50",
                     isActive ? "w-full" : "w-0 group-hover:w-full"
                   )}
                 />

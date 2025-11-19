@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const platformSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -45,6 +46,7 @@ type EditPlatformFormProps = {
 
 export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFormProps) {
   const router = useRouter();
+  const isMobile = useIsMobile();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedHorizontalFile, setSelectedHorizontalFile] = useState<File | null>(null);
 
@@ -219,7 +221,10 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
           return;
         }
       } else if (horizontalImageUrlChanged) {
-        if (normalizedNewHorizontalUrl && !normalizedNewHorizontalUrl.includes("mihaipol-com.b-cdn.net")) {
+        if (
+          normalizedNewHorizontalUrl &&
+          !normalizedNewHorizontalUrl.includes("mihaipol-com.b-cdn.net")
+        ) {
           const validation = await validateImageUrl(normalizedNewHorizontalUrl);
           if (!validation.valid) {
             toast.error(
@@ -247,7 +252,10 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
             toast.error(uploadError.message || "Failed to upload horizontal image from URL");
             return;
           }
-        } else if (normalizedNewHorizontalUrl && normalizedNewHorizontalUrl.includes("mihaipol-com.b-cdn.net")) {
+        } else if (
+          normalizedNewHorizontalUrl &&
+          normalizedNewHorizontalUrl.includes("mihaipol-com.b-cdn.net")
+        ) {
           const validation = await validateImageUrl(normalizedNewHorizontalUrl);
           if (!validation.valid) {
             toast.error(
@@ -346,7 +354,7 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
         const created = await response.json();
         let updatedIconUrl = finalImageUrl;
         let updatedHorizontalIconUrl = finalHorizontalImageUrl;
-        
+
         if (finalImageUrl && finalImageUrl.includes("/platforms/temp/") && created?.id) {
           try {
             const moveResponse = await fetch("/api/admin/upload/move", {
@@ -365,8 +373,12 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
             console.error("Failed to move image from temp folder:", moveError);
           }
         }
-        
-        if (finalHorizontalImageUrl && finalHorizontalImageUrl.includes("/platforms/temp/") && created?.id) {
+
+        if (
+          finalHorizontalImageUrl &&
+          finalHorizontalImageUrl.includes("/platforms/temp/") &&
+          created?.id
+        ) {
           try {
             const moveResponse = await fetch("/api/admin/upload/move", {
               method: "POST",
@@ -384,9 +396,13 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
             console.error("Failed to move horizontal image from temp folder:", moveError);
           }
         }
-        
+
         // Update both icons if any were moved
-        if ((updatedIconUrl !== finalImageUrl || updatedHorizontalIconUrl !== finalHorizontalImageUrl) && created?.id) {
+        if (
+          (updatedIconUrl !== finalImageUrl ||
+            updatedHorizontalIconUrl !== finalHorizontalImageUrl) &&
+          created?.id
+        ) {
           try {
             const { data: sessionData } = await supabase.auth.getSession();
             const accessToken = sessionData?.session?.access_token;
@@ -396,8 +412,8 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
                 "Content-Type": "application/json",
                 ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
               },
-              body: JSON.stringify({ 
-                id: created.id, 
+              body: JSON.stringify({
+                id: created.id,
                 icon_url: updatedIconUrl,
                 icon_horizontal_url: updatedHorizontalIconUrl,
               }),
@@ -455,7 +471,7 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
 
   return (
     <div className="w-full max-w-7xl relative">
-      <div className="mb-10 relative">
+      <div className="mb-6 md:mb-10 relative">
         <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/20 via-primary/10 to-transparent rounded-full" />
         <AdminPageTitle
           title={isNew ? "Create Platform" : "Edit Platform"}
@@ -468,20 +484,24 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
         />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 relative">
-        <Card className={cn("relative overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl group")}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative">
+        <Card
+          className={cn(
+            "relative overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl group"
+          )}
+        >
           {/* Decorative gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
-          
+
           {/* Sparkle decorations */}
           <div className="absolute top-4 right-4 w-2 h-2 bg-primary/20 rounded-full blur-sm animate-pulse" />
           <div
             className="absolute top-12 right-12 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm animate-pulse"
             style={{ animationDelay: "300ms" }}
           />
-          
-          <div className="p-6 space-y-6 relative">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <div className="p-6 space-y-4 md:space-y-6 relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <FormField label="Name" required error={errors.name?.message}>
                 <ShadowInput {...register("name")} placeholder="Platform name (unique)" />
               </FormField>
@@ -530,12 +550,13 @@ export function EditPlatformForm({ id, isNew, initialPlatform }: EditPlatformFor
           <ShadowButton
             type="button"
             variant="outline"
+            size={isMobile ? "lg" : undefined}
             onClick={() => router.push("/admin/platforms")}
           >
             Cancel
           </ShadowButton>
-          <ShadowButton type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : isNew ? "Create" : "Save"}
+          <ShadowButton type="submit" size={isMobile ? "lg" : undefined} disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : isNew ? "Create" : "Save Changes"}
           </ShadowButton>
         </div>
       </form>

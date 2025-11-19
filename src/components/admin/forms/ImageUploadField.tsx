@@ -43,9 +43,18 @@ export function ImageUploadField({
   const handleFileSelect = useCallback(
     (file: File) => {
       // Validate file type
-      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
+      const validTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+        "image/gif",
+        "image/svg+xml",
+      ];
       if (!validTypes.includes(file.type)) {
-        toast.error("Invalid file type. Please upload an image file (JPG, PNG, WebP, GIF, or SVG).");
+        toast.error(
+          "Invalid file type. Please upload an image file (JPG, PNG, WebP, GIF, or SVG)."
+        );
         return;
       }
 
@@ -164,12 +173,16 @@ export function ImageUploadField({
           onDrop={handleDrop}
           onClick={handleBrowseClick}
           className={cn(
-            "relative border-2 border-dashed transition-all cursor-pointer overflow-hidden group",
+            "relative border-2 border-dashed transition-all cursor-pointer overflow-hidden",
             "flex-shrink-0 w-32 h-32 rounded-lg",
             isDragging
               ? "border-primary bg-primary/10 scale-105"
               : "border-muted-foreground/25 hover:border-primary/40 hover:bg-primary/5",
-            previewUrl && !imageLoadError && "border-solid border-primary/20"
+            previewUrl && !imageLoadError && "border-solid border-primary/20",
+            // Use a unique group name to avoid conflicts with parent group classes
+            previewUrl &&
+              !imageLoadError &&
+              "[&:hover_.image-overlay]:opacity-100 [&:hover_.image-remove-btn]:opacity-100"
           )}
         >
           {previewUrl && !imageLoadError ? (
@@ -180,7 +193,7 @@ export function ImageUploadField({
                 className="w-full h-full object-cover pointer-events-none"
                 onError={handleImageError}
               />
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div className="image-overlay absolute inset-0 bg-black/60 opacity-0 transition-opacity flex items-center justify-center pointer-events-none">
                 <div className="text-center text-white">
                   <Upload className="h-5 w-5 mx-auto mb-1" />
                   <p className="text-xs font-medium">Replace</p>
@@ -190,7 +203,7 @@ export function ImageUploadField({
                 type="button"
                 variant="destructive"
                 size="icon"
-                className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="image-remove-btn absolute top-1 right-1 h-6 w-6 opacity-0 transition-opacity pointer-events-auto"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleRemove();

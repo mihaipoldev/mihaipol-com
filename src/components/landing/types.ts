@@ -19,6 +19,7 @@ export type LandingAlbum = {
   release_date?: string | null;
   catalog_number?: string | null;
   album_type?: string | null;
+  format_type?: string | null;
   description?: string | null;
 };
 

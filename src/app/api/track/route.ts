@@ -3,7 +3,14 @@ import { trackEvent, isBotUA, shouldDedupe } from "@/features/smart-links/analyt
 
 type TrackBody = {
   event_type: "page_view" | "link_click" | "section_view" | "session_start";
-  entity_type: "album" | "album_link" | "site_section" | "event" | "event_link" | "update" | "update_link";
+  entity_type:
+    | "album"
+    | "album_link"
+    | "site_section"
+    | "event"
+    | "event_link"
+    | "update"
+    | "update_link";
   entity_id: string;
   session_id?: string | null;
   metadata?: Record<string, unknown> | null;
@@ -38,7 +45,7 @@ export async function POST(req: NextRequest) {
   const existingSessionId = cookies.get("mp_session")?.value || null;
   let sessionId = existingSessionId;
   const isNewSession = !existingSessionId;
-  
+
   if (!sessionId) {
     sessionId = (globalThis as any).crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2);
   }

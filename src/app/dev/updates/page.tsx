@@ -1,4 +1,5 @@
 import { getAllUpdates } from "@/features/updates/data";
+import { getSitePreferenceNumber } from "@/features/settings/data";
 import LandingUpdatesList from "@/components/landing/lists/LandingUpdatesList";
 import TrackView from "@/features/smart-links/analytics/components/TrackView";
 
@@ -8,15 +9,14 @@ const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1000&q=80";
 
 export default async function UpdatesPage() {
-  const updates = await getAllUpdates();
+  const [updates, updatesPageColumns] = await Promise.all([
+    getAllUpdates(),
+    getSitePreferenceNumber("updates_page_columns", 3),
+  ]);
 
   return (
-    <div className="min-h-dvh">
-      <TrackView
-        eventType="section_view"
-        entityType="site_section"
-        entityId="updates"
-      />
+    <>
+      <TrackView eventType="section_view" entityType="site_section" entityId="updates" />
       <div className="py-24 px-6">
         <div className="container mx-auto px-0 md:px-8">
           <div className="text-center mb-12">
@@ -29,11 +29,16 @@ export default async function UpdatesPage() {
               <p className="text-muted-foreground">No updates yet. Check back soon.</p>
             </div>
           ) : (
-            <LandingUpdatesList updates={updates} fallbackImage={FALLBACK_IMAGE} variant="compact-square" />
+            <LandingUpdatesList
+              updates={updates}
+              fallbackImage={FALLBACK_IMAGE}
+              variant="compact-square"
+              columns={updatesPageColumns as 3 | 4 | 5}
+            />
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

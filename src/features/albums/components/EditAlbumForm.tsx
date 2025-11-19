@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,7 @@ import { FormField } from "@/components/admin/forms/FormField";
 import { ImageUploadField } from "@/components/admin/forms/ImageUploadField";
 import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
 import { ShadowInput } from "@/components/admin/ShadowInput";
+import { DatePicker } from "@/components/admin/DatePicker";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -17,7 +18,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectSeparator,
 } from "@/components/admin/ShadowSelect";
+import { Plus } from "lucide-react";
 import { ShadowButton } from "@/components/admin/ShadowButton";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,15 +31,19 @@ import { AlbumSmartLinksManager } from "@/features/smart-links/components/AlbumS
 import { PhonePreview } from "@/components/admin/PhonePreview";
 import { CreateLabelModal } from "@/components/admin/CreateLabelModal";
 import { getAllLabels } from "@/features/labels/data";
+import { getAllArtists } from "@/features/artists/data";
+import { ArtistSelect, type Artist, type AlbumArtist } from "@/components/admin/ArtistSelect";
 import type { Album, AlbumLink, Label, Platform } from "@/features/albums/types";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const albumSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
   catalog_number: z.string().optional(),
   album_type: z.string().optional(),
+  format_type: z.string().optional(),
   description: z.string().optional(),
   cover_image_url: z.string().url().optional().or(z.literal("")),
   release_date: z.string().optional(),
@@ -52,8 +59,10 @@ type EditAlbumFormProps = {
   isNew: boolean;
   initialAlbum: Album | null;
   initialLinks: AlbumLink[];
+  initialAlbumArtists: AlbumArtist[];
   labels: Label[];
   platforms: Platform[];
+  artists: Artist[];
 };
 
 export function EditAlbumForm({
@@ -61,10 +70,13 @@ export function EditAlbumForm({
   isNew,
   initialAlbum,
   initialLinks,
+  initialAlbumArtists,
   labels: initialLabels,
   platforms: initialPlatforms,
+  artists: initialArtists,
 }: EditAlbumFormProps) {
   const router = useRouter();
+  const isMobile = useIsMobile();
   const [links, setLinks] = useState<AlbumLink[]>(initialLinks);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [linkValidationErrors, setLinkValidationErrors] = useState<
@@ -72,7 +84,10 @@ export function EditAlbumForm({
   >({});
   const [labels, setLabels] = useState<Label[]>(initialLabels);
   const [platforms, setPlatforms] = useState<Platform[]>(initialPlatforms);
+  const [artists, setArtists] = useState<Artist[]>(initialArtists);
+  const [albumArtists, setAlbumArtists] = useState<AlbumArtist[]>(initialAlbumArtists);
   const [isCreateLabelModalOpen, setIsCreateLabelModalOpen] = useState(false);
+  const labelIdToSelectRef = useRef<string | null>(null);
   const normalizedInitialStatus = (() => {
     const s = (initialAlbum?.publish_status as any)?.toString?.().trim?.().toLowerCase?.();
     return s === "scheduled" || s === "published" || s === "archived" ? s : "draft";
@@ -94,6 +109,7 @@ export function EditAlbumForm({
       slug: "",
       catalog_number: "",
       album_type: "",
+      format_type: "",
       description: "",
       cover_image_url: "",
       release_date: "",
@@ -124,7 +140,8 @@ export function EditAlbumForm({
         title: initialAlbum.title || "",
         slug: initialAlbum.slug || "",
         catalog_number: initialAlbum.catalog_number || "",
-        album_type: initialAlbum.album_type || "",
+        album_type: initialAlbum.album_type ?? "",
+        format_type: initialAlbum.format_type ?? "",
         description: initialAlbum.description || "",
         cover_image_url: initialAlbum.cover_image_url || "",
         label_id: initialAlbum.label_id || "",
@@ -147,6 +164,14 @@ export function EditAlbumForm({
       // Ensure controller values are aligned immediately after reset
       setValue("publish_status", formData.publish_status as any, { shouldValidate: true });
       setValue("label_id", formData.label_id || "", { shouldValidate: true });
+
+      // Use requestAnimationFrame to ensure Select components update after reset
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setValue("album_type", formData.album_type ?? "", { shouldValidate: true });
+          setValue("format_type", formData.format_type ?? "", { shouldValidate: true });
+        });
+      });
     }
   }, [initialAlbum, isNew, reset, setValue]);
 
@@ -179,6 +204,11 @@ export function EditAlbumForm({
   useEffect(() => {
     setLinks(initialLinks);
   }, [initialLinks]);
+
+  // Album artists are managed in state, updated from props when they change
+  useEffect(() => {
+    setAlbumArtists(initialAlbumArtists);
+  }, [initialAlbumArtists]);
 
   // Ensure publish_status stays within allowed values
   useEffect(() => {
@@ -264,6 +294,7 @@ export function EditAlbumForm({
       console.log("[AlbumForm] submit - label_id:", data.label_id);
       console.log("[AlbumForm] submit - catalog_number:", data.catalog_number);
       console.log("[AlbumForm] submit - album_type:", data.album_type);
+      console.log("[AlbumForm] submit - format_type:", data.format_type);
       console.log("[AlbumForm] submit - cover_image_url:", data.cover_image_url);
 
       const newImageUrl = data.cover_image_url?.trim() || null;
@@ -361,6 +392,7 @@ export function EditAlbumForm({
         cover_image_url: finalImageUrl,
         catalog_number: data.catalog_number || null,
         album_type: data.album_type || null,
+        format_type: data.format_type || null,
         description: data.description || null,
       };
 
@@ -466,6 +498,37 @@ export function EditAlbumForm({
           }
         }
 
+        // Save album artists for new album
+        if (created?.id) {
+          try {
+            const { data: sessionData } = await supabase.auth.getSession();
+            const accessToken = sessionData?.session?.access_token;
+            const artistsResponse = await fetch("/api/admin/albums/artists", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+              },
+              body: JSON.stringify({
+                albumId: created.id,
+                artists: albumArtists.map((aa) => ({
+                  id: aa.id.startsWith("temp-") ? undefined : aa.id,
+                  artist_id: aa.artist_id,
+                  role: aa.role,
+                  sort_order: aa.sort_order,
+                })),
+              }),
+            });
+            if (!artistsResponse.ok) {
+              const error = await artistsResponse.json();
+              throw new Error(error.error || "Failed to save artists");
+            }
+          } catch (artistError: any) {
+            console.error("Error saving artists:", artistError);
+            toast.error(artistError.message || "Album created but failed to save artists");
+          }
+        }
+
         router.push("/admin/albums");
       } else {
         // Use initialAlbum.id if available, otherwise use id prop
@@ -535,6 +598,35 @@ export function EditAlbumForm({
           }
         }
 
+        // Save album artists for existing album
+        try {
+          const { data: sessionData } = await supabase.auth.getSession();
+          const accessToken = sessionData?.session?.access_token;
+          const artistsResponse = await fetch("/api/admin/albums/artists", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+            },
+            body: JSON.stringify({
+              albumId: albumId,
+              artists: albumArtists.map((aa) => ({
+                id: aa.id.startsWith("temp-") ? undefined : aa.id,
+                artist_id: aa.artist_id,
+                role: aa.role,
+                sort_order: aa.sort_order,
+              })),
+            }),
+          });
+          if (!artistsResponse.ok) {
+            const error = await artistsResponse.json();
+            throw new Error(error.error || "Failed to save artists");
+          }
+        } catch (artistError: any) {
+          console.error("Error saving artists:", artistError);
+          toast.error(artistError.message || "Album updated but failed to save artists");
+        }
+
         toast.success("Album updated successfully");
         router.push("/admin/albums");
       }
@@ -551,37 +643,52 @@ export function EditAlbumForm({
   };
 
   const handleLabelCreated = async (newLabel: { id: string; name: string }) => {
-    // Immediately add the new label to the list and select it
-    setLabels((prev) => [
-      ...prev,
-      {
-        id: newLabel.id,
-        name: newLabel.name,
-        slug: "",
-        description: null,
-        website_url: null,
-        logo_image_url: null,
-      },
-    ]);
-    setValue("label_id", newLabel.id, { shouldValidate: true });
+    // Store the label ID to select after labels are updated
+    labelIdToSelectRef.current = newLabel.id;
 
-    // Refresh labels list in the background to get full details
+    // Refresh labels list to get the complete label data including logo_image_url
     try {
       const updatedLabels = await getAllLabels();
       setLabels(updatedLabels);
+      toast.success(`Label "${newLabel.name}" created and selected`);
     } catch (error) {
       console.error("Error refreshing labels:", error);
-      // Labels list already has the new label, so we're good
+      // Fallback: add the label with minimal data
+      setLabels((prev) => [
+        ...prev,
+        {
+          id: newLabel.id,
+          name: newLabel.name,
+          slug: "",
+          description: null,
+          website_url: null,
+          logo_image_url: null,
+        },
+      ]);
+      toast.success(`Label "${newLabel.name}" created and selected`);
     }
-
-    toast.success(`Label "${newLabel.name}" created and selected`);
   };
+
+  // Watch for when the label to select appears in the labels list
+  useEffect(() => {
+    if (labelIdToSelectRef.current && labels.some((l) => l.id === labelIdToSelectRef.current)) {
+      const labelId = labelIdToSelectRef.current;
+      labelIdToSelectRef.current = null;
+
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setValue("label_id", labelId, { shouldValidate: true, shouldDirty: true });
+        });
+      });
+    }
+  }, [labels, setValue]);
 
   const displayName = isNew ? undefined : initialAlbum?.title || titleValue;
 
   return (
     <div className="w-full max-w-7xl relative">
-      <div className="mb-10 relative">
+      <div className="mb-6 md:mb-10 relative">
         <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/20 via-primary/10 to-transparent rounded-full" />
         <div className="flex items-start justify-between gap-4">
           <AdminPageTitle
@@ -620,12 +727,16 @@ export function EditAlbumForm({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 relative">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative">
         {/* Details & Links Section with Tabs */}
-        <Card className={cn("relative overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl group")}>
+        <Card
+          className={cn(
+            "relative overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl group"
+          )}
+        >
           {/* Decorative gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
-          
+
           {/* Sparkle decorations */}
           <div className="absolute top-4 right-4 w-2 h-2 bg-primary/20 rounded-full blur-sm animate-pulse" />
           <div
@@ -650,8 +761,8 @@ export function EditAlbumForm({
             </TabsList>
 
             <TabsContent value="details" className="mt-0 p-6 relative">
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4 md:space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                   <FormField label="Title" required error={errors.title?.message}>
                     <ShadowInput {...register("title")} placeholder="Album title" />
                   </FormField>
@@ -661,9 +772,19 @@ export function EditAlbumForm({
                   </FormField>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                   <FormField label="Release Date" error={errors.release_date?.message}>
-                    <ShadowInput type="date" {...register("release_date")} />
+                    <Controller
+                      name="release_date"
+                      control={control}
+                      render={({ field }) => (
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Select release date"
+                        />
+                      )}
+                    />
                   </FormField>
 
                   <FormField label="Label" error={errors.label_id?.message}>
@@ -681,6 +802,7 @@ export function EditAlbumForm({
                             const hasCurrentInList = labels.some((l) => l.id === currentId);
                             return (
                               <Select
+                                key={`label-select-${labels.length}`}
                                 value={currentId || "none"}
                                 onValueChange={(value) => {
                                   if (value === "new") {
@@ -701,14 +823,34 @@ export function EditAlbumForm({
                                   <SelectItem value="none">None</SelectItem>
                                   {labels.map((label) => (
                                     <SelectItem key={label.id} value={label.id}>
-                                      {label.name}
+                                      <div className="flex items-center gap-2">
+                                        {label.logo_image_url ? (
+                                          <img
+                                            src={label.logo_image_url}
+                                            alt={label.name}
+                                            className="w-5 h-5 rounded object-cover shrink-0"
+                                          />
+                                        ) : (
+                                          <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] shrink-0">
+                                            {label.name?.[0] || "?"}
+                                          </div>
+                                        )}
+                                        <span>{label.name}</span>
+                                      </div>
                                     </SelectItem>
                                   ))}
                                   {!hasCurrentInList && currentId && (
                                     <SelectItem value={currentId}>Unknown label</SelectItem>
                                   )}
-                                  <SelectItem value="new" className="font-medium text-primary">
-                                    + Create New Label
+                                  <SelectSeparator />
+                                  <SelectItem
+                                    value="new"
+                                    className="px-2 py-1.5 rounded-sm bg-transparent hover:bg-primary/10 focus:bg-primary/10 data-[highlighted]:bg-primary/10 data-[highlighted]:text-primary text-primary text-xs font-medium transition-colors"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <Plus className="h-3.5 w-3.5 shrink-0" />
+                                      <span>Create New Label</span>
+                                    </div>
                                   </SelectItem>
                                 </SelectContent>
                               </Select>
@@ -720,13 +862,80 @@ export function EditAlbumForm({
                   </FormField>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <FormField label="Catalog Number" error={errors.catalog_number?.message}>
+                <FormField label="Artists" error={undefined}>
+                  <ArtistSelect
+                    artists={artists}
+                    selectedArtists={albumArtists}
+                    onChange={setAlbumArtists}
+                    onArtistsChange={setArtists}
+                    disabled={isNew}
+                  />
+                </FormField>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+                  <FormField label="Catalog" error={errors.catalog_number?.message}>
                     <ShadowInput {...register("catalog_number")} placeholder="Catalog number" />
                   </FormField>
 
                   <FormField label="Album Type" error={errors.album_type?.message}>
-                    <ShadowInput {...register("album_type")} placeholder="EP, LP, Single, etc." />
+                    <Controller
+                      name="album_type"
+                      control={control}
+                      defaultValue=""
+                      render={({ field }) => {
+                        const currentValue = field.value || "none";
+                        return (
+                          <Select
+                            value={currentValue}
+                            onValueChange={(value) => {
+                              field.onChange(value === "none" ? "" : value);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select album type (optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">None</SelectItem>
+                              <SelectItem value="Album">Album</SelectItem>
+                              <SelectItem value="Edit">Edit</SelectItem>
+                              <SelectItem value="EP">EP</SelectItem>
+                              <SelectItem value="LP">LP</SelectItem>
+                              <SelectItem value="Remix">Remix</SelectItem>
+                              <SelectItem value="VA">VA</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        );
+                      }}
+                    />
+                  </FormField>
+
+                  <FormField label="Format Type" error={errors.format_type?.message}>
+                    <Controller
+                      name="format_type"
+                      control={control}
+                      defaultValue=""
+                      render={({ field }) => {
+                        const currentValue = field.value || "none";
+                        return (
+                          <Select
+                            value={currentValue}
+                            onValueChange={(value) => {
+                              field.onChange(value === "none" ? "" : value);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select format type (optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">None</SelectItem>
+                              <SelectItem value="Vinyl">Vinyl</SelectItem>
+                              <SelectItem value="Digital">Digital</SelectItem>
+                              <SelectItem value="USB">USB</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        );
+                      }}
+                    />
                   </FormField>
                 </div>
 
@@ -749,7 +958,7 @@ export function EditAlbumForm({
 
             <TabsContent value="links" className="mt-0 p-6 relative">
               {!isNew ? (
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
                   {/* Left column: Links Manager */}
                   <div className="lg:col-span-3">
                     <AlbumSmartLinksManager
@@ -775,12 +984,13 @@ export function EditAlbumForm({
           <ShadowButton
             type="button"
             variant="outline"
+            size={isMobile ? "lg" : undefined}
             onClick={() => router.push("/admin/albums")}
           >
             Cancel
           </ShadowButton>
-          <ShadowButton type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : isNew ? "Create" : "Save"}
+          <ShadowButton type="submit" size={isMobile ? "lg" : undefined} disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : isNew ? "Create" : "Save Changes"}
           </ShadowButton>
         </div>
       </form>

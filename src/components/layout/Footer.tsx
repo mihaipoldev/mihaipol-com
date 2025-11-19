@@ -11,13 +11,16 @@ export default function Footer({ textColor, className }: FooterProps) {
 
   return (
     <footer id="contact" className={className || "border-t border-border bg-background/80"}>
-      <div className="mx-auto w-full max-w-[1400px] px-10 md:px-16 lg:px-28 py-8 text-sm" style={footerTextStyle || {}}>
+      <div
+        className="mx-auto w-full max-w-[1400px] px-10 md:px-16 lg:px-28 py-8 text-sm"
+        style={footerTextStyle || {}}
+      >
         <div className="flex justify-center items-center">
           <span className={!textColor ? "text-muted-foreground" : ""}>
             © {currentYear} Mihai Pol · Griffith Records ·{" "}
-            <Link 
-              href="https://mihaipol.com" 
-              target="_blank" 
+            <Link
+              href="https://mihaipol.com"
+              target="_blank"
               rel="noreferrer"
               className="hover:opacity-80 transition-opacity"
             >

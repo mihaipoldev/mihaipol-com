@@ -35,7 +35,8 @@ export const gradientPresets = {
   table: {
     name: "Table",
     description: "Table background gradient",
-    classes: "backdrop-blur-sm bg-gradient-to-br from-primary/[5%] via-primary/[4%] to-primary/[3%]",
+    classes:
+      "backdrop-blur-sm bg-gradient-to-br from-primary/[5%] via-primary/[4%] to-primary/[3%]",
   },
   analytics: {
     name: "Analytics",

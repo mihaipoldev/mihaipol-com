@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   AdminTable,
   TableHeader,
@@ -34,7 +34,6 @@ type LabelsListProps = {
 };
 
 export function LabelsList({ initialLabels }: LabelsListProps) {
-  const router = useRouter();
   const [labels, setLabels] = useState<Label[]>(initialLabels);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -73,31 +72,33 @@ export function LabelsList({ initialLabels }: LabelsListProps) {
 
   return (
     <div className="w-full">
-      <div className="mb-6 relative">
+      <div className="mb-6 md:mb-8 relative">
         <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/20 via-primary/10 to-transparent rounded-full" />
         <AdminPageTitle
           title="Labels"
           description="Manage record labels and distributors associated with your music releases."
         />
       </div>
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         <AdminToolbar
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
           searchPlaceholder="Search labels..."
         >
           <Button
-            onClick={() => router.push("/admin/labels/new/edit")}
+            asChild
+            variant="ghost"
             className="rounded-full w-10 h-10 p-0 bg-transparent text-muted-foreground hover:text-primary hover:bg-transparent border-0 shadow-none transition-colors"
             title="New Label"
-            variant="ghost"
           >
-            <FontAwesomeIcon icon={faPlus} className="h-5 w-5" />
+            <Link href="/admin/labels/new/edit">
+              <FontAwesomeIcon icon={faPlus} className="h-5 w-5" />
+            </Link>
           </Button>
         </AdminToolbar>
 
         <AdminTable>
-          <TableHeader>
+          <TableHeader className="hidden md:table-header-group">
             <TableRow>
               <TableHead className="pl-4 w-24">Cover</TableHead>
               <TableHead>Name</TableHead>
@@ -113,27 +114,120 @@ export function LabelsList({ initialLabels }: LabelsListProps) {
               </TableRow>
             ) : (
               filteredLabels.map((label) => (
-                <TableRow
-                  key={label.id}
-                  onClick={() => router.push(`/admin/labels/${label.slug}/edit`)}
-                  className="group cursor-pointer hover:bg-muted/50"
-                >
-                  <CoverImageCell
-                    imageUrl={label.logo_image_url}
-                    title={label.name}
-                    showInitials={true}
-                    className="pl-4"
-                  />
-                  <TableTitleCell title={label.name} imageUrl={undefined} showInitials={false} />
-                  <TableCell className="text-right pr-4">
-                    <ActionMenu
-                      itemId={label.id}
-                      editHref={`/admin/labels/${label.slug}/edit`}
-                      onDelete={handleDelete}
-                      deleteLabel={`label "${label.name}"`}
-                    />
-                  </TableCell>
-                </TableRow>
+                <>
+                  {/* Mobile Layout */}
+                  <TableRow
+                    key={`${label.id}-mobile`}
+                    className="md:hidden group cursor-pointer hover:bg-muted/50 border-b border-border/50"
+                    onMouseDown={(e) => {
+                      if (e.button === 1) {
+                        e.preventDefault();
+                        window.open(`/admin/labels/${label.slug}/edit`, "_blank");
+                      }
+                    }}
+                  >
+                    <Link
+                      href={`/admin/labels/${label.slug}/edit`}
+                      className="contents"
+                      onClick={(e) => {
+                        if ((e.target as HTMLElement).closest("[data-action-menu]")) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      <TableCell className="px-3 md:pl-4 md:pr-4 py-4" colSpan={3}>
+                        <div className="flex items-start gap-3 md:gap-4">
+                          <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-muted shadow-md flex-shrink-0">
+                            {label.logo_image_url ? (
+                              <img
+                                src={label.logo_image_url}
+                                alt={label.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-xs font-semibold text-muted-foreground">
+                                {label.name
+                                  .split(/\s+/)
+                                  .map((w) => w[0])
+                                  .join("")
+                                  .substring(0, 2)
+                                  .toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-base mb-1.5 break-words">
+                              {label.name}
+                            </div>
+                            {label.website_url && (
+                              <div className="text-sm text-muted-foreground truncate">
+                                <a
+                                  href={label.website_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {label.website_url}
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-shrink-0 ml-2" data-action-menu>
+                            <ActionMenu
+                              itemId={label.id}
+                              editHref={`/admin/labels/${label.slug}/edit`}
+                              onDelete={handleDelete}
+                              deleteLabel={`label "${label.name}"`}
+                            />
+                          </div>
+                        </div>
+                      </TableCell>
+                    </Link>
+                  </TableRow>
+
+                  {/* Desktop Layout */}
+                  <TableRow
+                    key={`${label.id}-desktop`}
+                    className="hidden md:table-row group cursor-pointer hover:bg-muted/50"
+                    onMouseDown={(e) => {
+                      if (e.button === 1) {
+                        e.preventDefault();
+                        window.open(`/admin/labels/${label.slug}/edit`, "_blank");
+                      }
+                    }}
+                  >
+                    <Link
+                      href={`/admin/labels/${label.slug}/edit`}
+                      className="contents"
+                      onClick={(e) => {
+                        if ((e.target as HTMLElement).closest("[data-action-menu]")) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      <CoverImageCell
+                        imageUrl={label.logo_image_url}
+                        title={label.name}
+                        showInitials={true}
+                        className="pl-4"
+                      />
+                      <TableTitleCell
+                        title={label.name}
+                        imageUrl={undefined}
+                        showInitials={false}
+                      />
+                      <TableCell className="text-right pr-4" data-action-menu>
+                        <ActionMenu
+                          itemId={label.id}
+                          editHref={`/admin/labels/${label.slug}/edit`}
+                          onDelete={handleDelete}
+                          deleteLabel={`label "${label.name}"`}
+                        />
+                      </TableCell>
+                    </Link>
+                  </TableRow>
+                </>
               ))
             )}
           </TableBody>

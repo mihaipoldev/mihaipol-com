@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { AdminMetricTab } from "@/components/admin/AdminMetricTab";
@@ -98,17 +99,20 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
                     switch (type) {
                       case "album":
                         return {
-                          badgeClassName: "bg-blue-500 text-white",
+                          badgeClassName:
+                            "bg-blue-500 text-white dark:bg-blue-500/10 dark:text-blue-500 dark:border-blue-500",
                           progress: "bg-blue-500",
                         };
                       case "event":
                         return {
-                          badgeClassName: "bg-orange-500 text-white",
+                          badgeClassName:
+                            "bg-orange-500 text-white dark:bg-orange-500/10 dark:text-orange-500 dark:border-orange-500",
                           progress: "bg-orange-500",
                         };
                       case "update":
                         return {
-                          badgeClassName: "bg-emerald-500 text-white",
+                          badgeClassName:
+                            "bg-emerald-500 text-white dark:bg-emerald-500/10 dark:text-emerald-500 dark:border-emerald-500",
                           progress: "bg-emerald-500",
                         };
                       default:
@@ -121,10 +125,14 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
 
                   return data.topPerformingPages.map((page) => {
                     const colors = getTypeColor(page.type);
+                    const statsHref = `/admin/${page.type}s/${page.slug}/stats`;
                     return (
                       <tr key={`${page.type}-${page.id}`} className="border-t">
                         <td className="py-2 pr-4">
-                          <div className="flex items-center gap-2">
+                          <Link
+                            href={statsHref}
+                            className="flex items-center gap-2 hover:text-primary transition-colors"
+                          >
                             <Avatar className="h-6 w-6 rounded-md">
                               <AvatarImage src={page.imageUrl || undefined} alt={page.title} />
                               <AvatarFallback className="text-[10px] bg-muted">
@@ -137,10 +145,13 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
                               </AvatarFallback>
                             </Avatar>
                             <span>{page.title}</span>
-                          </div>
+                          </Link>
                         </td>
                         <td className="py-2 pr-4">
-                          <Badge variant="secondary" className={cn("capitalize", colors.badgeClassName)}>
+                          <Badge
+                            variant="secondary"
+                            className={cn("capitalize border dark:border", colors.badgeClassName)}
+                          >
                             {page.type}
                           </Badge>
                         </td>

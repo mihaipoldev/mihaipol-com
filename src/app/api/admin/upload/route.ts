@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { uploadToBunny } from "@/lib/bunny";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/svg+xml",
+];
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,7 +64,10 @@ export async function POST(request: NextRequest) {
         const isValidContentType = ALLOWED_MIME_TYPES.some((type) => {
           const normalizedType = type.toLowerCase();
           // Check if content type starts with the MIME type or contains it (handles cases like "image/svg+xml; charset=utf-8")
-          return urlContentType && (urlContentType.startsWith(normalizedType) || urlContentType.includes(normalizedType));
+          return (
+            urlContentType &&
+            (urlContentType.startsWith(normalizedType) || urlContentType.includes(normalizedType))
+          );
         });
 
         if (!isValidContentType) {
@@ -102,7 +112,7 @@ export async function POST(request: NextRequest) {
     // Generate filename with timestamp and appropriate extension
     const timestamp = Date.now();
     let extension = "jpg"; // default
-    
+
     // Determine extension based on file type
     if (file) {
       // Get extension from file name or MIME type
@@ -157,11 +167,21 @@ export async function POST(request: NextRequest) {
               extension = "svg";
             }
             // PNG: 89 50 4E 47
-            else if (fileBuffer[0] === 0x89 && fileBuffer[1] === 0x50 && fileBuffer[2] === 0x4e && fileBuffer[3] === 0x47) {
+            else if (
+              fileBuffer[0] === 0x89 &&
+              fileBuffer[1] === 0x50 &&
+              fileBuffer[2] === 0x4e &&
+              fileBuffer[3] === 0x47
+            ) {
               extension = "png";
             }
             // GIF: 47 49 46 38
-            else if (fileBuffer[0] === 0x47 && fileBuffer[1] === 0x49 && fileBuffer[2] === 0x46 && fileBuffer[3] === 0x38) {
+            else if (
+              fileBuffer[0] === 0x47 &&
+              fileBuffer[1] === 0x49 &&
+              fileBuffer[2] === 0x46 &&
+              fileBuffer[3] === 0x38
+            ) {
               extension = "gif";
             }
             // WebP: RIFF...WEBP
@@ -180,9 +200,19 @@ export async function POST(request: NextRequest) {
           const start = fileBuffer.toString("utf-8", 0, Math.min(100, fileBuffer.length)).trim();
           if (start.startsWith("<?xml") || start.startsWith("<svg")) {
             extension = "svg";
-          } else if (fileBuffer[0] === 0x89 && fileBuffer[1] === 0x50 && fileBuffer[2] === 0x4e && fileBuffer[3] === 0x47) {
+          } else if (
+            fileBuffer[0] === 0x89 &&
+            fileBuffer[1] === 0x50 &&
+            fileBuffer[2] === 0x4e &&
+            fileBuffer[3] === 0x47
+          ) {
             extension = "png";
-          } else if (fileBuffer[0] === 0x47 && fileBuffer[1] === 0x49 && fileBuffer[2] === 0x46 && fileBuffer[3] === 0x38) {
+          } else if (
+            fileBuffer[0] === 0x47 &&
+            fileBuffer[1] === 0x49 &&
+            fileBuffer[2] === 0x46 &&
+            fileBuffer[3] === 0x38
+          ) {
             extension = "gif";
           } else if (fileBuffer.length >= 12) {
             const riff = fileBuffer.toString("ascii", 0, 4);
@@ -194,7 +224,7 @@ export async function POST(request: NextRequest) {
         }
       }
     }
-    
+
     const filename = `image_${timestamp}.${extension}`;
     const storagePath = `${folderPath}/${filename}`;
 

@@ -17,8 +17,8 @@ const socialLinks = [
 export default function LandingFooter() {
   return (
     <footer id="contact" className="relative py-12 px-6 overflow-hidden">
-        {/* Logo overlay - subtle texture */}
-        <div className="absolute top-[-50px] left-[-40px] pointer-events-none z-0">
+      {/* Logo overlay - subtle texture */}
+      <div className="absolute top-[-50px] left-[-40px] pointer-events-none z-0">
         <img
           src="/griffithblack.svg"
           alt="Griffith Logo"
@@ -28,8 +28,8 @@ export default function LandingFooter() {
           }}
         />
       </div>
-        {/* Logo overlay - subtle texture */}
-        <div className="absolute bottom-[70px] right-[20px] pointer-events-none z-0">
+      {/* Logo overlay - subtle texture */}
+      <div className="absolute bottom-[70px] right-[20px] pointer-events-none z-0">
         <img
           src="/griffithblack.svg"
           alt="Griffith Logo"
@@ -45,20 +45,17 @@ export default function LandingFooter() {
           <div className="flex flex-col items-center text-center space-y-5 mb-8">
             {/* Centered dot */}
             <div className="w-12 h-12 rounded-full bg-gradient-sunset shadow-card mb-4" />
-            
+
             {/* Name */}
             <h3 className="font-bold text-lg">Mihai Pol</h3>
-            
+
             {/* Contact section */}
             <div className="grid grid-cols-3 items-center gap-8 text-sm text-muted-foreground max-w-xs mx-auto pt-">
               <div className="flex flex-col items-center">
                 <p className="font-semibold text-xs uppercase tracking-wide text-muted-foreground mb-1">
                   Bookings
                 </p>
-                <Link
-                  href="mailto:ioana@griffith.ro"
-                  className="text-foreground no-underline"
-                >
+                <Link href="mailto:ioana@griffith.ro" className="text-foreground no-underline">
                   ioana@griffith.ro
                 </Link>
               </div>
@@ -67,32 +64,26 @@ export default function LandingFooter() {
                 <p className="font-semibold text-xs uppercase tracking-wide text-muted-foreground mb-1">
                   Demos
                 </p>
-                <Link
-                  href="mailto:mihaipol@griffith.ro"
-                  className="text-foreground no-underline"
-                >
+                <Link href="mailto:mihaipol@griffith.ro" className="text-foreground no-underline">
                   mihaipol@griffith.ro
                 </Link>
               </div>
             </div>
           </div>
-          
+
           {/* Divider */}
           <div className="w-16 h-px bg-border/30 mx-auto mb-6" />
-          
-          <div className="grid grid-cols-3 md:flex md:flex-wrap gap-4 justify-items-center md:justify-center mb-8">
+
+          <div className="grid grid-cols-3 md:flex md:flex-wrap gap-4 md:gap-8 justify-items-center md:justify-center mb-8">
             {socialLinks.map((social, index) => {
               const isLastItem = index === socialLinks.length - 1;
               const hasRemainder = socialLinks.length % 3 !== 0;
               const shouldCenter = isLastItem && hasRemainder;
-              
+
               return (
                 <div
                   key={social.name}
-                  className={cn(
-                    "md:contents",
-                    shouldCenter && "col-start-2 md:col-start-auto"
-                  )}
+                  className={cn("md:contents", shouldCenter && "col-start-2 md:col-start-auto")}
                   style={shouldCenter ? { gridColumnStart: 2 } : undefined}
                 >
                   <Link
@@ -100,14 +91,12 @@ export default function LandingFooter() {
                     target="_blank"
                     rel="noreferrer"
                     className={cn(
-                      "transition-all duration-300 relative group py-2 text-base font-bold text-foreground/70 hover:text-foreground",
+                      "transition-all duration-300 relative group py-2 text-sm font-normal text-foreground/70 hover:text-foreground",
                       "md:w-auto w-full justify-center flex items-center"
                     )}
                   >
                     <span className="relative z-10">{social.name}</span>
-                    <span
-                      className="absolute bottom-0 left-0 h-px bg-foreground/50 transition-all duration-300 ease-out w-0 group-hover:w-full"
-                    />
+                    <span className="absolute bottom-0 left-0 h-px bg-foreground/50 transition-all duration-300 ease-out w-0 group-hover:w-full" />
                   </Link>
                 </div>
               );

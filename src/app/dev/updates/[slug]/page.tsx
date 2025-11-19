@@ -39,7 +39,7 @@ export default async function UpdateDetailPage({ params }: UpdateDetailPageProps
     : null;
 
   return (
-    <div className="min-h-dvh">
+    <>
       <TrackView
         eventType="page_view"
         entityType="update"
@@ -123,6 +123,6 @@ export default async function UpdateDetailPage({ params }: UpdateDetailPageProps
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

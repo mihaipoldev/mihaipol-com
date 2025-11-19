@@ -52,7 +52,7 @@ export default function SmartLinksLanding({
 
           <div
             className="flex-shrink-0 overflow-hidden rounded-3xl shadow-xl backdrop-blur-xl transition-opacity duration-300"
-            style={{ 
+            style={{
               backgroundColor: cardBgColor,
               opacity: colorsReady ? 1 : 0,
             }}

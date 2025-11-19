@@ -5,13 +5,20 @@ import { cn } from "@/lib/utils";
 type LandingAlbumsListProps = {
   albums: LandingAlbum[];
   fallbackImage: string;
-  columns?: 3 | 4;
+  columns?: 3 | 4 | 5;
 };
 
-export default function LandingAlbumsList({ albums, fallbackImage, columns = 3 }: LandingAlbumsListProps) {
-  const gridClasses = columns === 4
-    ? "grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto"
-    : "grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto";
+export default function LandingAlbumsList({
+  albums,
+  fallbackImage,
+  columns = 3,
+}: LandingAlbumsListProps) {
+  const gridClasses =
+    columns === 5
+      ? "grid md:grid-cols-2 lg:grid-cols-5 gap-8 max-w-[1200px] mx-auto"
+      : columns === 4
+        ? "grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-[1200px] mx-auto"
+        : "grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-[1200px] mx-auto";
 
   return (
     <div className={cn(gridClasses)}>

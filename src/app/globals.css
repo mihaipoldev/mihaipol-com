@@ -440,10 +440,10 @@ body {
 .dark .preset-balanced {
   /* ── DARK ────────────────────────────────────────── */
   /* Balanced dark mode with moderate contrast */
-  --background: var(--brand-h) 1% 10%;     /* warmer dark background */
+  --background: var(--brand-h) 1% 7.3%;     /* warmer dark background */
   --foreground: 240 40% 98%;
 
-  --card: var(--brand-h) 2% 16%;
+  --card: var(--brand-h) 2% 12%;
   --card-foreground: var(--brand-h) 15% 85%;
 
   --popover: var(--brand-h) 0% 14%;
@@ -472,7 +472,7 @@ body {
   --destructive-foreground: 0 0% 98%;
 
   /* Sidebar: balanced dark contrast */
-  --sidebar-background: var(--brand-h) 1% 18%;
+  --sidebar-background: var(--brand-h) 1% 15%;
   --sidebar-foreground: var(--brand-h) 10% 92%;
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: 0 0% 100%;
@@ -2614,4 +2614,81 @@ body.preset-landing-page-22 {
 
   --shadow-card: 0 4px 24px hsl(90 86% 60% / 0.22);
   --shadow-card-hover: 0 8px 32px hsl(90 86% 60% / 0.3);
+}
+
+/* Glitch Text Effect */
+@keyframes glitch-horizontal {
+  0%, 90%, 100% {
+    transform: translateX(0);
+  }
+  91% {
+    transform: translateX(-2px);
+  }
+  92% {
+    transform: translateX(2px);
+  }
+  93% {
+    transform: translateX(-1px);
+  }
+  94% {
+    transform: translateX(1px);
+  }
+}
+
+@keyframes glitch-horizontal-strong {
+  0%, 95%, 100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  96% {
+    transform: translateX(-4px);
+    opacity: 0.8;
+  }
+  97% {
+    transform: translateX(4px);
+    opacity: 0.8;
+  }
+  98% {
+    transform: translateX(-2px);
+    opacity: 0.9;
+  }
+  99% {
+    transform: translateX(2px);
+    opacity: 0.9;
+  }
+}
+
+.glitch-text {
+  position: relative;
+  display: inline-block;
+  animation: glitch-horizontal 15s infinite;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.glitch-text::before {
+  left: 2px;
+  color: hsl(var(--foreground));
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+  animation: glitch-horizontal-strong 12s infinite;
+  animation-delay: 0.1s;
+  opacity: 0.8;
+}
+
+.glitch-text::after {
+  left: -2px;
+  color: hsl(var(--foreground));
+  clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+  animation: glitch-horizontal-strong 12s infinite;
+  animation-delay: 0.2s;
+  opacity: 0.8;
 }

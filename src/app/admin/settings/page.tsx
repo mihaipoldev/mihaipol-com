@@ -73,7 +73,11 @@ function SettingsPageInner() {
       {isMobile ? (
         // Mobile layout with tabs
         <div className="flex flex-col gap-2 -mt-4 md:mt-0">
-          <Tabs value={activeSection} onValueChange={(value) => handleSectionChange(value as SettingsSection)} className="w-full">
+          <Tabs
+            value={activeSection}
+            onValueChange={(value) => handleSectionChange(value as SettingsSection)}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="account" className="flex items-center gap-2">
                 <FontAwesomeIcon icon={faUser} className="h-4 w-4" />
@@ -96,17 +100,17 @@ function SettingsPageInner() {
         </div>
       ) : (
         // Desktop layout with sidebar
-      <div className="flex gap-6">
-        {/* Sidebar */}
-        <div className="w-64 flex-shrink-0">
-          <SettingsSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-        </div>
+        <div className="flex gap-6">
+          {/* Sidebar */}
+          <div className="w-64 flex-shrink-0">
+            <SettingsSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+          </div>
 
-        {/* Main Content */}
-        <div className="flex-1 min-w-0">
-          <SettingsContent activeSection={activeSection} />
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
+            <SettingsContent activeSection={activeSection} />
+          </div>
         </div>
-      </div>
       )}
     </div>
   );

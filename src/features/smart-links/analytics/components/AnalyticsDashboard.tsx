@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AdminMetricTab } from "@/components/admin/AdminMetricTab";
@@ -81,7 +82,10 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
               {perAlbumRows.map((row) => (
                 <tr key={row.id} className="border-t">
                   <td className="py-2 pr-4">
-                    <div className="flex items-center gap-2">
+                    <Link
+                      href={`/admin/albums/${row.slug}/stats`}
+                      className="flex items-center gap-2 hover:text-primary transition-colors"
+                    >
                       <Avatar className="h-6 w-6 rounded-md">
                         <AvatarImage src={row.coverImageUrl || undefined} alt={row.title} />
                         <AvatarFallback className="text-[10px] bg-muted">
@@ -94,7 +98,7 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                         </AvatarFallback>
                       </Avatar>
                       <span>{row.title}</span>
-                    </div>
+                    </Link>
                   </td>
                   <td className="py-2 pr-4 w-44">
                     <div className="flex items-center gap-3">

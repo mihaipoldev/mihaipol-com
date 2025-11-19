@@ -1,6 +1,7 @@
 export type Label = {
   id: string;
   name: string;
+  logo_image_url?: string | null;
 };
 
 export type Platform = {
@@ -32,5 +33,6 @@ export type Album = {
   publish_status: "draft" | "scheduled" | "published" | "archived";
   labels: Label | null;
   album_type?: string | null;
+  format_type?: string | null;
   description?: string | null;
 };
