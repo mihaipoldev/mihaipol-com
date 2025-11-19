@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -19,6 +19,7 @@ export default function LandingHeader() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const scrollListenersAttached = useRef(false);
 
   // Determine active section based on pathname for slug pages and list pages
   useEffect(() => {
@@ -54,30 +55,41 @@ export default function LandingHeader() {
   useEffect(() => {
     // Skip scroll-based detection if we're on a list page or slug page
     if (pathname && pathname !== "/dev" && (pathname.startsWith("/dev/events") || pathname.startsWith("/dev/updates") || pathname.startsWith("/dev/albums"))) {
+      // Clean up if we had listeners attached
+      if (scrollListenersAttached.current) {
+        scrollListenersAttached.current = false;
+      }
+      return;
+    }
+
+    // Prevent double-attaching listeners (React StrictMode runs effects twice in dev)
+    if (scrollListenersAttached.current) {
       return;
     }
 
     const updateActiveSection = () => {
+      // Get current scroll position - try multiple sources
+      const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      
       // Get the first section (events) to check if we're in hero
       const firstSection = document.getElementById("events");
-      if (!firstSection) return;
-
-      const firstSectionTop = firstSection.getBoundingClientRect().top;
-      const viewportHeight = window.innerHeight;
-      const scrollY = window.scrollY;
-      const documentHeight = document.documentElement.scrollHeight;
-
-      // Check if we're near the bottom of the page (within 200px) or footer is visible
-      const footer = document.getElementById("contact");
-      const isNearBottom = scrollY + viewportHeight >= documentHeight - 200;
-      const isFooterVisible = footer && footer.getBoundingClientRect().top < viewportHeight * 0.7;
-
-      // If we're at the bottom or footer is visible, set contact as active
-      if (isNearBottom || isFooterVisible) {
-        setActiveSection("contact");
+      
+      if (!firstSection) {
         return;
       }
 
+      const firstSectionTop = firstSection.getBoundingClientRect().top;
+      const viewportHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight || document.body.scrollHeight || 0;
+
+      // Check if we're near the bottom of the page or footer is visible
+      const footer = document.getElementById("contact");
+      const isScrollable = documentHeight > viewportHeight + 100;
+      
+      // Calculate distance from bottom
+      const scrollPosition = scrollY + viewportHeight;
+      const distanceFromBottom = documentHeight - scrollPosition;
+      
       // If we're above the first section (in hero), no section should be active
       if (firstSectionTop > viewportHeight * 0.4) {
         setActiveSection(null);
@@ -89,7 +101,7 @@ export default function LandingHeader() {
       let maxVisibility = 0;
 
       navLinks.forEach((link) => {
-        // Skip contact as we handle it separately above
+        // Skip contact as we handle it separately
         if (link.target === "contact") return;
 
         const el = document.getElementById(link.target);
@@ -114,7 +126,35 @@ export default function LandingHeader() {
         }
       });
 
-      setActiveSection(activeTarget);
+      // FINAL CHECK: Override with contact if footer is visible or approaching
+      // This is the MOST RELIABLE check - just look at footer position
+      if (footer) {
+        const footerRect = footer.getBoundingClientRect();
+        // Footer is visible if ANY part is in viewport
+        const footerIsInViewport = footerRect.top < viewportHeight && footerRect.bottom > 0;
+        // Footer is approaching if it's within 80% of viewport from top
+        const footerIsApproaching = footerRect.top <= viewportHeight * 0.8;
+        
+        // If footer is visible OR approaching, FORCE contact to be active
+        if (footerIsInViewport || footerIsApproaching) {
+          console.log("[LandingHeader] ✅ FOOTER DETECTED - Setting contact:", {
+            footerTop: footerRect.top,
+            footerBottom: footerRect.bottom,
+            viewportHeight,
+            footerIsInViewport,
+            footerIsApproaching
+          });
+          activeTarget = "contact";
+        }
+      }
+
+      // Use functional setState to avoid stale closure issues
+      setActiveSection((prevActive) => {
+        if (activeTarget !== prevActive) {
+          console.log(`[LandingHeader] 🎯 Setting activeSection: "${prevActive}" -> "${activeTarget}"`);
+        }
+        return activeTarget;
+      });
     };
 
     // Check on scroll
@@ -125,10 +165,18 @@ export default function LandingHeader() {
     // Initial check
     updateActiveSection();
     
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Add scroll listeners
+    window.addEventListener("scroll", handleScroll, { passive: true, capture: false });
+    document.addEventListener("scroll", handleScroll, { passive: true, capture: true });
+    document.documentElement.addEventListener("scroll", handleScroll, { passive: true, capture: true });
+    
+    scrollListenersAttached.current = true;
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", handleScroll, { capture: false } as EventListenerOptions);
+      document.removeEventListener("scroll", handleScroll, { capture: true } as EventListenerOptions);
+      document.documentElement.removeEventListener("scroll", handleScroll, { capture: true } as EventListenerOptions);
+      scrollListenersAttached.current = false;
     };
   }, [pathname]);
 

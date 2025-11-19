@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
-import { PerformanceMonitor } from "@/components/dev/PerformanceMonitor";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
@@ -236,8 +235,6 @@ export default function TestPerformancePage() {
           </CardContent>
         </Card>
       </div>
-
-      <PerformanceMonitor />
     </div>
   );
 }

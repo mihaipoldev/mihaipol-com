@@ -83,7 +83,7 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
               <tr className="text-left text-muted-foreground">
                 <th className="py-2 pr-4">Page</th>
                 <th className="py-2 pr-4">Type</th>
-                <th className="py-2 pr-4 w-44">Page Views</th>
+                <th className="py-2 pr-4 w-44">Page Visits</th>
                 <th className="py-2 pr-4 w-24">Clicks</th>
               </tr>
             </thead>
@@ -146,7 +146,7 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
                         </td>
                         <td className="py-2 pr-4 w-44">
                           <div className="flex items-center gap-3">
-                            <span>{page.pageViews}</span>
+                            <span className="w-8 text-right tabular-nums">{page.pageViews}</span>
                             {totalPageViews > 0 ? (
                               <div className="flex items-center gap-2">
                                 <div className="h-2 w-14 rounded-full bg-muted">

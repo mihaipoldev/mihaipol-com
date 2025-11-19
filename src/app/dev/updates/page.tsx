@@ -1,5 +1,6 @@
 import { getAllUpdates } from "@/features/updates/data";
 import LandingUpdatesList from "@/components/landing/lists/LandingUpdatesList";
+import TrackView from "@/features/smart-links/analytics/components/TrackView";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,11 @@ export default async function UpdatesPage() {
 
   return (
     <div className="min-h-dvh">
+      <TrackView
+        eventType="section_view"
+        entityType="site_section"
+        entityId="updates"
+      />
       <div className="py-24 px-6">
         <div className="container mx-auto px-0 md:px-8">
           <div className="text-center mb-12">

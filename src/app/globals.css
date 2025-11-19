@@ -29,6 +29,11 @@
   font-display: swap;
 }
 
+html {
+  scroll-behavior: smooth;
+  overscroll-behavior-y: auto;
+}
+
 body {
   font-family:
     var(--font-family-primary, var(--font-josefin-sans, var(--font-geist-sans))),
@@ -37,6 +42,8 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  scroll-behavior: smooth;
+  overscroll-behavior-y: auto;
 }
 
 @layer base {
@@ -145,21 +152,48 @@ body {
     /* Fallback for browsers that don't support the JS variable */
     --vh: 1vh;
     height: 100%;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    max-height: 100%;
+    overflow: hidden !important;
     /* Prevent overlay issues on mobile */
     position: relative;
-    -webkit-overflow-scrolling: touch;
+    /* Prevent overscroll bounce and momentum scrolling issues */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    /* Prevent pinch zoom */
+    touch-action: pan-y;
+    /* Ensure html background matches body to prevent color bars */
+    background-color: hsl(var(--background));
   }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-family-primary, var(--font-geist-sans), system-ui, sans-serif) !important;
-    min-height: 100%;
+    height: 100%;
+    max-height: 100%;
     position: relative;
-    overflow-x: hidden;
+    overflow-x: hidden !important;
+    overflow-y: auto;
     /* Ensure body doesn't create overlay */
     margin: 0;
     padding: 0;
+    -webkit-overflow-scrolling: touch;
+    /* Prevent overscroll bounce */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    /* Prevent pinch zoom */
+    touch-action: pan-y;
+    /* Prevent extra scrollable space */
+    box-sizing: border-box;
+    /* Ensure body background matches to prevent color bars */
+    background-color: hsl(var(--background));
+    /* Prevent extra scrollable space at bottom */
+    min-height: 100%;
+  }
+  
+  /* Prevent body scrolling when preset-balanced class is present (admin pages) */
+  body.preset-balanced {
+    overflow: hidden !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
   }
 }
 

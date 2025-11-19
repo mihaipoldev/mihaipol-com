@@ -7,6 +7,7 @@ export type Platform = {
   id: string;
   name: string;
   icon_url: string | null;
+  icon_horizontal_url?: string | null;
   default_cta_label: string | null;
 };
 

@@ -36,7 +36,7 @@ export function CoverImageCell({
         className={cn(
           horizontal
             ? "h-8 flex items-center justify-start"
-            : "h-12 w-12 rounded-xl overflow-hidden flex items-center justify-center bg-muted",
+            : "h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-muted shadow-md",
           showInitialsFallback && "bg-primary/10 text-xs font-semibold text-muted-foreground"
         )}
       >

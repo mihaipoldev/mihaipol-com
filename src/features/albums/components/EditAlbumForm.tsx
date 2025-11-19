@@ -661,27 +661,6 @@ export function EditAlbumForm({
                   </FormField>
                 </div>
 
-                <FormField label="Cover Image" error={errors.cover_image_url?.message}>
-                  <ImageUploadField
-                    value={watch("cover_image_url") || null}
-                    onChange={(url) => setValue("cover_image_url", url || "")}
-                    onFileChange={(file) => setSelectedFile(file)}
-                    folderPath={id === "new" ? "albums/temp" : `albums/${id}`}
-                    error={errors.cover_image_url?.message}
-                    placeholder="https://example.com/cover.jpg"
-                  />
-                </FormField>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <FormField label="Catalog Number" error={errors.catalog_number?.message}>
-                    <ShadowInput {...register("catalog_number")} placeholder="Catalog number" />
-                  </FormField>
-
-                  <FormField label="Album Type" error={errors.album_type?.message}>
-                    <ShadowInput {...register("album_type")} placeholder="EP, LP, Single, etc." />
-                  </FormField>
-                </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <FormField label="Release Date" error={errors.release_date?.message}>
                     <ShadowInput type="date" {...register("release_date")} />
@@ -741,8 +720,29 @@ export function EditAlbumForm({
                   </FormField>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <FormField label="Catalog Number" error={errors.catalog_number?.message}>
+                    <ShadowInput {...register("catalog_number")} placeholder="Catalog number" />
+                  </FormField>
+
+                  <FormField label="Album Type" error={errors.album_type?.message}>
+                    <ShadowInput {...register("album_type")} placeholder="EP, LP, Single, etc." />
+                  </FormField>
+                </div>
+
                 <FormField label="Description" error={errors.description?.message}>
                   <Textarea {...register("description")} placeholder="Album description" rows={4} />
+                </FormField>
+
+                <FormField label="Cover Image" error={errors.cover_image_url?.message}>
+                  <ImageUploadField
+                    value={watch("cover_image_url") || null}
+                    onChange={(url) => setValue("cover_image_url", url || "")}
+                    onFileChange={(file) => setSelectedFile(file)}
+                    folderPath={id === "new" ? "albums/temp" : `albums/${id}`}
+                    error={errors.cover_image_url?.message}
+                    placeholder="https://example.com/cover.jpg"
+                  />
                 </FormField>
               </div>
             </TabsContent>

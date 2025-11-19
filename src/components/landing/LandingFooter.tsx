@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const socialLinks = [
@@ -96,17 +95,20 @@ export default function LandingFooter() {
                   )}
                   style={shouldCenter ? { gridColumnStart: 2 } : undefined}
                 >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    style={{ borderRadius: "0.75rem" }}
-                    className="md:w-auto w-full justify-center"
-                    asChild
+                  <Link
+                    href={social.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={cn(
+                      "transition-all duration-300 relative group py-2 text-base font-bold text-foreground/70 hover:text-foreground",
+                      "md:w-auto w-full justify-center flex items-center"
+                    )}
                   >
-                    <Link href={social.url} target="_blank" rel="noreferrer">
-                      {social.name}
-                    </Link>
-                  </Button>
+                    <span className="relative z-10">{social.name}</span>
+                    <span
+                      className="absolute bottom-0 left-0 h-px bg-foreground/50 transition-all duration-300 ease-out w-0 group-hover:w-full"
+                    />
+                  </Link>
                 </div>
               );
             })}

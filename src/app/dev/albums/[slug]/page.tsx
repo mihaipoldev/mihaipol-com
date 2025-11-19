@@ -32,8 +32,8 @@ export default async function AlbumDetailPage({ params }: AlbumDetailPageProps) 
         metadata={{ album_slug: album.slug, path: `/dev/albums/${album.slug}` }}
       />
       <LinksLogger value={links} label="Album links" />
-      <div className="flex-1 relative z-10 min-h-0 flex flex-col">
-        <div className="flex flex-col items-center px-4 flex-1">
+      <div className="relative z-10 flex flex-col w-full">
+        <div className="flex flex-col items-center px-4 w-full">
           <div className="w-full max-w-sm mx-auto py-6">
             <div className="flex flex-col">
               <SmartLinksLanding album={album} links={links} />

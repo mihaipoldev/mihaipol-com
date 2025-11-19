@@ -105,8 +105,8 @@ export function AlbumsList({ initialAlbums }: AlbumsListProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="pl-4 w-24">Cover</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead>Catalog</TableHead>
+              <TableHead className="w-64 max-w-64">Title</TableHead>
+              <TableHead className="w-32 max-w-32">Catalog</TableHead>
               <TableHead>Label</TableHead>
               <TableHead>Release Date</TableHead>
               <TableHead className="w-24">Status</TableHead>
@@ -138,9 +138,12 @@ export function AlbumsList({ initialAlbums }: AlbumsListProps) {
                     imageUrl={undefined}
                     showInitials={false}
                     href={`/dev/albums/${album.slug}`}
+                    className="w-64 max-w-64"
                   />
-                  <TableCell className="text-muted-foreground">
-                    {album.catalog_number || "-"}
+                  <TableCell className="text-muted-foreground w-32 max-w-32">
+                    <span className="block truncate" title={album.catalog_number || undefined}>
+                      {album.catalog_number || "-"}
+                    </span>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {album.labels?.name || "-"}

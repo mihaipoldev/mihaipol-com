@@ -32,8 +32,8 @@ export function AccountSettings() {
           <CardTitle className="text-2xl">Account Settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-start gap-6">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+            <div className="relative flex-shrink-0">
               <Avatar className="h-20 w-20">
                 <AvatarImage src="" alt="Profile" />
                 <AvatarFallback className="text-lg bg-muted">MP</AvatarFallback>
@@ -48,7 +48,7 @@ export function AccountSettings() {
               </Button>
             </div>
 
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 space-y-4 w-full">
               <FormField label="Display Name">
                 <ShadowInput
                   value={displayName}
@@ -57,7 +57,7 @@ export function AccountSettings() {
                 />
               </FormField>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                 <Badge variant="destructive" className="gap-1">
                   <Crown className="h-3 w-3" />
                   Super Admin
@@ -124,7 +124,7 @@ export function AccountSettings() {
           </div>
 
           <div className="flex justify-end pt-4">
-            <ShadowButton onClick={handleSave} size="lg" className="gap-2">
+            <ShadowButton onClick={handleSave} size="lg" className="gap-2 w-full sm:w-auto">
               <Save className="h-4 w-4" />
               Save Changes
             </ShadowButton>

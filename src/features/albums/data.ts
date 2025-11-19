@@ -373,7 +373,8 @@ export async function getAlbumLinks(albumId: string) {
         platforms (
           id,
           name,
-          icon_url
+          icon_url,
+          icon_horizontal_url
         )
       `
       )

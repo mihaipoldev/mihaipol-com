@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, createContext, useContext } from "react";
+import { useEffect, useState, createContext, useContext, useRef } from "react";
 import { rgbToHsl, hslToRgb } from "@/lib/colorUtils";
 
 type AlbumGradientBackgroundProps = {
   coverImageUrl: string | null | undefined;
   children: React.ReactNode;
+  useAbsolutePositioning?: boolean;
 };
 
 // Context to provide album colors to children
@@ -34,18 +35,18 @@ function getLuminance(r: number, g: number, b: number): number {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 }
 
-// Calculate appropriate text color - always black
-function calculateTextColor(colors: string[]): string {
+// Calculate appropriate text color - always light theme style
+function calculateTextColor(colors: string[], isDark: boolean): string {
   return "rgba(0, 0, 0, 0.95)";
 }
 
-// Calculate muted color - always dark gray
-function calculateMutedColor(colors: string[]): string {
+// Calculate muted color - always light theme style
+function calculateMutedColor(colors: string[], isDark: boolean): string {
   return "rgba(0, 0, 0, 0.7)";
 }
 
-// Calculate card background color that blends with album colors
-function calculateCardBgColor(colors: string[]): string {
+// Calculate card background color that blends with album colors - always light theme style
+function calculateCardBgColor(colors: string[], isDark: boolean): string {
   if (colors.length === 0) {
     return "rgba(255, 255, 255, 0.5)";
   }
@@ -72,8 +73,8 @@ function calculateCardBgColor(colors: string[]): string {
   return `rgba(${Math.round(bgRgb.r)}, ${Math.round(bgRgb.g)}, ${Math.round(bgRgb.b)}, ${opacity})`;
 }
 
-// Calculate link button background - dark grayish button
-function calculateLinkButtonBgColor(colors: string[]): string {
+// Calculate link button background - always light theme style
+function calculateLinkButtonBgColor(colors: string[], isDark: boolean): string {
   // Fallback color if no album colors
   if (colors.length === 0) {
     return "rgba(0, 0, 0, 0.08)";
@@ -93,12 +94,13 @@ function calculateLinkButtonBgColor(colors: string[]): string {
   const hsl = rgbToHsl(r, g, b);
   hsl.s = hsl.s * 0.1; // Very low saturation = more gray
   hsl.l = 30; // Dark gray
+  
   const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
   return `rgba(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)}, 0.15)`;
 }
 
-// Calculate link hover background - slightly darker than button
-function calculateLinkHoverBgColor(colors: string[]): string {
+// Calculate link hover background - always light theme style
+function calculateLinkHoverBgColor(colors: string[], isDark: boolean): string {
   // Fallback color if no album colors
   if (colors.length === 0) {
     return "rgba(0, 0, 0, 0.12)";
@@ -118,13 +120,14 @@ function calculateLinkHoverBgColor(colors: string[]): string {
   const hsl = rgbToHsl(r, g, b);
   hsl.s = hsl.s * 0.1;
   hsl.l = 25;
+  
   const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
   return `rgba(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)}, 0.2)`;
 }
 
 // Calculate link text color - same as main text color
-function calculateLinkTextColor(colors: string[]): string {
-  return calculateTextColor(colors);
+function calculateLinkTextColor(colors: string[], isDark: boolean): string {
+  return calculateTextColor(colors, isDark);
 }
 
 // Export hook to use album colors
@@ -246,49 +249,20 @@ function extractColors(
 export default function AlbumGradientBackground({
   coverImageUrl,
   children,
+  useAbsolutePositioning = false,
 }: AlbumGradientBackgroundProps) {
-  // Force light theme while on this page, restore original on unmount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Store original theme state
-      const wasDark = document.documentElement.classList.contains('dark');
-      
-      // Force light theme
-      document.documentElement.classList.remove('dark');
-      
-      // Prevent theme changes while on this page
-      const observer = new MutationObserver(() => {
-        if (document.documentElement.classList.contains('dark')) {
-          document.documentElement.classList.remove('dark');
-        }
-      });
-      observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['class'],
-      });
-      
-      // Restore original theme when component unmounts
-      return () => {
-        observer.disconnect();
-        if (wasDark) {
-          document.documentElement.classList.add('dark');
-        }
-      };
-    }
-  }, []);
-
   const [gradientColors, setGradientColors] = useState<string[]>([]);
   const [dotColors, setDotColors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Initialize colors
+  // Initialize colors - always use light theme values
   const getInitialColors = () => ({
-    textColor: calculateTextColor([]),
-    mutedColor: calculateMutedColor([]),
-    cardBgColor: calculateCardBgColor([]),
-    linkButtonBgColor: calculateLinkButtonBgColor([]),
-    linkHoverBgColor: calculateLinkHoverBgColor([]),
-    linkTextColor: calculateLinkTextColor([]),
+    textColor: calculateTextColor([], false),
+    mutedColor: calculateMutedColor([], false),
+    cardBgColor: calculateCardBgColor([], false),
+    linkButtonBgColor: calculateLinkButtonBgColor([], false),
+    linkHoverBgColor: calculateLinkHoverBgColor([], false),
+    linkTextColor: calculateLinkTextColor([], false),
   });
   
   const initialColors = getInitialColors();
@@ -298,6 +272,7 @@ export default function AlbumGradientBackground({
   const [linkButtonBgColor, setLinkButtonBgColor] = useState<string>(initialColors.linkButtonBgColor);
   const [linkHoverBgColor, setLinkHoverBgColor] = useState<string>(initialColors.linkHoverBgColor);
   const [linkTextColor, setLinkTextColor] = useState<string>(initialColors.linkTextColor);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!coverImageUrl) {
@@ -314,12 +289,12 @@ export default function AlbumGradientBackground({
       ];
       setGradientColors(fallbackGradient);
       setDotColors(fallbackDots);
-      setTextColor(calculateTextColor(fallbackGradient));
-      setMutedColor(calculateMutedColor(fallbackGradient));
-      setCardBgColor(calculateCardBgColor(fallbackGradient));
-      setLinkButtonBgColor(calculateLinkButtonBgColor(fallbackGradient));
-      setLinkHoverBgColor(calculateLinkHoverBgColor(fallbackGradient));
-      setLinkTextColor(calculateLinkTextColor(fallbackGradient));
+      setTextColor(calculateTextColor(fallbackGradient, false));
+      setMutedColor(calculateMutedColor(fallbackGradient, false));
+      setCardBgColor(calculateCardBgColor(fallbackGradient, false));
+      setLinkButtonBgColor(calculateLinkButtonBgColor(fallbackGradient, false));
+      setLinkHoverBgColor(calculateLinkHoverBgColor(fallbackGradient, false));
+      setLinkTextColor(calculateLinkTextColor(fallbackGradient, false));
       setIsLoading(false);
       return;
     }
@@ -329,12 +304,12 @@ export default function AlbumGradientBackground({
       .then((result) => {
         setGradientColors(result.gradientColors);
         setDotColors(result.dotColors);
-        setTextColor(calculateTextColor(result.gradientColors));
-        setMutedColor(calculateMutedColor(result.gradientColors));
-        setCardBgColor(calculateCardBgColor(result.gradientColors));
-        setLinkButtonBgColor(calculateLinkButtonBgColor(result.gradientColors));
-        setLinkHoverBgColor(calculateLinkHoverBgColor(result.gradientColors));
-        setLinkTextColor(calculateLinkTextColor(result.gradientColors));
+        setTextColor(calculateTextColor(result.gradientColors, false));
+        setMutedColor(calculateMutedColor(result.gradientColors, false));
+        setCardBgColor(calculateCardBgColor(result.gradientColors, false));
+        setLinkButtonBgColor(calculateLinkButtonBgColor(result.gradientColors, false));
+        setLinkHoverBgColor(calculateLinkHoverBgColor(result.gradientColors, false));
+        setLinkTextColor(calculateLinkTextColor(result.gradientColors, false));
         setIsLoading(false);
       })
       .catch((error) => {
@@ -344,16 +319,60 @@ export default function AlbumGradientBackground({
         const fallbackDots = ["rgb(99, 102, 241)", "rgb(168, 85, 247)", "rgb(236, 72, 153)"];
         setGradientColors(fallbackGradient);
         setDotColors(fallbackDots);
-        setTextColor(calculateTextColor(fallbackGradient));
-        setMutedColor(calculateMutedColor(fallbackGradient));
-        setCardBgColor(calculateCardBgColor(fallbackGradient));
-        setLinkButtonBgColor(calculateLinkButtonBgColor(fallbackGradient));
-        setLinkHoverBgColor(calculateLinkHoverBgColor(fallbackGradient));
-        setLinkTextColor(calculateLinkTextColor(fallbackGradient));
+        setTextColor(calculateTextColor(fallbackGradient, false));
+        setMutedColor(calculateMutedColor(fallbackGradient, false));
+        setCardBgColor(calculateCardBgColor(fallbackGradient, false));
+        setLinkButtonBgColor(calculateLinkButtonBgColor(fallbackGradient, false));
+        setLinkHoverBgColor(calculateLinkHoverBgColor(fallbackGradient, false));
+        setLinkTextColor(calculateLinkTextColor(fallbackGradient, false));
         setIsLoading(false);
       });
   }, [coverImageUrl]);
 
+  // Prevent body scrolling when using fixed positioning to avoid double scrollbar
+  useEffect(() => {
+    if (!useAbsolutePositioning) {
+      // Prevent html/body from scrolling - the fixed container will handle scrolling
+      // Use exact pixel height to prevent extra scrollable space
+      const setStyles = () => {
+        const vh = window.innerHeight;
+        document.documentElement.style.setProperty("overflow", "hidden", "important");
+        document.documentElement.style.setProperty("height", `${vh}px`, "important");
+        document.documentElement.style.setProperty("max-height", `${vh}px`, "important");
+        document.body.style.setProperty("overflow", "hidden", "important");
+        document.body.style.setProperty("height", `${vh}px`, "important");
+        document.body.style.setProperty("max-height", `${vh}px`, "important");
+        document.body.style.setProperty("margin", "0", "important");
+        document.body.style.setProperty("padding", "0", "important");
+        
+        // Set the scroll container height to exact viewport height
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.style.height = `${vh}px`;
+          scrollContainerRef.current.style.maxHeight = `${vh}px`;
+        }
+      };
+      
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        setStyles();
+      });
+      
+      window.addEventListener("resize", setStyles);
+      
+      return () => {
+        // Restore scrolling when component unmounts
+        window.removeEventListener("resize", setStyles);
+        document.documentElement.style.removeProperty("overflow");
+        document.documentElement.style.removeProperty("height");
+        document.documentElement.style.removeProperty("max-height");
+        document.body.style.removeProperty("overflow");
+        document.body.style.removeProperty("height");
+        document.body.style.removeProperty("max-height");
+        document.body.style.removeProperty("margin");
+        document.body.style.removeProperty("padding");
+      };
+    }
+  }, [useAbsolutePositioning]);
 
   // Convert rgb to rgba helper
   const rgbToRgba = (rgb: string, opacity: number) => {
@@ -361,12 +380,17 @@ export default function AlbumGradientBackground({
   };
 
   if (isLoading || gradientColors.length === 0) {
-    const loadingTextColor = calculateTextColor([]);
-    const loadingMutedColor = calculateMutedColor([]);
-    const loadingCardBgColor = calculateCardBgColor([]);
-    const loadingLinkButtonBgColor = calculateLinkButtonBgColor([]);
-    const loadingLinkHoverBgColor = calculateLinkHoverBgColor([]);
-    const loadingLinkTextColor = calculateLinkTextColor([]);
+    const loadingTextColor = calculateTextColor([], false);
+    const loadingMutedColor = calculateMutedColor([], false);
+    const loadingCardBgColor = calculateCardBgColor([], false);
+    const loadingLinkButtonBgColor = calculateLinkButtonBgColor([], false);
+    const loadingLinkHoverBgColor = calculateLinkHoverBgColor([], false);
+    const loadingLinkTextColor = calculateLinkTextColor([], false);
+    const fallbackGradient = [
+      "rgb(59, 130, 246)", // blue-500
+      "rgb(147, 197, 253)", // blue-300
+      "rgb(203, 213, 225)", // slate-300
+    ];
     return (
       <AlbumColorsContext.Provider
         value={{
@@ -381,24 +405,35 @@ export default function AlbumGradientBackground({
         }}
       >
         {/* Blurred album cover as background - positioned outside main container */}
-        {coverImageUrl && (
-          <div
-            className="fixed inset-0"
-            style={{
-              zIndex: 0,
-              backgroundImage: `url(${coverImageUrl})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              filter: "blur(100px) brightness(1.5)",
-              transform: "scale(2)", // Scale up to avoid blur edges
-              opacity: 0.5,
-            }}
-          />
-        )}
+          {coverImageUrl && (
+            <div
+              className={useAbsolutePositioning ? "absolute inset-0" : "fixed inset-0"}
+              style={{
+                zIndex: 0,
+                backgroundImage: `url(${coverImageUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                filter: "blur(100px) brightness(1.5)",
+                transform: "scale(2)", // Scale up to avoid blur edges
+                opacity: 0.5,
+              }}
+            />
+          )}
+
+        {/* White base layer with gradient */}
+        <div
+          className={useAbsolutePositioning ? "absolute inset-0" : "fixed inset-0"}
+          style={{
+            zIndex: 1,
+            background: `linear-gradient(135deg, ${rgbToRgba(fallbackGradient[0], 0.3)} 0%, ${rgbToRgba(fallbackGradient[1], 0.2)} 50%, ${rgbToRgba(fallbackGradient[2], 0.3)} 100%), white`,
+            opacity: 0.6,
+          }}
+        />
 
         <div
-          className={`fixed inset-0 z-[100] h-screen flex flex-col overflow-y-auto`}
+          ref={scrollContainerRef}
+          className={useAbsolutePositioning ? "absolute inset-0 z-[100] flex flex-col" : "fixed inset-0 z-[100] flex flex-col overflow-y-auto"}
           style={{ background: "transparent" }}
         >
           {children}
@@ -423,7 +458,7 @@ export default function AlbumGradientBackground({
           {/* Blurred album cover as background - positioned outside main container */}
           {coverImageUrl && (
             <div
-              className="fixed inset-0"
+              className={useAbsolutePositioning ? "absolute inset-0" : "fixed inset-0"}
               style={{
                 zIndex: 0,
                 backgroundImage: `url(${coverImageUrl})`,
@@ -432,13 +467,26 @@ export default function AlbumGradientBackground({
                 backgroundRepeat: "no-repeat",
                 filter: "blur(60px) brightness(1.5)",
                 transform: "scale(2)", // Scale up to avoid blur edges
-                opacity: 0.5,
+                opacity: 0.9,
               }}
             />
           )}
 
+          {/* White base layer with gradient */}
+          <div
+            className={useAbsolutePositioning ? "absolute inset-0" : "fixed inset-0"}
+            style={{
+              zIndex: 1,
+              background: gradientColors.length >= 3
+                ? `linear-gradient(135deg, ${rgbToRgba(gradientColors[0], 0.3)} 0%, ${rgbToRgba(gradientColors[1], 0.2)} 50%, ${rgbToRgba(gradientColors[2], 0.3)} 100%), white`
+                : "white",
+              opacity: 0.5,
+            }}
+          />
+
       <div
-        className="fixed inset-0 z-[100] min-h-dvh flex flex-col overflow-y-auto"
+        ref={scrollContainerRef}
+        className={useAbsolutePositioning ? "absolute inset-0 z-[100] flex flex-col" : "fixed inset-0 z-[100] flex flex-col overflow-y-auto"}
         style={{ background: "transparent" }}
       >
         {children}

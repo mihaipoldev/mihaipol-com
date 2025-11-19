@@ -20,6 +20,11 @@ export function UserMenu() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     async function fetchUser() {
@@ -75,6 +80,42 @@ export function UserMenu() {
   const userEmail = user.email || "";
   const emailName = userEmail.split("@")[0];
   const userInitials = emailName ? emailName.slice(0, 1).toUpperCase() : "U";
+
+  // Render a non-dropdown version during SSR to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="mt-auto p-2">
+        <button
+          className={cn(
+            "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+          )}
+        >
+          <div className="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
+            {user.user_metadata?.avatar_url ? (
+              <img
+                src={user.user_metadata.avatar_url}
+                alt={userEmail}
+                className="aspect-square h-full w-full rounded-lg object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center rounded-lg bg-muted text-xs font-semibold">
+                {userInitials}
+              </div>
+            )}
+          </div>
+          <div className="flex flex-1 flex-col gap-0.5 overflow-hidden text-left">
+            <div className="truncate text-md font-bold text-foreground leading-none">
+              {emailName}
+            </div>
+            <div className="truncate text-xs font-normal leading-none text-muted-foreground">
+              {userEmail}
+            </div>
+          </div>
+          <MoreVertical className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-auto p-2">

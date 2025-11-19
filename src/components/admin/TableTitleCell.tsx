@@ -61,22 +61,22 @@ export function TableTitleCell({
           <img
             src={imageUrl}
             alt={title}
-            className="h-8 w-8 mr-1 rounded-md object-cover flex-shrink-0"
+            className="h-8 w-8 mr-1 rounded-full object-cover flex-shrink-0 shadow-md"
             onError={() => setImageError(true)}
           />
         ) : showIcon ? (
           <FontAwesomeIcon icon={icon} className="h-4 w-4 mr-1 flex-shrink-0" />
         ) : showInitialsFallback ? (
-          <div className="h-8 w-8 mr-1 rounded-md bg-primary/10 flex items-center justify-center text-xs font-semibold text-muted-foreground flex-shrink-0">
+          <div className="h-8 w-8 mr-1 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-muted-foreground flex-shrink-0 shadow-md">
             {initials}
           </div>
         ) : null}
         <div className="flex flex-col gap-0 flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap font-bold">
-            {titleContent}
-            {metadata && <span className="text-xs text-muted-foreground/70">[{metadata}]</span>}
+          <div className="flex items-center gap-2 font-bold min-w-0">
+            <span className="truncate">{titleContent}</span>
+            {metadata && <span className="text-xs text-muted-foreground/70 flex-shrink-0">[{metadata}]</span>}
           </div>
-          {description && <span className="text-xs text-muted-foreground">{description}</span>}
+          {description && <span className="text-xs text-muted-foreground truncate">{description}</span>}
         </div>
       </div>
     </TableCell>

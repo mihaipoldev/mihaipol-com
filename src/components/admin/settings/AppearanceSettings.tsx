@@ -239,13 +239,13 @@ export function AppearanceSettings() {
         </CardHeader>
         <CardContent className="space-y-6 relative">
           {/* Theme Section */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <div className="font-medium">Theme</div>
               <div className="text-sm text-muted-foreground">Choose your interface theme</div>
             </div>
             <Select value={theme} onValueChange={setTheme}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <div className="flex items-center gap-2">
                   {theme === "dark" ? (
                     <Moon className="h-4 w-4" />
@@ -301,8 +301,8 @@ export function AppearanceSettings() {
                   background: `radial-gradient(circle at center, ${primaryColor} 0%, transparent 70%)`,
                 }}
               />
-              <div className="relative flex items-center gap-5">
-                <div className="relative group/color">
+              <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
+                <div className="relative group/color flex-shrink-0">
                   <div
                     className="w-20 h-20 rounded-xl border-[3px] border-white/90 shadow-2xl transition-all duration-300 group-hover/color:scale-110 group-hover/color:shadow-[0_0_30px_rgba(0,0,0,0.3)]"
                     style={{ backgroundColor: primaryColor }}
@@ -317,8 +317,8 @@ export function AppearanceSettings() {
                     <div className="absolute inset-0.5 bg-primary rounded-full" />
                   </div>
                 </div>
-                <div className="flex-1">
-                  <div className="text-sm font-semibold mb-1.5 flex items-center gap-2">
+                <div className="flex-1 w-full min-w-0">
+                  <div className="text-sm font-semibold mb-1.5 flex flex-wrap items-center gap-2">
                     Current Color
                     {primaryColor ===
                       savedColors.find((c) => c.hex_value === primaryColor)?.hex_value && (
@@ -327,7 +327,7 @@ export function AppearanceSettings() {
                       </span>
                     )}
                   </div>
-                  <div className="text-sm text-muted-foreground font-mono font-medium">
+                  <div className="text-sm text-muted-foreground font-mono font-medium break-all">
                     {primaryColor}
                   </div>
                 </div>
@@ -337,7 +337,7 @@ export function AppearanceSettings() {
                     setShowColorModal(true);
                   }}
                   variant="outline"
-                  className="relative overflow-hidden group/btn hover:border-primary/50 transition-all duration-300"
+                  className="relative overflow-hidden group/btn hover:border-primary/50 transition-all duration-300 w-full sm:w-auto"
                 >
                   <div
                     className="absolute inset-0 opacity-0 group-hover/btn:opacity-10 transition-opacity duration-300"

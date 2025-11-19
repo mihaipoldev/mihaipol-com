@@ -16,19 +16,42 @@ import {
   faExternalLink,
   faNewspaper,
   faGlobe,
+  faChevronDown,
+  faChevronLeft,
+  faMusic,
 } from "@fortawesome/free-solid-svg-icons";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserMenu } from "./UserMenu";
 import { getSidebarGradient, getSidebarAccentGradient } from "@/lib/gradient-presets";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const overviewItems = [
   {
     title: "Dashboard",
     href: "/admin",
+    icon: faChartLine,
+  },
+  {
+    title: "Events",
+    href: "/admin/events",
+    icon: faCalendar,
+  },
+];
+
+const updatesItem = {
+  title: "Updates",
+  href: "/admin/updates",
+  icon: faNewspaper,
+};
+
+const musicItems = [
+  {
+    title: "Analytics",
+    href: "/admin/analytics",
     icon: faChartLine,
   },
   {
@@ -42,27 +65,9 @@ const overviewItems = [
     icon: faUsers,
   },
   {
-    title: "Events",
-    href: "/admin/events",
-    icon: faCalendar,
-  },
-  {
     title: "Labels",
     href: "/admin/labels",
     icon: faTag,
-  },
-  {
-    title: "Updates",
-    href: "/admin/updates",
-    icon: faNewspaper,
-  },
-];
-
-const smartLinksItems = [
-  {
-    title: "Analytics",
-    href: "/admin/analytics",
-    icon: faChartLine,
   },
   {
     title: "Platforms",
@@ -71,20 +76,132 @@ const smartLinksItems = [
   },
 ];
 
+const smartLinksItems: Array<{ title: string; href: string; icon: any }> = [];
+
 const settingsItems = [
   {
     title: "Settings",
     href: "/admin/settings",
     icon: faGear,
   },
-  {
-    title: "Performance Test",
-    href: "/admin/test-performance",
-    icon: faChartLine,
-  },
 ];
 
-function SidebarContent() {
+function MusicCollapsible({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const sidebarAccentGradient = getSidebarAccentGradient();
+  const hoverGradientClasses = sidebarAccentGradient
+    .split(" ")
+    .map((cls) => `hover:${cls}`)
+    .join(" ");
+
+  const handleNavigation = (href: string) => {
+    router.push(href);
+    onNavigate?.();
+  };
+
+  const isMusicActive =
+    pathname.startsWith("/admin/analytics") ||
+    pathname.startsWith("/admin/albums") ||
+    pathname.startsWith("/admin/artists") ||
+    pathname.startsWith("/admin/labels") ||
+    pathname.startsWith("/admin/platforms");
+
+  // Only render after mount to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Auto-expand if we're on a music-related page
+  useEffect(() => {
+    if (isMusicActive && !isOpen) {
+      setIsOpen(true);
+    }
+  }, [isMusicActive, isOpen]);
+
+  // Render a non-collapsible version during SSR to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <button
+        type="button"
+        data-active={isMusicActive}
+        className={cn(
+          `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-5`,
+          "[&>svg]:size-4 [&>svg]:shrink-0",
+          "[&>span:last-child]:truncate",
+          isMusicActive
+            ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
+            : "text-sidebar-muted-foreground rounded-lg px-4"
+        )}
+      >
+        <FontAwesomeIcon icon={faMusic} />
+        <span className="flex-1">Music</span>
+        <FontAwesomeIcon
+          icon={faChevronDown}
+          className="transition-transform duration-200"
+          style={{ fontSize: '0.75rem', width: '0.75rem', height: '0.75rem' }}
+        />
+      </button>
+    );
+  }
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger asChild>
+        <button
+          type="button"
+          data-active={isMusicActive}
+          className={cn(
+            `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-5`,
+            "[&>svg]:size-4 [&>svg]:shrink-0",
+            "[&>span:last-child]:truncate",
+            isMusicActive
+              ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
+              : "text-sidebar-muted-foreground rounded-lg px-4"
+          )}
+        >
+          <FontAwesomeIcon icon={faMusic} />
+          <span className="flex-1">Music</span>
+          <FontAwesomeIcon
+            icon={isOpen ? faChevronDown : faChevronLeft}
+            className="transition-transform duration-200"
+            style={{ fontSize: '0.75rem', width: '0.75rem', height: '0.75rem' }}
+          />
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="mt-0.5">
+        <div className="flex flex-col gap-0.5 pl-9">
+          {musicItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            return (
+              <button
+                key={item.href}
+                type="button"
+                onClick={() => handleNavigation(item.href)}
+                data-active={isActive}
+                className={cn(
+                  `peer/menu-button flex w-full items-center overflow-hidden py-2 text-left text-[14px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-9 gap-3`,
+                  "[&>svg]:size-3 [&>svg]:shrink-0",
+                  "[&>span:last-child]:truncate",
+                  isActive
+                    ? `${getSidebarAccentGradient()} relative font-semibold hover:font-semibold text-primary rounded-r-lg rounded-l-none pl-5 pr-3`
+                    : "text-sidebar-muted-foreground rounded-lg px-3"
+                )}
+              >
+                <FontAwesomeIcon icon={item.icon} />
+                <span>{item.title}</span>
+              </button>
+            );
+          })}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const sidebarAccentGradient = getSidebarAccentGradient();
@@ -92,6 +209,11 @@ function SidebarContent() {
     .split(" ")
     .map((cls) => `hover:${cls}`)
     .join(" ");
+
+  const handleNavigation = (href: string) => {
+    router.push(href);
+    onNavigate?.();
+  };
 
   return (
     <div className="flex h-full flex-col relative sidebar-sparkles">
@@ -112,7 +234,7 @@ function SidebarContent() {
             Artist Portal
           </span>
         </Link>
-        <Link href="/dev">
+        <Link href="/dev" target="_blank" rel="noopener noreferrer">
           <Button
             variant="ghost"
             size="icon"
@@ -147,7 +269,7 @@ function SidebarContent() {
                 <button
                   key={item.href}
                   type="button"
-                  onClick={() => router.push(item.href)}
+                  onClick={() => handleNavigation(item.href)}
                   data-active={isActive}
                   className={cn(
                     `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-5`,
@@ -163,40 +285,26 @@ function SidebarContent() {
                 </button>
               );
             })}
+            <MusicCollapsible onNavigate={onNavigate} />
+            <button
+              type="button"
+              onClick={() => handleNavigation(updatesItem.href)}
+              data-active={pathname === updatesItem.href || pathname.startsWith(updatesItem.href + "/")}
+              className={cn(
+                `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-5`,
+                "[&>svg]:size-4 [&>svg]:shrink-0",
+                "[&>span:last-child]:truncate",
+                pathname === updatesItem.href || pathname.startsWith(updatesItem.href + "/")
+                  ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
+                  : "text-sidebar-muted-foreground rounded-lg px-4"
+              )}
+            >
+              <FontAwesomeIcon icon={updatesItem.icon} />
+              <span>{updatesItem.title}</span>
+            </button>
           </div>
         </div>
 
-        {/* Smart Links Category */}
-        <div className="space-y-2.5">
-          <div className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider px-3 mb-1">
-            Smart Links
-          </div>
-          <div className="flex flex-col gap-0.5">
-            {smartLinksItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-
-              return (
-                <button
-                  key={item.href}
-                  type="button"
-                  onClick={() => router.push(item.href)}
-                  data-active={isActive}
-                  className={cn(
-                    `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-1.5`,
-                    "[&>svg]:size-4 [&>svg]:shrink-0",
-                    "[&>span:last-child]:truncate gap-5",
-                    isActive
-                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none pl-7 pr-4`
-                      : "text-sidebar-muted-foreground rounded-lg px-4"
-                  )}
-                >
-                  <FontAwesomeIcon icon={item.icon} />
-                  <span>{item.title}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
         {/* Settings Category */}
         <div className="space-y-2.5">
@@ -211,7 +319,7 @@ function SidebarContent() {
                 <button
                   key={item.href}
                   type="button"
-                  onClick={() => router.push(item.href)}
+                  onClick={() => handleNavigation(item.href)}
                   data-active={isActive}
                   className={cn(
                     `peer/menu-button flex w-full items-center overflow-hidden py-2.5 text-left text-[15px] font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary h-10 gap-1.5`,
@@ -254,8 +362,9 @@ export function AdminSidebarMobile() {
           <FontAwesomeIcon icon={faBars} className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className={`w-64 p-0 ${getSidebarGradient()}`}>
-        <SidebarContent />
+      <SheetContent side="left" className={`w-64 p-0 ${getSidebarGradient()}`} hideCloseButton>
+        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+        <SidebarContent onNavigate={() => setOpen(false)} />
       </SheetContent>
     </Sheet>
   );

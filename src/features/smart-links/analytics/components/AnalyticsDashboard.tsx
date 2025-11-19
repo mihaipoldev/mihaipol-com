@@ -72,7 +72,7 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
             <thead>
               <tr className="text-left text-muted-foreground">
                 <th className="py-2 pr-4">Album</th>
-                <th className="py-2 pr-4 w-44">Page Views</th>
+                <th className="py-2 pr-4 w-44">Page Visits</th>
                 <th className="py-2 pr-4 w-44">Clicks</th>
                 <th className="py-2 pr-4 w-44">CTR</th>
               </tr>
@@ -98,7 +98,7 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                   </td>
                   <td className="py-2 pr-4 w-44">
                     <div className="flex items-center gap-3">
-                      <span>{row.pageViews}</span>
+                      <span className="w-8 text-right tabular-nums">{row.pageViews}</span>
                       {totalAlbumPageViews > 0 ? (
                         <div className="flex items-center gap-2">
                           <div className="h-2 w-14 rounded-full bg-muted">
@@ -119,7 +119,7 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                   <td className="py-2 pr-4 w-44">{row.clicks}</td>
                   <td className="py-2 pr-4 w-44">
                     <div className="flex items-center gap-2">
-                      <span>{row.ctr.toFixed(1)}%</span>
+                      <span className="w-12 text-right tabular-nums">{row.ctr.toFixed(1)}%</span>
                       <div className="h-2 w-14 rounded-full bg-muted">
                         <div
                           className="h-2 rounded-full bg-primary"
@@ -145,17 +145,17 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Top Performing Platforms</h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
             <thead>
               <tr className="text-left text-muted-foreground">
-                <th className="py-2 pr-4">Platform</th>
-                <th className="py-2 pr-4">Clicks</th>
+                <th className="py-2 pr-4 w-4/5">Platform</th>
+                <th className="py-2 pr-4 w-1/5">Clicks</th>
               </tr>
             </thead>
             <tbody>
               {perPlatformRows.map((row) => (
                 <tr key={row.name} className="border-t">
-                  <td className="py-2 pr-4">
+                  <td className="py-2 pr-4 w-4/5">
                     <div className="flex items-center gap-2">
                       <Avatar className="h-6 w-6 rounded-md">
                         <AvatarImage src={row.iconUrl || undefined} alt={row.name} />
@@ -171,7 +171,7 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                       <span>{row.name}</span>
                     </div>
                   </td>
-                  <td className="py-2 pr-4">{row.clicks}</td>
+                  <td className="py-2 pr-4 w-1/5">{row.clicks}</td>
                 </tr>
               ))}
               {perPlatformRows.length === 0 && (
@@ -189,18 +189,18 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Top Countries</h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
             <thead>
               <tr className="text-left text-muted-foreground">
-                <th className="py-2 pr-4">Country</th>
-                <th className="py-2 pr-4">Events</th>
+                <th className="py-2 pr-4 w-4/5">Country</th>
+                <th className="py-2 pr-4 w-1/5">Events</th>
               </tr>
             </thead>
             <tbody>
               {topCountries.slice(0, 20).map((row) => (
                 <tr key={row.country} className="border-t">
-                  <td className="py-2 pr-4">{row.country}</td>
-                  <td className="py-2 pr-4">{row.count}</td>
+                  <td className="py-2 pr-4 w-4/5">{row.country}</td>
+                  <td className="py-2 pr-4 w-1/5">{row.count}</td>
                 </tr>
               ))}
               {topCountries.length === 0 && (

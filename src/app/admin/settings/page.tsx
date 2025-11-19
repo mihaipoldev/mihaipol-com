@@ -4,6 +4,10 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SettingsSidebar } from "@/components/admin/settings/SettingsSidebar";
 import { SettingsContent } from "@/components/admin/settings/SettingsContent";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser, faPalette, faGear } from "@fortawesome/free-solid-svg-icons";
 
 type SettingsSection = "account" | "appearance" | "preferences";
 
@@ -25,6 +29,7 @@ const VALID_SECTIONS: SettingsSection[] = ["account", "appearance", "preferences
 function SettingsPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const isMobile = useIsMobile();
   const [activeSection, setActiveSection] = useState<SettingsSection>(() => {
     const urlTab = searchParams.get("tab");
     if (urlTab && URL_SECTION_MAP[urlTab]) {
@@ -59,8 +64,38 @@ function SettingsPageInner() {
     }
   }, [activeSection, searchParams, router]);
 
+  const handleSectionChange = (section: SettingsSection) => {
+    setActiveSection(section);
+  };
+
   return (
     <div className="w-full">
+      {isMobile ? (
+        // Mobile layout with tabs
+        <div className="flex flex-col gap-2 -mt-4 md:mt-0">
+          <Tabs value={activeSection} onValueChange={(value) => handleSectionChange(value as SettingsSection)} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="account" className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faUser} className="h-4 w-4" />
+                <span className="hidden sm:inline">Account</span>
+              </TabsTrigger>
+              <TabsTrigger value="appearance" className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faPalette} className="h-4 w-4" />
+                <span className="hidden sm:inline">Appearance</span>
+              </TabsTrigger>
+              <TabsTrigger value="preferences" className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faGear} className="h-4 w-4" />
+                <span className="hidden sm:inline">Prefs</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
+            <SettingsContent activeSection={activeSection} />
+          </div>
+        </div>
+      ) : (
+        // Desktop layout with sidebar
       <div className="flex gap-6">
         {/* Sidebar */}
         <div className="w-64 flex-shrink-0">
@@ -72,6 +107,7 @@ function SettingsPageInner() {
           <SettingsContent activeSection={activeSection} />
         </div>
       </div>
+      )}
     </div>
   );
 }

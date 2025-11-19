@@ -2,6 +2,7 @@ import { getAllAlbums } from "@/features/albums/data";
 import { getLabelBySlug } from "@/features/labels/data";
 import LandingAlbumsList from "@/components/landing/lists/LandingAlbumsList";
 import type { LandingAlbum } from "@/components/landing/types";
+import TrackView from "@/features/smart-links/analytics/components/TrackView";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,11 @@ export default async function AlbumsPage({ searchParams }: AlbumsPageProps) {
 
   return (
     <div className="min-h-dvh">
+      <TrackView
+        eventType="section_view"
+        entityType="site_section"
+        entityId="albums"
+      />
       <div className="py-24 px-6">
         <div className="container mx-auto px-0 md:px-8">
           <div className="text-center mb-12">

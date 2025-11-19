@@ -6,9 +6,10 @@ import { useRef, type ReactNode } from "react";
 
 type AdminPageTransitionProps = {
   children: ReactNode;
+  className?: string;
 };
 
-export default function AdminPageTransition({ children }: AdminPageTransitionProps) {
+export default function AdminPageTransition({ children, className }: AdminPageTransitionProps) {
   const pathname = usePathname();
   const isFirstMount = useRef(true);
 
@@ -18,7 +19,7 @@ export default function AdminPageTransition({ children }: AdminPageTransitionPro
   }
 
   return (
-    <div className="relative flex flex-1 flex-col">
+    <div className={`relative flex flex-1 flex-col min-h-0 ${className || ""}`}>
       <motion.div
         key={pathname}
         initial={isFirstMount.current ? false : { opacity: 0, scale: 0.99 }}
@@ -27,7 +28,7 @@ export default function AdminPageTransition({ children }: AdminPageTransitionPro
           duration: 0.15,
           ease: "easeOut",
         }}
-        className="flex flex-1 flex-col"
+        className="flex flex-1 flex-col min-h-0"
       >
         {children}
       </motion.div>

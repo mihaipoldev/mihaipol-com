@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ShadowButton } from "@/components/admin/ShadowButton";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const artistSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -350,9 +352,18 @@ export function EditArtistForm({ id, isNew, initialArtist }: EditArtistFormProps
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 relative">
-        <div className="relative rounded-xl border border-border/30 overflow-hidden bg-gradient-to-br from-card/30 to-transparent backdrop-blur-sm">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
-          <div className="p-6 space-y-6">
+        <Card className={cn("relative overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl group")}>
+          {/* Decorative gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
+          
+          {/* Sparkle decorations */}
+          <div className="absolute top-4 right-4 w-2 h-2 bg-primary/20 rounded-full blur-sm animate-pulse" />
+          <div
+            className="absolute top-12 right-12 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm animate-pulse"
+            style={{ animationDelay: "300ms" }}
+          />
+          
+          <div className="p-6 space-y-6 relative">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField label="Name" required error={errors.name?.message}>
                 <ShadowInput {...register("name")} placeholder="Artist name" />
@@ -380,18 +391,8 @@ export function EditArtistForm({ id, isNew, initialArtist }: EditArtistFormProps
                 error={errors.profile_image_url?.message}
               />
             </FormField>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField label="City" error={errors.city?.message}>
-                <ShadowInput {...register("city")} placeholder="City" />
-              </FormField>
-
-              <FormField label="Country" error={errors.country?.message}>
-                <ShadowInput {...register("country")} placeholder="Country" />
-              </FormField>
-            </div>
           </div>
-        </div>
+        </Card>
 
         <div className="flex gap-4 justify-end">
           <ShadowButton

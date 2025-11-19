@@ -22,6 +22,8 @@ import { PublishStateSwitch } from "@/components/admin/PublishStateSwitch";
 import { Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const eventSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -357,9 +359,18 @@ export function EditEventForm({ id, isNew, initialEvent }: EditEventFormProps) {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 relative">
-        <div className="relative rounded-xl border border-border/30 overflow-hidden bg-gradient-to-br from-card/30 to-transparent backdrop-blur-sm">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
-          <div className="p-6 space-y-6">
+        <Card className={cn("relative overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl group")}>
+          {/* Decorative gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
+          
+          {/* Sparkle decorations */}
+          <div className="absolute top-4 right-4 w-2 h-2 bg-primary/20 rounded-full blur-sm animate-pulse" />
+          <div
+            className="absolute top-12 right-12 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm animate-pulse"
+            style={{ animationDelay: "300ms" }}
+          />
+          
+          <div className="p-6 space-y-6 relative">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField label="Title" required error={errors.title?.message}>
                 <ShadowInput {...register("title")} placeholder="Event title" />
@@ -369,10 +380,6 @@ export function EditEventForm({ id, isNew, initialEvent }: EditEventFormProps) {
                 <ShadowInput {...register("slug")} placeholder="event-slug" />
               </FormField>
             </div>
-
-            <FormField label="Description" error={errors.description?.message}>
-              <Textarea {...register("description")} placeholder="Event description" rows={4} />
-            </FormField>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FormField label="Venue" error={errors.venue?.message}>
@@ -388,34 +395,11 @@ export function EditEventForm({ id, isNew, initialEvent }: EditEventFormProps) {
               </FormField>
             </div>
 
-            <FormField label="Date" required error={errors.date?.message}>
-              <ShadowInput type="date" {...register("date")} />
-            </FormField>
-
-            <FormField label="Tickets URL" error={errors.tickets_url?.message}>
-              <ShadowInput
-                type="url"
-                {...register("tickets_url")}
-                placeholder="https://example.com/tickets"
-              />
-            </FormField>
-
-            <FormField label="Ticket Label" error={errors.ticket_label?.message}>
-              <ShadowInput {...register("ticket_label")} placeholder="Tickets" />
-            </FormField>
-
-            <FormField label="Flyer Image" error={errors.flyer_image_url?.message}>
-              <ImageUploadField
-                value={watch("flyer_image_url") || null}
-                onChange={(url) => setValue("flyer_image_url", url || "")}
-                onFileChange={(file) => setSelectedFile(file)}
-                folderPath={id === "new" ? "events/temp" : `events/${id}`}
-                error={errors.flyer_image_url?.message}
-                placeholder="https://example.com/flyer.jpg"
-              />
-            </FormField>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField label="Date" required error={errors.date?.message}>
+                <ShadowInput type="date" {...register("date")} />
+              </FormField>
+
               <FormField label="Event Status" required error={errors.event_status?.message}>
                 <Select
                   value={watch("event_status") || initialEvent?.event_status || "upcoming"}
@@ -434,8 +418,37 @@ export function EditEventForm({ id, isNew, initialEvent }: EditEventFormProps) {
                 </Select>
               </FormField>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField label="Tickets URL" error={errors.tickets_url?.message}>
+                <ShadowInput
+                  type="url"
+                  {...register("tickets_url")}
+                  placeholder="https://example.com/tickets"
+                />
+              </FormField>
+
+              <FormField label="Ticket Label" error={errors.ticket_label?.message}>
+                <ShadowInput {...register("ticket_label")} placeholder="Tickets" />
+              </FormField>
+            </div>
+
+            <FormField label="Description" error={errors.description?.message}>
+              <Textarea {...register("description")} placeholder="Event description" rows={4} />
+            </FormField>
+
+            <FormField label="Flyer Image" error={errors.flyer_image_url?.message}>
+              <ImageUploadField
+                value={watch("flyer_image_url") || null}
+                onChange={(url) => setValue("flyer_image_url", url || "")}
+                onFileChange={(file) => setSelectedFile(file)}
+                folderPath={id === "new" ? "events/temp" : `events/${id}`}
+                error={errors.flyer_image_url?.message}
+                placeholder="https://example.com/flyer.jpg"
+              />
+            </FormField>
           </div>
-        </div>
+        </Card>
 
         <div className="flex gap-4 justify-end">
           <ShadowButton
