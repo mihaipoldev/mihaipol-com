@@ -27,14 +27,24 @@ export function AccountSettings() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
+      <Card className="relative overflow-hidden shadow-lg">
+        {/* Decorative gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
+
+        {/* Sparkle decorations */}
+        <div className="absolute top-4 right-4 w-2 h-2 bg-primary/20 rounded-full blur-sm animate-pulse" />
+        <div
+          className="absolute top-12 right-12 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm animate-pulse"
+          style={{ animationDelay: "300ms" }}
+        />
+
+        <CardHeader className="relative">
           <CardTitle className="text-2xl flex items-center gap-2">
             <User className="h-6 w-6 text-primary" />
             Account Settings
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 relative">
           <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
             <div className="relative flex-shrink-0">
               <Avatar className="h-20 w-20">
@@ -94,8 +104,6 @@ export function AccountSettings() {
             </FormField>
           </div>
 
-          <Separator />
-
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Change Password</h3>
             <FormField label="Current Password">
@@ -125,15 +133,16 @@ export function AccountSettings() {
               />
             </FormField>
           </div>
+        </CardContent>
+      </Card>
 
-          <div className="flex justify-end pt-4">
+      {/* Save Changes Button - Outside Card */}
+      <div className="flex justify-end">
             <ShadowButton onClick={handleSave} size="lg" className="gap-2 w-full sm:w-auto">
               <Save className="h-4 w-4" />
               Save Changes
             </ShadowButton>
           </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

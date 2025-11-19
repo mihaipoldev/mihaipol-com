@@ -78,16 +78,25 @@ function SettingsPageInner() {
             onValueChange={(value) => handleSectionChange(value as SettingsSection)}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="account" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-3 bg-transparent p-1">
+              <TabsTrigger 
+                value="account" 
+                className="flex items-center gap-2 data-[state=active]:bg-card/50 data-[state=active]:dark:bg-card/30 data-[state=active]:backdrop-blur-sm data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary/[2%] data-[state=active]:via-primary/[1%] data-[state=active]:to-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              >
                 <FontAwesomeIcon icon={faUser} className="h-4 w-4" />
                 <span className="hidden sm:inline">Account</span>
               </TabsTrigger>
-              <TabsTrigger value="appearance" className="flex items-center gap-2">
+              <TabsTrigger 
+                value="appearance" 
+                className="flex items-center gap-2 data-[state=active]:bg-card/50 data-[state=active]:dark:bg-card/30 data-[state=active]:backdrop-blur-sm data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary/[2%] data-[state=active]:via-primary/[1%] data-[state=active]:to-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              >
                 <FontAwesomeIcon icon={faPalette} className="h-4 w-4" />
                 <span className="hidden sm:inline">Appearance</span>
               </TabsTrigger>
-              <TabsTrigger value="preferences" className="flex items-center gap-2">
+              <TabsTrigger 
+                value="preferences" 
+                className="flex items-center gap-2 data-[state=active]:bg-card/50 data-[state=active]:dark:bg-card/30 data-[state=active]:backdrop-blur-sm data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary/[2%] data-[state=active]:via-primary/[1%] data-[state=active]:to-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              >
                 <FontAwesomeIcon icon={faGear} className="h-4 w-4" />
                 <span className="hidden sm:inline">Prefs</span>
               </TabsTrigger>

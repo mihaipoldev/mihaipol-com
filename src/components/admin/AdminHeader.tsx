@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { AdminSidebarMobile } from "./AdminSidebar";
 import { AdminBreadcrumb } from "./AdminBreadcrumb";
 import { NotificationButton } from "./NotificationButton";
@@ -9,6 +10,32 @@ import { ShowMoreMenu } from "./ShowMoreMenu";
 import { getHeaderGradient } from "@/lib/gradient-presets";
 
 export function AdminHeader() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Prevent hydration mismatch by only rendering on client
+  if (!isMounted) {
+    return (
+      <header
+        className={`sticky top-0 z-30 flex h-[72px] items-center gap-2 ${getHeaderGradient()} px-4 md:px-10 lg:px-12`}
+      >
+        <AdminSidebarMobile />
+        <div className="flex flex-1 items-center gap-4 h-full">
+          <AdminBreadcrumb />
+          <div className="flex flex-1 items-center justify-end gap-2 h-full">
+            <div className="h-8 w-8" />
+            <div className="h-8 w-8" />
+            <div className="h-8 w-8" />
+            <div className="h-8 w-8" />
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header
       className={`sticky top-0 z-30 flex h-[72px] items-center gap-2 ${getHeaderGradient()} px-4 md:px-10 lg:px-12`}

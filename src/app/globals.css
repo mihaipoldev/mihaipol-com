@@ -463,7 +463,7 @@ body {
   --secondary: var(--brand-h) 25% 22%;
   --secondary-foreground: var(--brand-h) 45% 95%;
 
-  --border: var(--brand-h) 0% 25%;
+  --border: var(--brand-h) 0% 22%;
   --input: var(--border);
   --ring: var(--primary);
 
@@ -478,7 +478,7 @@ body {
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: var(--brand-h) 1% 10%;
   --sidebar-accent-foreground: var(--brand-h) 10% 94%;
-  --sidebar-border: var(--brand-h) 0% 30%;
+  --sidebar-border: var(--brand-h) 0% 24%;
   --sidebar-ring: var(--ring);
   --sidebar-muted: var(--muted);
   --sidebar-muted-foreground: var(--muted-foreground);

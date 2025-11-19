@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import LandingPageClient from "@/components/landing/LandingPageClient";
-import { getHomepageAlbums, getLatestAlbumByLabelId } from "@/features/albums/data";
+import { getHomepageAlbums, getLatestAlbumByLabelId, getAlbumById, getHomepageGriffithAlbums } from "@/features/albums/data";
 import { getHomepageEvents } from "@/features/events/data";
 import { getHomepageUpdates } from "@/features/updates/data";
 import { getLabelById } from "@/features/labels/data";
-import { getSitePreferenceBoolean, getSitePreferenceNumber } from "@/features/settings/data";
+import { getSitePreferenceBoolean, getSitePreferenceNumber, getSitePreferenceString } from "@/features/settings/data";
+import { getHeroCarouselImages } from "@/features/hero-carousel/data";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,22 @@ export default async function DevHomePage() {
     showPastStrikethrough,
     albumsHomepageColumnsRaw,
     updatesHomepageColumnsRaw,
+    featuredAlbumId,
+    griffithAlbums,
+    griffithAlbumsHomepageColumnsRaw,
+    heroCarouselImages,
+    // Section visibility preferences
+    eventsSectionShow,
+    albumsSectionShow,
+    griffithSectionShow,
+    featureSectionShow,
+    updatesSectionShow,
+    // Section order preferences
+    eventsSectionOrder,
+    albumsSectionOrder,
+    griffithSectionOrder,
+    featureSectionOrder,
+    updatesSectionOrder,
   ] = await Promise.all([
     getHomepageEvents(),
     getHomepageAlbums(),
@@ -56,7 +73,32 @@ export default async function DevHomePage() {
     getSitePreferenceBoolean("events_show_past_strikethrough", true),
     getSitePreferenceNumber("albums_homepage_columns", 3),
     getSitePreferenceNumber("updates_homepage_columns", 3),
+    getSitePreferenceString("featured_album_id", null),
+    getHomepageGriffithAlbums(),
+    getSitePreferenceNumber("griffith_albums_homepage_columns", 3),
+    getHeroCarouselImages(),
+    // Section visibility
+    getSitePreferenceBoolean("events_section_show", true),
+    getSitePreferenceBoolean("albums_section_show", true),
+    getSitePreferenceBoolean("griffith_section_show", true),
+    getSitePreferenceBoolean("feature_section_show", true),
+    getSitePreferenceBoolean("updates_section_show", true),
+    // Section order
+    getSitePreferenceNumber("events_section_order", 1),
+    getSitePreferenceNumber("albums_section_order", 2),
+    getSitePreferenceNumber("griffith_section_order", 3),
+    getSitePreferenceNumber("feature_section_order", 4),
+    getSitePreferenceNumber("updates_section_order", 5),
   ]);
+
+  // Get featured album: use preference if set, otherwise fallback to griffith album
+  let featuredAlbum = griffithAlbum;
+  if (featuredAlbumId) {
+    const preferredAlbum = await getAlbumById(featuredAlbumId);
+    if (preferredAlbum && preferredAlbum.publish_status === "published") {
+      featuredAlbum = preferredAlbum;
+    }
+  }
 
   // Ensure columns are between 3 and 5
   const albumsHomepageColumns = Math.max(3, Math.min(5, Math.round(albumsHomepageColumnsRaw))) as
@@ -67,9 +109,16 @@ export default async function DevHomePage() {
     | 3
     | 4
     | 5;
+  const griffithAlbumsHomepageColumns = Math.max(3, Math.min(5, Math.round(griffithAlbumsHomepageColumnsRaw))) as
+    | 3
+    | 4
+    | 5;
 
   const heroImage = "/hero images/01_BB_9497.jpg";
   const griffithLabelSlug = griffithLabel?.slug || "griffith-records";
+  
+  // Extract image URLs from carousel images
+  const heroImages = heroCarouselImages.map((img) => img.image_url);
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -90,12 +139,27 @@ export default async function DevHomePage() {
         events={events}
         albums={albums}
         updates={updates}
-        featuredAlbum={griffithAlbum}
+        featuredAlbum={featuredAlbum}
         heroImage={heroImage}
+        heroImages={heroImages}
         griffithLabelSlug={griffithLabelSlug}
         showPastStrikethrough={showPastStrikethrough}
         albumsHomepageColumns={albumsHomepageColumns}
         updatesHomepageColumns={updatesHomepageColumns}
+        griffithAlbums={griffithAlbums}
+        griffithAlbumsHomepageColumns={griffithAlbumsHomepageColumns}
+        // Section visibility
+        eventsSectionShow={eventsSectionShow}
+        albumsSectionShow={albumsSectionShow}
+        griffithSectionShow={griffithSectionShow}
+        featureSectionShow={featureSectionShow}
+        updatesSectionShow={updatesSectionShow}
+        // Section order
+        eventsSectionOrder={eventsSectionOrder}
+        albumsSectionOrder={albumsSectionOrder}
+        griffithSectionOrder={griffithSectionOrder}
+        featureSectionOrder={featureSectionOrder}
+        updatesSectionOrder={updatesSectionOrder}
       />
     </>
   );

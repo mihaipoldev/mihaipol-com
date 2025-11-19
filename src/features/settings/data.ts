@@ -147,7 +147,7 @@ export async function getAllSitePreferences(): Promise<SitePreference[]> {
  * Get site preferences by category
  */
 export async function getSitePreferencesByCategory(
-  category: "events" | "albums" | "updates" | "general"
+  category: "events" | "albums" | "updates" | "general" | "griffith" | "feature"
 ): Promise<SitePreference[]> {
   try {
     const { data, error } = await supabase
@@ -198,4 +198,25 @@ export async function getSitePreferenceBoolean(
     return value.toLowerCase() === "true";
   }
   return defaultValue;
+}
+
+/**
+ * Get a site preference as a string with fallback to default
+ */
+export async function getSitePreferenceString(
+  key: string,
+  defaultValue: string | null = null
+): Promise<string | null> {
+  const value = await getSitePreference(key);
+  if (value === null || value === undefined) {
+    return defaultValue;
+  }
+  if (typeof value === "string") {
+    return value.trim() === "" ? defaultValue : value;
+  }
+  // Handle JSON null
+  if (value === "null" || (typeof value === "object" && value === null)) {
+    return defaultValue;
+  }
+  return String(value);
 }

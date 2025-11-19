@@ -12,6 +12,7 @@ import LandingHeader from "@/components/landing/LandingHeader";
 
 type ConditionalDevLayoutProps = {
   children: ReactNode;
+  landingPagePreset?: number;
 };
 
 function SimpleHeader() {
@@ -43,7 +44,7 @@ function SimpleHeader() {
   );
 }
 
-export default function ConditionalDevLayout({ children }: ConditionalDevLayoutProps) {
+export default function ConditionalDevLayout({ children, landingPagePreset = 19 }: ConditionalDevLayoutProps) {
   const pathname = usePathname();
   const isAlbumSlugPage = pathname?.includes("/dev/albums/") && pathname !== "/dev/albums";
   const gradientBgRef = useRef<HTMLDivElement>(null);
@@ -144,7 +145,10 @@ export default function ConditionalDevLayout({ children }: ConditionalDevLayoutP
 
   return (
     <div
-      className="flex min-h-dvh flex-col bg-background preset-landing-page-22 relative"
+      className={cn(
+        "flex min-h-dvh flex-col bg-background relative",
+        `preset-landing-page-${landingPagePreset}`
+      )}
       style={{
         scrollBehavior: "smooth",
       }}

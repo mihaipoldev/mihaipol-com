@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import LandingHeroSection from "./sections/LandingHeroSection";
 import LandingFeatureMusicSection from "./sections/LandingFeatureMusicSection";
 import LandingAlbumsSection from "./sections/LandingAlbumsSection";
 import LandingEventsSection from "./sections/LandingEventsSection";
 import LandingGriffithSection from "./sections/LandingGriffithSection";
+import LandingGriffithAlbumsSection from "./sections/LandingGriffithAlbumsSection";
 import LandingUpdatesSection from "./sections/LandingUpdatesSection";
 import type { LandingAlbum, LandingEvent, LandingUpdate } from "./types";
 
@@ -19,10 +20,25 @@ type LandingPageClientProps = {
   updates: LandingUpdate[];
   featuredAlbum: LandingAlbum | null;
   heroImage: string;
+  heroImages: string[];
   griffithLabelSlug: string;
   showPastStrikethrough: boolean;
   albumsHomepageColumns: number;
   updatesHomepageColumns: number;
+  griffithAlbums: LandingAlbum[];
+  griffithAlbumsHomepageColumns: number;
+  // Section visibility
+  eventsSectionShow: boolean;
+  albumsSectionShow: boolean;
+  griffithSectionShow: boolean;
+  featureSectionShow: boolean;
+  updatesSectionShow: boolean;
+  // Section order
+  eventsSectionOrder: number;
+  albumsSectionOrder: number;
+  griffithSectionOrder: number;
+  featureSectionOrder: number;
+  updatesSectionOrder: number;
 };
 
 export default function LandingPageClient({
@@ -31,10 +47,23 @@ export default function LandingPageClient({
   updates,
   featuredAlbum,
   heroImage,
+  heroImages,
   griffithLabelSlug,
   showPastStrikethrough,
   albumsHomepageColumns,
   updatesHomepageColumns,
+  griffithAlbums,
+  griffithAlbumsHomepageColumns,
+  eventsSectionShow,
+  albumsSectionShow,
+  griffithSectionShow,
+  featureSectionShow,
+  updatesSectionShow,
+  eventsSectionOrder,
+  albumsSectionOrder,
+  griffithSectionOrder,
+  featureSectionOrder,
+  updatesSectionOrder,
 }: LandingPageClientProps) {
   const featured = featuredAlbum ?? albums[0] ?? null;
   const pathname = usePathname();
@@ -183,35 +212,93 @@ export default function LandingPageClient({
     };
   }, [pathname]);
 
-  return (
-    <>
-      <LandingHeroSection
-        heroImage={heroImage}
-        featuredAlbum={featured}
-        events={events}
-        albums={albums}
-      />
+  // Define sections with their visibility, order, and render functions
+  type SectionConfig = {
+    id: string;
+    order: number;
+    show: boolean;
+    render: () => React.ReactNode;
+  };
 
+  const sections: SectionConfig[] = [
+    {
+      id: "events",
+      order: eventsSectionOrder,
+      show: eventsSectionShow,
+      render: () => (
       <LandingEventsSection events={events} showPastStrikethrough={showPastStrikethrough} />
-
+      ),
+    },
+    {
+      id: "albums",
+      order: albumsSectionOrder,
+      show: albumsSectionShow,
+      render: () => (
       <LandingAlbumsSection
         albums={albums}
         fallbackImage={FALLBACK_IMAGE}
         columns={albumsHomepageColumns as 3 | 4 | 5}
       />
-
+      ),
+    },
+    {
+      id: "griffith-albums",
+      order: griffithSectionOrder,
+      show: griffithSectionShow,
+      render: () => (
+        <LandingGriffithAlbumsSection
+          albums={griffithAlbums}
+          fallbackImage={FALLBACK_IMAGE}
+          columns={griffithAlbumsHomepageColumns as 3 | 4 | 5}
+          griffithLabelSlug={griffithLabelSlug}
+        />
+      ),
+    },
+    {
+      id: "griffith",
+      order: featureSectionOrder,
+      show: featureSectionShow,
+      render: () => (
       <LandingGriffithSection
         featuredAlbum={featuredAlbum}
         fallbackImage={FALLBACK_IMAGE}
         griffithLabelSlug={griffithLabelSlug}
       />
-
+      ),
+    },
+    {
+      id: "updates",
+      order: updatesSectionOrder,
+      show: updatesSectionShow,
+      render: () => (
       <LandingUpdatesSection
         updates={updates}
         fallbackImage={FALLBACK_IMAGE}
         variant="compact"
         columns={updatesHomepageColumns as 3 | 4 | 5}
       />
+      ),
+    },
+  ];
+
+  // Filter visible sections and sort by order
+  const visibleSections = sections
+    .filter((section) => section.show)
+    .sort((a, b) => a.order - b.order);
+
+  return (
+    <>
+      <LandingHeroSection
+        heroImage={heroImage}
+        heroImages={heroImages}
+        featuredAlbum={featured}
+        events={events}
+        albums={albums}
+      />
+
+      {visibleSections.map((section) => (
+        <React.Fragment key={section.id}>{section.render()}</React.Fragment>
+      ))}
     </>
   );
 }

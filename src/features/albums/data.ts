@@ -166,6 +166,20 @@ export async function getHomepageAlbums(limit?: number) {
   return fetchAlbums({ limit: actualLimit, order: "desc", includeLabels: true });
 }
 
+// Griffith label ID constant
+const GRIFFITH_LABEL_ID = "689e375f-e5eb-492c-8942-cc4723c9bc91";
+
+export async function getHomepageGriffithAlbums(limit?: number) {
+  const defaultLimit = await getSitePreferenceNumber("griffith_albums_homepage_limit", 6);
+  const actualLimit = limit ?? defaultLimit;
+  return fetchAlbums({
+    limit: actualLimit,
+    order: "desc",
+    includeLabels: true,
+    labelId: GRIFFITH_LABEL_ID,
+  });
+}
+
 export async function getLatestAlbumByLabelId(labelId: string) {
   try {
     // Use server client for proper RLS handling in server components
@@ -340,15 +354,17 @@ export async function getAlbumById(id: string) {
 
     // Normalize labels: Supabase returns array even for one-to-one relationships
     if (data) {
-      const normalizedData = {
+      const normalizedLabel = Array.isArray(data.labels)
+        ? data.labels.length > 0
+          ? data.labels[0]
+          : null
+        : data.labels || null;
+
+      return {
         ...data,
-        labels: Array.isArray(data.labels)
-          ? data.labels.length > 0
-            ? data.labels[0]
-            : null
-          : data.labels || null,
-      };
-      return normalizedData;
+        labelName: normalizedLabel?.name || null,
+        labels: normalizedLabel,
+      } as AlbumWithLabel;
     }
 
     return null;

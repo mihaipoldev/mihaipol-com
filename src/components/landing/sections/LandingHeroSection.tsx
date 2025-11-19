@@ -6,25 +6,24 @@ import type { LandingAlbum, LandingEvent } from "../types";
 
 type LandingHeroSectionProps = {
   heroImage: string;
+  heroImages: string[];
   featuredAlbum: LandingAlbum | null;
   events: LandingEvent[];
   albums: LandingAlbum[];
 };
 
-const HERO_IMAGES = [
-  "/hero images/02__B_0116.jpg",
-  "/hero images/04__B_0242.jpg",
-  "/hero images/01_BB_9497.jpg",
-];
-
 export default function LandingHeroSection({
   heroImage,
+  heroImages,
   featuredAlbum,
   events,
   albums,
 }: LandingHeroSectionProps) {
   const FALLBACK_IMAGE =
     "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1000&q=80";
+
+  // Use heroImages prop, fallback to empty array
+  const HERO_IMAGES = heroImages.length > 0 ? heroImages : [heroImage];
 
   // Find initial index by matching filename
   const getInitialIndex = () => {
@@ -219,7 +218,7 @@ export default function LandingHeroSection({
           />
         )}
         {/* Logo overlay - blended as texture/shadow */}
-        <div className="absolute bottom-[205px] left-[100px] pointer-events-none hidden md:block">
+        <div className="absolute bottom-[30%] left-[10%] pointer-events-none hidden md:block">
           <img
             src="/griffithblack.svg"
             alt="Griffith Logo"

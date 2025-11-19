@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun, Monitor, Palette, Plus, Edit2, Trash2 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -22,6 +23,7 @@ import type { UserColor } from "@/features/settings/types";
 
 export function AppearanceSettings() {
   const { theme, setTheme } = useTheme();
+  const isMobile = useIsMobile();
   const {
     primaryColor,
     setPrimaryColor,
@@ -337,14 +339,17 @@ export function AppearanceSettings() {
                     setShowColorModal(true);
                   }}
                   variant="outline"
-                  className="relative overflow-hidden group/btn hover:border-primary/50 transition-all duration-300 w-full sm:w-auto"
+                  className={cn(
+                    "relative overflow-hidden group/btn hover:border-primary/50 transition-all duration-300",
+                    isMobile ? "h-9 w-9 p-0" : "w-full sm:w-auto"
+                  )}
                 >
                   <div
                     className="absolute inset-0 opacity-0 group-hover/btn:opacity-10 transition-opacity duration-300"
                     style={{ backgroundColor: primaryColor }}
                   />
-                  <Plus className="h-4 w-4 mr-2 relative z-10" />
-                  <span className="relative z-10">Add Color</span>
+                  <Plus className={cn("h-4 w-4 relative z-10", !isMobile && "mr-2")} />
+                  {!isMobile && <span className="relative z-10">Add Color</span>}
                 </Button>
               </div>
             </div>

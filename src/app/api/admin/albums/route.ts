@@ -1,8 +1,35 @@
 import { NextRequest } from "next/server";
 import { createAlbum, updateAlbum, deleteAlbum } from "@/features/albums/mutations";
 import { albumCreateSchema, albumUpdateSchema } from "@/features/albums/schemas";
+import { getAllAlbumsWithLabels } from "@/features/albums/data";
 import { ok, created, badRequest, serverError } from "@/lib/api";
 import { requireAdmin } from "@/lib/auth";
+
+export async function GET(request: NextRequest) {
+  try {
+    const guard = await requireAdmin(request);
+    if ("status" in (guard as any)) return guard as any;
+
+    // Fetch all albums (including unpublished) for admin selection
+    const albums = await getAllAlbumsWithLabels();
+    
+    // Return simplified album list for selection
+    const albumList = albums.map((album) => ({
+      id: album.id,
+      title: album.title,
+      slug: album.slug,
+      release_date: album.release_date,
+      publish_status: album.publish_status,
+      labelName: album.labels?.name || null,
+      cover_image_url: album.cover_image_url || null,
+    }));
+
+    return ok(albumList);
+  } catch (error: any) {
+    console.error("Error fetching albums:", error);
+    return serverError("Failed to fetch albums", error?.message);
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
