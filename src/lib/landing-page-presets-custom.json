@@ -21,13 +21,6 @@
     "accent": "210 20% 30%"
   },
   {
-    "id": 7,
-    "name": "Midnight Violet",
-    "primary": "268 55% 48%",
-    "secondary": "260 25% 40%",
-    "accent": "200 50% 52%"
-  },
-  {
     "id": 10,
     "name": "Deep Navy & Gold",
     "primary": "45 85% 56%",
@@ -47,13 +40,6 @@
     "primary": "195 65% 50%",
     "secondary": "210 14% 40%",
     "accent": "220 40% 55%"
-  },
-  {
-    "id": 15,
-    "name": "Neon Matrix",
-    "primary": "120 90% 55%",
-    "secondary": "190 90% 55%",
-    "accent": "50 95% 60%"
   },
   {
     "id": 16,
@@ -138,5 +124,19 @@
     "primary": "153 6% 30%",
     "secondary": "344 8% 56%",
     "accent": "39 33% 64%"
+  },
+  {
+    "id": 29,
+    "name": "Terracotta Dusk",
+    "primary": "6 9% 43%",
+    "secondary": "16 23% 56%",
+    "accent": "155 14% 76%"
+  },
+  {
+    "id": 30,
+    "name": "Weathered Stones",
+    "primary": "150 16% 38%",
+    "secondary": "25 31% 56%",
+    "accent": "18 36% 77%"
   }
 ]
