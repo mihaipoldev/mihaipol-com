@@ -9,6 +9,9 @@ import { ok, badRequest, serverError, unauthorized } from "@/lib/api";
 import { requireAdmin } from "@/lib/auth";
 import { z } from "zod";
 
+// Ensure this route uses Node.js runtime (required for fs operations)
+export const runtime = "nodejs";
+
 const presetSchema = z.object({
   name: z.string().min(1).max(100),
   primary: z.string().regex(/^\d+\s+\d+%\s+\d+%$/, "Invalid HSL format (expected: 'h s% l%')"),

@@ -25,7 +25,7 @@ export function ArtworkProcessor({ albumId }: ArtworkProcessorProps) {
   const [error, setError] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<ProcessedImageResult["metadata"] | null>(null);
   const [selectedShape, setSelectedShape] = useState<ArtworkShape>("circle");
-  const [processingMethod, setProcessingMethod] = useState<"n8n" | "ai" | null>(null);
+  const [processingMethod, setProcessingMethod] = useState<"n8n" | "ai" | "server" | null>(null);
 
   const handleFileSelect = (file: File | null) => {
     setSelectedFile(file);

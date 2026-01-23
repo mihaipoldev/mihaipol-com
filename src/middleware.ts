@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { hexToHsl } from "@/lib/colorUtils";
-import { generateAllCustomPresetsCSS, getPresetById } from "@/lib/landing-page-presets-server";
 import { generatePresetCSS } from "@/lib/landing-page-presets";
 import type { LandingPagePreset } from "@/lib/landing-page-presets";
 
@@ -53,11 +52,9 @@ export async function middleware(request: NextRequest) {
       if (presetData?.value) {
         let preset: LandingPagePreset | null = null;
         
-        // Handle preset object or number format
+        // Handle preset object format (presets are now stored as objects in the database)
         if (typeof presetData.value === "object" && presetData.value !== null && "id" in presetData.value) {
           preset = presetData.value as LandingPagePreset;
-        } else if (typeof presetData.value === "number") {
-          preset = getPresetById(presetData.value) || null;
         }
 
         if (preset) {
@@ -66,11 +63,9 @@ export async function middleware(request: NextRequest) {
         }
       }
 
-      // Generate CSS for all custom presets (for dropdown selection)
-      const customPresetsCSS = generateAllCustomPresetsCSS();
-      
-      // Combine both CSS strings
-      const allCSS = selectedPresetCSS + (selectedPresetCSS && customPresetsCSS ? "\n" : "") + customPresetsCSS;
+      // Only inject CSS for the selected preset
+      // Custom presets CSS for dropdown selection is handled client-side
+      const allCSS = selectedPresetCSS;
       
       if (allCSS) {
         const styleTag = `<style id="landing-preset-css">${allCSS}</style>`;

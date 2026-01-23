@@ -2,6 +2,9 @@ import { NextRequest } from "next/server";
 import { generateAllCustomPresetsCSS } from "@/lib/landing-page-presets-server";
 import { ok, serverError } from "@/lib/api";
 
+// Ensure this route uses Node.js runtime (required for fs operations)
+export const runtime = "nodejs";
+
 export async function GET(request: NextRequest) {
   try {
     const css = generateAllCustomPresetsCSS();

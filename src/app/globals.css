@@ -36,7 +36,7 @@ html {
 
 body {
   font-family:
-    var(--font-roboto, var(--font-geist-sans)),
+    var(--font-family-primary, var(--font-nunito-sans, var(--font-geist-sans))),
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -48,9 +48,11 @@ body {
 
 @layer base {
   :root {
-    /* Font family - Using Roboto for entire website */
-    --font-family-primary: var(--font-roboto, var(--font-geist-sans));
-    --font-family-heading: var(--font-roboto, var(--font-geist-sans));
+    /* Font family - Set via ACTIVE_FONT_PAIRING in src/lib/fonts.ts */
+    /* Change ACTIVE_FONT_PAIRING in src/lib/fonts.ts to switch fonts */
+    /* Currently using: Raleway + Nunito Sans (Pairing 6) */
+    --font-family-primary: var(--font-nunito-sans, var(--font-geist-sans));
+    --font-family-heading: var(--font-raleway, var(--font-geist-sans));
     
     /* Custom fonts */
     --font-urw-din: "urw-din", sans-serif;
@@ -349,9 +351,10 @@ body {
   --font-source-code-pro
   */
 
-  /* Active font family - Using Roboto for entire website */
-  --font-family-primary: var(--font-roboto); /* Body font - Using Roboto */
-  --font-family-heading: var(--font-roboto); /* Heading font - Using Roboto */
+  /* Active font family - Set via ACTIVE_FONT_PAIRING in src/lib/fonts.ts */
+  /* Admin panel uses Nunito Sans - Change ACTIVE_FONT_PAIRING in fonts.ts to switch */
+  --font-family-primary: var(--font-nunito-sans); /* Body font - Admin uses Nunito Sans */
+  --font-family-heading: var(--font-nunito-sans); /* Heading font - Admin uses Nunito Sans */
   --font-size-base: 16px;
   --font-weight-normal: 400;
   --font-weight-medium: 500;

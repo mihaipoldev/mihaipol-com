@@ -87,7 +87,7 @@ export async function POST(
     }
 
     // Safely parse JSON body - default to empty object if no body
-    let json = {};
+    let json: any = {};
     try {
       const text = await request.text();
       if (text) {
@@ -219,7 +219,7 @@ export async function PUT(
     // Update folder
     const updated = await updateAlbumFolder(
       id,
-      album as Album,
+      album as unknown as Album,
       {
         title: parsed.data.title,
         release_date: parsed.data.release_date,

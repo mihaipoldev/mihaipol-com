@@ -111,6 +111,31 @@ export function PresetForm({ isOpen, onClose, onSubmit, initialPreset, mode }: P
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Generate with AI Button - Only show in create mode */}
+          {mode === "create" && (
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleGeneratePreset}
+                disabled={isGenerating}
+                className="gap-2"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    Generate with AI
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
           {/* Name Input */}
           <div className="space-y-2">
             <Label htmlFor="preset-name">Preset Name</Label>
