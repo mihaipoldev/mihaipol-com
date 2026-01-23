@@ -166,13 +166,38 @@ export function PreferencesSettings() {
           
           // Handle preset objects - keep as object (both dev and prod)
           if (pref.key === "landing_page_preset_number" || pref.key === "landing_page_preset_prod") {
-            // If it's already an object, use it directly
+            // If it's already an object, validate and use it directly
             if (typeof currentValue === "object" && currentValue !== null && "id" in currentValue) {
+              // Ensure all required fields are present
+              const preset = currentValue as any;
+              if (
+                typeof preset.id === "number" &&
+                typeof preset.name === "string" &&
+                typeof preset.primary === "string" &&
+                typeof preset.secondary === "string" &&
+                typeof preset.accent === "string"
+              ) {
+                processedValue = {
+                  id: preset.id,
+                  name: preset.name,
+                  primary: preset.primary,
+                  secondary: preset.secondary,
+                  accent: preset.accent,
+                };
+              } else {
+                console.error("[PreferencesSettings] Invalid preset object structure:", preset);
+                // Don't save invalid preset objects - skip this preference
+                return;
+              }
+            } else if (typeof currentValue === "number") {
+              // If it's a number (backward compat), we can't convert it here without file system access
+              // This should not happen with new presets
+              console.warn("[PreferencesSettings] Preset value is a number, not an object:", currentValue);
               processedValue = currentValue;
             } else {
-              // If it's a number (backward compat), convert to object would require lookup
-              // But since we're saving, we should have the full object from the selector
-              processedValue = currentValue;
+              console.error("[PreferencesSettings] Unexpected preset value type:", typeof currentValue, currentValue);
+              // Don't save invalid preset values - skip this preference
+              return;
             }
           } else if (typeof pref.value === "number") {
             processedValue =

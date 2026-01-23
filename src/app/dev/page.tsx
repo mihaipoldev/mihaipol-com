@@ -7,7 +7,8 @@ import { getLabelById } from "@/features/labels/data";
 import { getHomepageSitePreferences } from "@/features/settings/data";
 import { getHeroCarouselImages } from "@/features/hero-carousel/data";
 
-export const revalidate = 60;
+// Force dynamic rendering since this route uses cookies via Supabase client
+export const dynamic = 'force-dynamic';
 
 const baseUrl = "https://mihaipol.com";
 

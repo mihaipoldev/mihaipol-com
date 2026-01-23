@@ -74,8 +74,8 @@ function SettingsPageInner() {
     <div className="w-full">
       {isMobile ? (
         // Mobile layout with tabs
-        <div className="flex flex-col" style={{ marginTop: '-24px' }}>
-          <div className="sticky top-[72px] z-10 bg-background/95 backdrop-blur-sm border-b border-border/50 -mx-4 md:-mx-10 lg:-mx-12 px-4 md:px-10 lg:px-12 pt-2 pb-2">
+        <div className="flex flex-col">
+          <div className="sticky top-[96px] z-10 bg-background/95 backdrop-blur-sm border-b border-border/50 -mx-4 md:-mx-10 lg:-mx-12 px-4 md:px-10 lg:px-12 pt-2 pb-2">
             <Tabs
               value={activeSection}
               onValueChange={(value) => handleSectionChange(value as SettingsSection)}

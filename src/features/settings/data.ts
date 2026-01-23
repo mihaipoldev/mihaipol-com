@@ -396,16 +396,26 @@ export async function getSitePreferencePreset(
 
   // If it's already a preset object, validate and return it
   if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-    const preset = value as Partial<LandingPagePreset>;
+    const presetValue = value as any;
+    // Normalize ID - Supabase JSONB might store numbers as strings
+    const normalizedId = typeof presetValue.id === "string" ? parseInt(presetValue.id, 10) : presetValue.id;
+    
     // Validate it has required fields
     if (
-      typeof preset.id === "number" &&
-      typeof preset.name === "string" &&
-      typeof preset.primary === "string" &&
-      typeof preset.secondary === "string" &&
-      typeof preset.accent === "string"
+      typeof normalizedId === "number" &&
+      !isNaN(normalizedId) &&
+      typeof presetValue.name === "string" &&
+      typeof presetValue.primary === "string" &&
+      typeof presetValue.secondary === "string" &&
+      typeof presetValue.accent === "string"
     ) {
-      return preset as LandingPagePreset;
+      return {
+        id: normalizedId,
+        name: presetValue.name,
+        primary: presetValue.primary,
+        secondary: presetValue.secondary,
+        accent: presetValue.accent,
+      };
     }
   }
 

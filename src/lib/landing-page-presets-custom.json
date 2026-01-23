@@ -96,5 +96,47 @@
     "primary": "90 80% 56%",
     "secondary": "210 10% 32%",
     "accent": "200 45% 50%"
+  },
+  {
+    "id": 23,
+    "name": "Vibrant Harmony",
+    "primary": "2 67% 57%",
+    "secondary": "140 33% 46%",
+    "accent": "40 84% 68%"
+  },
+  {
+    "id": 24,
+    "name": "Driftwood Mist",
+    "primary": "212 7% 57%",
+    "secondary": "30 40% 66%",
+    "accent": "15 20% 54%"
+  },
+  {
+    "id": 25,
+    "name": "asdf",
+    "primary": "107 40% 38%",
+    "secondary": "248 55% 55%",
+    "accent": "269 64% 47%"
+  },
+  {
+    "id": 26,
+    "name": "Silk Horizon",
+    "primary": "215 14% 49%",
+    "secondary": "30 18% 56%",
+    "accent": "29 57% 76%"
+  },
+  {
+    "id": 27,
+    "name": "Mossy Preserve",
+    "primary": "148 17% 37%",
+    "secondary": "86 25% 63%",
+    "accent": "42 38% 73%"
+  },
+  {
+    "id": 28,
+    "name": "Slate Meadow",
+    "primary": "153 6% 30%",
+    "secondary": "344 8% 56%",
+    "accent": "39 33% 64%"
   }
 ]

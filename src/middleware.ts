@@ -42,25 +42,80 @@ export async function middleware(request: NextRequest) {
       );
 
       // Fetch selected preset from database
-      const { data: presetData } = await supabase
+      const { data: presetData, error: presetError } = await supabase
         .from("site_preferences")
         .select("value")
         .eq("key", presetKey)
         .maybeSingle();
 
+      if (presetError) {
+        console.error(`[Middleware] Error fetching preset for ${presetKey}:`, presetError);
+      }
+
       let selectedPresetCSS = "";
       if (presetData?.value) {
         let preset: LandingPagePreset | null = null;
         
+        console.log(`[Middleware] Found preset data for ${presetKey}:`, JSON.stringify(presetData.value));
+        
         // Handle preset object format (presets are now stored as objects in the database)
         if (typeof presetData.value === "object" && presetData.value !== null && "id" in presetData.value) {
-          preset = presetData.value as LandingPagePreset;
+          const presetValue = presetData.value as any;
+          
+          // Normalize ID - Supabase JSONB might store numbers as strings
+          const normalizedId = typeof presetValue.id === "string" ? parseInt(presetValue.id, 10) : presetValue.id;
+          
+          // Validate that all required fields are present
+          if (
+            typeof normalizedId === "number" &&
+            !isNaN(normalizedId) &&
+            typeof presetValue.name === "string" &&
+            typeof presetValue.primary === "string" &&
+            typeof presetValue.secondary === "string" &&
+            typeof presetValue.accent === "string"
+          ) {
+            preset = {
+              id: normalizedId,
+              name: presetValue.name,
+              primary: presetValue.primary,
+              secondary: presetValue.secondary,
+              accent: presetValue.accent,
+            };
+            console.log(`[Middleware] Valid preset object found: ID ${preset.id}, Name: ${preset.name}`);
+          } else {
+            console.error("[Middleware] Invalid preset object structure - missing required fields:", {
+              id: presetValue.id,
+              normalizedId,
+              idType: typeof presetValue.id,
+              normalizedIdType: typeof normalizedId,
+              hasName: typeof presetValue.name === "string",
+              hasPrimary: typeof presetValue.primary === "string",
+              hasSecondary: typeof presetValue.secondary === "string",
+              hasAccent: typeof presetValue.accent === "string",
+              fullValue: JSON.stringify(presetValue)
+            });
+          }
+        } else if (typeof presetData.value === "number") {
+          // Backward compatibility: if it's just a number, we can't look it up in Edge runtime
+          // This should not happen with new presets, but log it for debugging
+          console.warn("[Middleware] Preset stored as number instead of object (backward compatibility):", presetData.value);
+        } else {
+          console.error("[Middleware] Unexpected preset value type:", typeof presetData.value, presetData.value);
         }
 
         if (preset) {
-          // Generate CSS for the selected preset
-          selectedPresetCSS = generatePresetCSS(preset);
+          try {
+            // Generate CSS for the selected preset
+            selectedPresetCSS = generatePresetCSS(preset);
+            console.log(`[Middleware] Generated CSS for preset ${preset.id}, CSS length: ${selectedPresetCSS.length}`);
+          } catch (error) {
+            console.error("[Middleware] Failed to generate CSS for preset:", preset.id, error);
+          }
+        } else {
+          console.error("[Middleware] No valid preset found for CSS generation. Value:", JSON.stringify(presetData.value));
         }
+      } else {
+        console.warn(`[Middleware] No preset data found for key: ${presetKey}`);
       }
 
       // Only inject CSS for the selected preset

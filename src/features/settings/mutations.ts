@@ -157,6 +157,11 @@ export async function updateSitePreference(key: string, value: any): Promise<voi
     }
 
     if (existing) {
+      // Log what we're saving for preset preferences
+      if (key === "landing_page_preset_number" || key === "landing_page_preset_prod") {
+        console.log(`[updateSitePreference] Saving preset for ${key}:`, JSON.stringify(value, null, 2));
+      }
+      
       // Update existing preference - Supabase handles JSONB conversion automatically
       const { error } = await supabaseClient
         .from("site_preferences")
@@ -168,6 +173,16 @@ export async function updateSitePreference(key: string, value: any): Promise<voi
       if (error) {
         console.error("Supabase error updating preference:", error);
         throw error;
+      }
+      
+      // Verify what was saved
+      if (key === "landing_page_preset_number" || key === "landing_page_preset_prod") {
+        const { data: verifyData } = await supabaseClient
+          .from("site_preferences")
+          .select("value")
+          .eq("key", key)
+          .maybeSingle();
+        console.log(`[updateSitePreference] Verified saved value for ${key}:`, JSON.stringify(verifyData?.value, null, 2));
       }
     } else {
       // Preference doesn't exist - this shouldn't happen if migration ran

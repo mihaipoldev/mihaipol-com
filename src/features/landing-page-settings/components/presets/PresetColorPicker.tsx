@@ -54,6 +54,7 @@ function isValidHex(hex: string): boolean {
 
 export function PresetColorPicker({ label, value, onChange, className }: PresetColorPickerProps) {
   const [hexValue, setHexValue] = useState(() => hslToHexFromString(value));
+  const lastProcessedHslRef = useRef<string>(value);
   const lastSentHslRef = useRef<string | null>(null);
 
   // Update hex value when HSL value prop changes (e.g., when editing existing preset)
@@ -62,6 +63,7 @@ export function PresetColorPicker({ label, value, onChange, className }: PresetC
     // Normalize both values for comparison to handle rounding differences
     const normalizedValue = normalizeHsl(value);
     const normalizedLastSent = lastSentHslRef.current ? normalizeHsl(lastSentHslRef.current) : null;
+    const normalizedLastProcessed = normalizeHsl(lastProcessedHslRef.current);
 
     // Skip if this is the value we just sent (to prevent loops)
     if (normalizedValue === normalizedLastSent) {
@@ -69,13 +71,29 @@ export function PresetColorPicker({ label, value, onChange, className }: PresetC
       return;
     }
 
-    // Only update if the value actually changed from outside
-    const currentHex = hslToHexFromString(value);
-    setHexValue(currentHex);
-    lastSentHslRef.current = null; // Reset since this is an external change
+    // Skip if we've already processed this value
+    if (normalizedValue === normalizedLastProcessed) {
+      return;
+    }
+
+    // Update the hex value and track that we've processed this HSL value
+    const newHex = hslToHexFromString(value);
+    setHexValue((prevHex) => {
+      // Only update if the hex actually changed
+      if (prevHex !== newHex) {
+        lastProcessedHslRef.current = value;
+        return newHex;
+      }
+      return prevHex;
+    });
   }, [value]);
 
   const handleHexChange = (hex: string) => {
+    // Skip if this is the same hex value (prevent unnecessary updates)
+    if (hex === hexValue) {
+      return;
+    }
+
     setHexValue(hex);
     // Convert HEX to HSL and call onChange with HSL format
     const hslString = hexToHslString(hex);
@@ -88,6 +106,11 @@ export function PresetColorPicker({ label, value, onChange, className }: PresetC
     const hex = input.startsWith("#") ? input : `#${input}`;
     
     if (isValidHex(hex)) {
+      // Skip if this is the same hex value
+      if (hex === hexValue) {
+        return;
+      }
+
       setHexValue(hex);
       const hslString = hexToHslString(hex);
       lastSentHslRef.current = hslString; // Track what we're sending

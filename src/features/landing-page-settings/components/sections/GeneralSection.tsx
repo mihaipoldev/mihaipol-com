@@ -27,10 +27,21 @@ export function GeneralSection({
 }: GeneralSectionProps) {
   if (preferences.length === 0) return null;
 
-  // Separate preset preferences from other preferences
-  const presetPreferences = preferences.filter(
-    (p) => p.key === "landing_page_preset_number" || p.key === "landing_page_preset_prod"
-  );
+  // Determine environment - check NODE_ENV (available in client via Next.js)
+  const isDevMode = process.env.NODE_ENV === 'development';
+
+  // Filter preset preferences based on environment
+  // Show only dev preset in dev mode, only prod preset in prod mode
+  const presetPreferences = preferences.filter((p) => {
+    if (p.key === "landing_page_preset_number") {
+      return isDevMode; // Show dev preset only in dev mode
+    }
+    if (p.key === "landing_page_preset_prod") {
+      return !isDevMode; // Show prod preset only in prod mode
+    }
+    return false;
+  });
+  
   const otherPreferences = preferences.filter(
     (p) => p.key !== "landing_page_preset_number" && p.key !== "landing_page_preset_prod"
   );

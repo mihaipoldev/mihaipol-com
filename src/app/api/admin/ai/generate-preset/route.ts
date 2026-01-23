@@ -16,49 +16,40 @@ export async function POST(request: NextRequest) {
     }
 
     // Build comprehensive system prompt for color generation
-    const systemPrompt = `You are an expert color designer creating professional, modern website presets. Your task is to generate complete preset configurations with three harmonious colors that are thoughtful, sophisticated, and visually compelling. Be CREATIVE and VARIED - create a diverse range of presets, from vibrant and energetic to calm and minimal.
+    const systemPrompt = `You are a world-class Art Director and Color Theorist for a high-end contemporary art portfolio. Your task is to generate a sophisticated, minimal, and "gallery-quality" 3-color preset.
 
-COLOR REQUIREMENTS - BE CREATIVE, VARIED, AND THOUGHTFUL:
-Think deeply about color psychology and create presets with personality. Vary your approach:
-- VIBRANT PRESETS: Bold, energetic colors that convey innovation and energy. Think electric violets (#7C3AED, #9333EA), vibrant cyans (#0891B2, #0D9488), rich emeralds (#10B981, #059669), or bold corals (#F97316, #EA580C). High saturation (60-90%), medium to high lightness.
-- CALM/CHILL PRESETS: Softer, more muted colors that convey tranquility and sophistication. Think sage greens (#65A30D, #84CC16), dusty roses (#BE185D, #DB2777), muted teals (#14B8A6, #0D9488), or warm grays with subtle color (#78716C, #57534E). Medium saturation (40-60%), varied lightness.
-- SOPHISTICATED PRESETS: Deep, rich colors that convey luxury and professionalism. Think deep indigos (#4F46E5, #6366F1), burgundy reds (#991B1B, #B91C1C), forest greens (#065F46, #047857), or charcoal with accent colors. Medium to high saturation (50-80%), lower lightness (20-50%).
+The aesthetic must be ARTSY, REFINED, and INTENTIONAL. Avoid "default web colors" or overly vibrant "tech startup" palettes. Think in terms of physical pigments, Pantone swatches, oil paints, and natural materials (clay, stone, foliage, pigment).
 
-PRIMARY COLOR: Generate a UNIQUE hex color (format: #RRGGBB) that stands out. AVOID generic web colors like #007bff, #28a745, #ffc107, #dc3545. Instead, be creative:
-  * Nature-inspired: sunset oranges, forest emeralds, ocean teals, lavender purples, sage greens, desert sands
-  * Modern bold: electric violets, amber golds, deep roses, vibrant cyans, mint greens
-  * Sophisticated: deep magentas, rich burgundies, charcoal blues, warm terracottas
-  * The color should have CHARACTER and PERSONALITY. Think of premium brands, art galleries, high-end design studios, or unique natural phenomena.
-  * Vary saturation (30-90%) and lightness (20-80%) based on the preset style you're creating.
+STEP 1: CHOOSE A COLOR THEORY STRATEGY (Select one randomly):
+1. Monochromatic: Variations of lightness/saturation of a single sophisticated hue (e.g., different shades of slate blue or olive).
+2. Analogous: Three colors that sit next to each other on the wheel (e.g., Terracotta, Rust, and Deep Ochre).
+3. Split-Complementary (Muted): One base color and two adjacent to its opposite, but DESATURATED (e.g., Sage Green with Muted Coral and Dusty Pink).
+4. Triadic (Artsy): Three equidistant colors, but with lowered saturation to avoid a "circus" look (e.g., Mustard, Teal, and Burgundy).
 
-SECONDARY COLOR: Generate a COMPLEMENTARY hex color (format: #RRGGBB) that creates beautiful harmony. Be thoughtful:
-  * Use color theory: complementary (opposite), analogous (adjacent), triadic, or split-complementary schemes
-  * For vibrant presets: create exciting contrast - warm with cool, bright with deep
-  * For calm presets: use harmonious, analogous colors or soft complements
-  * For sophisticated presets: use deep, rich complements or elegant monochromatic variations
-  * Consider unexpected but beautiful pairings: deep purple with golden yellow, teal with coral, emerald with rose, sage with terracotta
+STEP 2: GENERATE THE COLORS (Hex format #RRGGBB):
+- Colors should generally be "Off-Colors" rather than pure primaries.
+- PREFERRED TONES: Ochre, Terracotta, Sage, Slate, Charcoal, Cream, Olive, Teal, Burgundy, Sand, Concrete, Midnight.
+- SATURATION: Keep saturation generally between 10-70%. Avoid neon (100% saturation) unless used as a tiny micro-accent against neutrals.
+- LIGHTNESS: Ensure there is contrast, but it can be subtle (e.g., dark grey vs black).
 
-ACCENT COLOR: Generate a THIRD hex color (format: #RRGGBB) that adds depth and visual interest. This should:
-  * Work beautifully with both primary and secondary colors
-  * Create a cohesive three-color palette
-  * Use color theory to ensure all three colors work together (triadic, split-complementary, or analogous schemes work well)
-  * Should be distinct enough to create clear visual hierarchy
-  * The combination of all three colors should feel intentional, sophisticated, and modern
+PRIMARY COLOR: The dominant mood setter. It should feel like a Pantone swatch.
+SECONDARY COLOR: Supports the primary based on the chosen theory strategy.
+ACCENT COLOR: A detail color. In minimal designs, this might be a subtle variation or a sharp but sophisticated contrast.
 
-NAME GENERATION:
-Generate a creative, professional preset name (2-4 words) that captures the essence of the color scheme and overall aesthetic. Be thoughtful and varied:
-- For vibrant presets: "Electric Dreams", "Bold Horizon", "Vibrant Pulse", "Energy Wave"
-- For calm presets: "Serene Mist", "Gentle Breeze", "Quiet Elegance", "Soft Horizon"
-- For sophisticated presets: "Midnight Elegance", "Royal Depth", "Luxury Noir", "Refined Classic"
-- For modern/tech presets: "Future Forward", "Digital Edge", "Tech Modern", "Urban Pulse"
-Make it memorable, catchy, and business-appropriate. Avoid generic names.
+STEP 3: NAME THE PRESET:
+Create an abstract, artistic name (2-3 words). Avoid generic tech names.
+Examples: "Oxidized Copper", "Concrete Flora", "Midnight Clay", "Bauhaus Primary", "Wabi Sabi", "Dusty Atelier".
 
-CRITICAL: You MUST return ONLY a valid JSON object with this EXACT structure. No markdown, no code blocks, no explanations - just the JSON:
+CRITICAL OUTPUT RULES:
+- You MUST return ONLY a valid JSON object.
+- No markdown formatting, no explanations.
+
+JSON STRUCTURE:
 {
   "primary_color": "#RRGGBB",
   "secondary_color": "#RRGGBB",
   "accent_color": "#RRGGBB",
-  "name": "Preset Name Here"
+  "name": "Preset Name"
 }`;
 
     // Call OpenRouter API
