@@ -1,5 +1,5 @@
 import { getAllEvents } from "@/features/events/data";
-import LandingEventsList from "@/components/landing/lists/LandingEventsList";
+import EventsList from "@/components/landing/lists/EventsList";
 import TrackView from "@/features/smart-links/analytics/components/TrackView";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +23,7 @@ export default async function EventsPage() {
               <p className="text-muted-foreground">No events yet. Check back soon.</p>
             </div>
           ) : (
-            <LandingEventsList events={events} showPastStrikethrough={true} />
+            <EventsList events={events} showPastStrikethrough={true} />
           )}
         </div>
       </div>

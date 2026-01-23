@@ -65,7 +65,75 @@ export async function PUT(request: NextRequest) {
     const parsed = albumUpdateSchema.safeParse(json);
     if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten());
     const { id, ...updates } = parsed.data;
+
+    // Get old album data before updating (for Drive folder updates)
+    const { getAlbumById } = await import("@/features/albums/data");
+    const oldAlbum = await getAlbumById(id);
+
+    // Update album in database
     const data = await updateAlbum(id, updates);
+
+    // Update Drive folder if title or release_date changed (non-blocking)
+    if (oldAlbum && (updates.title !== undefined || updates.release_date !== undefined)) {
+      // Check if title or release_date actually changed
+      const titleChanged = updates.title !== undefined && updates.title !== oldAlbum.title;
+      const releaseDateChanged =
+        updates.release_date !== undefined &&
+        updates.release_date !== oldAlbum.release_date;
+
+      if ((titleChanged || releaseDateChanged) && oldAlbum.drive_folder_id) {
+        // Update Drive folder asynchronously - don't block the response
+        // Use setImmediate or Promise.resolve().then() to run after response is sent
+        Promise.resolve()
+          .then(async () => {
+            try {
+              const { updateAlbumDriveFolder } = await import("@/features/google-drive/mutations");
+              const { updateAlbumFolder } = await import("@/features/google-drive/service");
+              const { getSupabaseServer } = await import("@/lib/supabase-ssr");
+
+              // Get current user for Drive API
+              const supabase = await getSupabaseServer();
+              const {
+                data: { user },
+              } = await supabase.auth.getUser();
+
+              if (!user) {
+                console.warn("No user found for Drive folder update");
+                return;
+              }
+
+              // Update the folder in Drive
+              const folderUpdate = await updateAlbumFolder(
+                id,
+                oldAlbum as any,
+                {
+                  title: updates.title,
+                  release_date: updates.release_date,
+                },
+                user.id
+              );
+
+              // If folder was updated, save new folder info to database
+              if (folderUpdate) {
+                await updateAlbumDriveFolder(id, folderUpdate.folderId, folderUpdate.folderUrl);
+                console.log("Drive folder updated successfully:", folderUpdate);
+              }
+            } catch (driveError: any) {
+              // Log error but don't throw - album update already succeeded
+              console.error("Error updating Drive folder (non-blocking):", {
+                albumId: id,
+                error: driveError.message,
+                stack: driveError.stack,
+              });
+              // Optionally, you could store this error in a queue for retry later
+            }
+          })
+          .catch((error) => {
+            console.error("Unexpected error in Drive folder update:", error);
+          });
+      }
+    }
+
     return ok(data);
   } catch (error: any) {
     console.error("Error updating album:", error);

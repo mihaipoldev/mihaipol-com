@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
-import { DashboardTimeScope } from "@/components/admin/DashboardTimeScope";
+import { AdminPageTitle } from "@/components/admin/ui/AdminPageTitle";
+import { DashboardTimeScope } from "@/components/admin/dashboard/DashboardTimeScope";
 import { getDashboardData } from "@/features/admin/dashboard/data";
-import { DashboardCards } from "@/components/admin/DashboardCards";
-import { DashboardCharts } from "@/components/admin/DashboardCharts";
+import { DashboardCards } from "@/components/admin/dashboard/DashboardCards";
+import { DashboardCharts } from "@/components/admin/dashboard/DashboardCharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";

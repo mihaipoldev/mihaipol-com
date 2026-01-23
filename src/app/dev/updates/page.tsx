@@ -1,6 +1,6 @@
 import { getAllUpdates } from "@/features/updates/data";
 import { getSitePreferenceNumber } from "@/features/settings/data";
-import LandingUpdatesList from "@/components/landing/lists/LandingUpdatesList";
+import UpdatesList from "@/components/landing/lists/UpdatesList";
 import TrackView from "@/features/smart-links/analytics/components/TrackView";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +29,7 @@ export default async function UpdatesPage() {
               <p className="text-muted-foreground">No updates yet. Check back soon.</p>
             </div>
           ) : (
-            <LandingUpdatesList
+            <UpdatesList
               updates={updates}
               fallbackImage={FALLBACK_IMAGE}
               variant="compact-square"

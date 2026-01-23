@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 
-import { AdminHeader } from "@/components/admin/AdminHeader";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import AdminPageTransition from "@/components/admin/AdminPageTransition";
-import { AdminBodyClass } from "@/components/admin/AdminBodyClass";
-import { ColorInitializer } from "@/components/admin/ColorInitializer";
-import { AdminThemeProvider } from "@/components/theme/AdminThemeProvider";
+import { AdminHeader } from "@/components/admin/layout/AdminHeader";
+import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
+import AdminPageTransition from "@/components/admin/layout/AdminPageTransition";
+import { AdminFooter } from "@/components/admin/layout/AdminFooter";
+import { AdminBodyClass } from "@/components/admin/layout/AdminBodyClass";
+import { ColorInitializer } from "@/components/admin/initializers/ColorInitializer";
+import { AdminThemeProvider } from "@/providers/AdminThemeProvider";
 import { requireUserRedirect } from "@/lib/auth";
 import { getGradient, getSidebarGradient } from "@/lib/gradient-presets";
 import { headers } from "next/headers";
@@ -51,10 +52,11 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
               <div className="mx-auto w-full max-w-[1400px] flex flex-col">
                 <AdminHeader />
                 <AdminPageTransition>
-                  <div className="flex flex-col py-6 pb-4 md:pb-8 px-4 md:px-10 lg:px-12 space-y-4 md:space-y-6">
+                  <div className="flex flex-col pt-6 pb-0 md:pb-0 px-4 md:px-10 lg:px-12 space-y-4 md:space-y-6">
                     {children}
                   </div>
                 </AdminPageTransition>
+                <AdminFooter />
                 {/* Mobile bottom spacer - creates scrollable space */}
                 <div className="h-40 md:h-0 flex-shrink-0" aria-hidden="true" />
               </div>

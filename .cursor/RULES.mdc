@@ -8,4 +8,8 @@ alwaysApply: true
   - `components/`  
   - `features/`  
 - Bunny CDN → never `delete`, always `move to trash`  
-- ! ICONS: Use **Font Awesome React** icons only.  
+- ! ICONS: Use **Font Awesome React** icons only. 
+
+- for webhook calls or bunny calls we always use SERVER, no next_public variables 
+
+Always report which model and which version you are at the end of each response

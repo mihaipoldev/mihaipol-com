@@ -9,12 +9,12 @@ import {
   TableRow,
   TableHead,
   TableCell,
-} from "@/components/admin/AdminTable";
-import { TableTitleCell } from "@/components/admin/TableTitleCell";
-import { CoverImageCell } from "@/components/admin/CoverImageCell";
-import { ActionMenu } from "@/components/admin/ActionMenu";
-import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
-import { AdminToolbar } from "@/components/admin/AdminToolbar";
+} from "@/components/admin/table/AdminTable";
+import { TableTitleCell } from "@/components/admin/table/TableTitleCell";
+import { CoverImageCell } from "@/components/admin/table/CoverImageCell";
+import { ActionMenu } from "@/components/admin/ui/ActionMenu";
+import { AdminPageTitle } from "@/components/admin/ui/AdminPageTitle";
+import { AdminToolbar } from "@/components/admin/table/AdminToolbar";
 import { Button } from "@/components/ui/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";

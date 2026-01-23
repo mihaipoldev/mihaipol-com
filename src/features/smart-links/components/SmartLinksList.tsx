@@ -1,7 +1,7 @@
 "use client";
 
 import SmartLinkItem, { SmartLink } from "./SmartLinkItem";
-import { useAlbumColors } from "@/components/landing/AlbumGradientBackground";
+import { useAlbumColors } from "@/features/smart-links/layout/SmartLinksGradientBackground";
 
 type SmartLinksListProps = {
   links: SmartLink[];

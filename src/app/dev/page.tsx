@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import LandingPageClient from "@/components/landing/LandingPageClient";
+import PageClient from "@/components/landing/PageClient";
 import { getHomepageAlbums, getLatestAlbumByLabelId, getAlbumById, getHomepageGriffithAlbums } from "@/features/albums/data";
 import { getHomepageEvents } from "@/features/events/data";
 import { getHomepageUpdates } from "@/features/updates/data";
 import { getLabelById } from "@/features/labels/data";
-import { getSitePreferenceBoolean, getSitePreferenceNumber, getSitePreferenceString } from "@/features/settings/data";
+import { getHomepageSitePreferences } from "@/features/settings/data";
 import { getHeroCarouselImages } from "@/features/hero-carousel/data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const baseUrl = "https://mihaipol.com";
 
@@ -39,65 +39,53 @@ export const metadata: Metadata = {
 const GRIFFITH_LABEL_ID = "689e375f-e5eb-492c-8942-cc4723c9bc91";
 
 export default async function DevHomePage() {
+  // Fetch preferences first to get featuredAlbumId
+  const homepagePreferences = await getHomepageSitePreferences();
+  const featuredAlbumId = homepagePreferences.featured_album_id;
+
   const [
     events,
     albums,
     updates,
     griffithAlbum,
     griffithLabel,
-    showPastStrikethrough,
-    albumsHomepageColumnsRaw,
-    updatesHomepageColumnsRaw,
-    featuredAlbumId,
     griffithAlbums,
-    griffithAlbumsHomepageColumnsRaw,
     heroCarouselImages,
-    // Section visibility preferences
-    eventsSectionShow,
-    albumsSectionShow,
-    griffithSectionShow,
-    featureSectionShow,
-    updatesSectionShow,
-    // Section order preferences
-    eventsSectionOrder,
-    albumsSectionOrder,
-    griffithSectionOrder,
-    featureSectionOrder,
-    updatesSectionOrder,
+    preferredAlbum,
   ] = await Promise.all([
     getHomepageEvents(),
     getHomepageAlbums(),
     getHomepageUpdates(),
     getLatestAlbumByLabelId(GRIFFITH_LABEL_ID),
     getLabelById(GRIFFITH_LABEL_ID),
-    getSitePreferenceBoolean("events_show_past_strikethrough", true),
-    getSitePreferenceNumber("albums_homepage_columns", 3),
-    getSitePreferenceNumber("updates_homepage_columns", 3),
-    getSitePreferenceString("featured_album_id", null),
     getHomepageGriffithAlbums(),
-    getSitePreferenceNumber("griffith_albums_homepage_columns", 3),
     getHeroCarouselImages(),
-    // Section visibility
-    getSitePreferenceBoolean("events_section_show", true),
-    getSitePreferenceBoolean("albums_section_show", true),
-    getSitePreferenceBoolean("griffith_section_show", true),
-    getSitePreferenceBoolean("feature_section_show", true),
-    getSitePreferenceBoolean("updates_section_show", true),
-    // Section order
-    getSitePreferenceNumber("events_section_order", 1),
-    getSitePreferenceNumber("albums_section_order", 2),
-    getSitePreferenceNumber("griffith_section_order", 3),
-    getSitePreferenceNumber("feature_section_order", 4),
-    getSitePreferenceNumber("updates_section_order", 5),
+    // Include featured album query in parallel if ID exists
+    featuredAlbumId ? getAlbumById(featuredAlbumId) : Promise.resolve(null),
   ]);
 
-  // Get featured album: use preference if set, otherwise fallback to griffith album
+  // Extract preferences from batched result
+  const {
+    events_show_past_strikethrough: showPastStrikethrough,
+    albums_homepage_columns: albumsHomepageColumnsRaw,
+    updates_homepage_columns: updatesHomepageColumnsRaw,
+    griffith_albums_homepage_columns: griffithAlbumsHomepageColumnsRaw,
+    events_section_show: eventsSectionShow,
+    albums_section_show: albumsSectionShow,
+    griffith_section_show: griffithSectionShow,
+    feature_section_show: featureSectionShow,
+    updates_section_show: updatesSectionShow,
+    events_section_order: eventsSectionOrder,
+    albums_section_order: albumsSectionOrder,
+    griffith_section_order: griffithSectionOrder,
+    feature_section_order: featureSectionOrder,
+    updates_section_order: updatesSectionOrder,
+  } = homepagePreferences;
+
+  // Get featured album: use preference if set and valid, otherwise fallback to griffith album
   let featuredAlbum = griffithAlbum;
-  if (featuredAlbumId) {
-    const preferredAlbum = await getAlbumById(featuredAlbumId);
-    if (preferredAlbum && preferredAlbum.publish_status === "published") {
-      featuredAlbum = preferredAlbum;
-    }
+  if (preferredAlbum && preferredAlbum.publish_status === "published") {
+    featuredAlbum = preferredAlbum;
   }
 
   // Ensure columns are between 3 and 5
@@ -135,7 +123,7 @@ export default async function DevHomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <LandingPageClient
+      <PageClient
         events={events}
         albums={albums}
         updates={updates}

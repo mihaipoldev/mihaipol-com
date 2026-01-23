@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 
 import { Toaster } from "@/components/ui/sonner";
-import { AdminColorStyle } from "@/components/admin/AdminColorStyle";
-import { InstantColorApply } from "@/components/admin/InstantColorApply";
-import { QueryProvider } from "@/components/providers/QueryProvider";
+import { AdminColorStyle } from "@/components/admin/initializers/AdminColorStyle";
+import { InstantColorApply } from "@/components/admin/initializers/InstantColorApply";
+import { QueryProvider } from "@/providers/QueryProvider";
 import ViewportFix from "@/components/ViewportFix";
 import "@/lib/fontawesome";
 
@@ -12,7 +12,23 @@ import "./globals.css";
 import { getCurrentUser } from "@/lib/auth";
 import { getSupabaseServer } from "@/lib/supabase-ssr";
 import { hexToHsl } from "@/lib/colorUtils";
-import { getAllFontVariables, geistMono, activeFontPairing } from "@/lib/fonts";
+// Import all fonts so Next.js can detect them, but we'll only use the active pairing
+import {
+  roboto,
+  openSans,
+  montserrat,
+  dmSans,
+  sourceCodePro,
+  spaceGrotesk,
+  josefinSans,
+  rubik,
+  inter,
+  poppins,
+  raleway,
+  nunitoSans,
+  geistMono,
+  activeFontPairing,
+} from "@/lib/fonts";
 
 export const metadata: Metadata = {
   title: {
@@ -39,7 +55,7 @@ export default async function RootLayout({
   const isRootPage = pathname === "/";
 
   return (
-    <html lang="en" suppressHydrationWarning className={`dark ${getAllFontVariables()}`}>
+    <html lang="en" suppressHydrationWarning className={`dark ${roboto.variable} ${activeFontPairing.heading.variable} ${activeFontPairing.body.variable} ${geistMono.variable}`}>
       <body className="antialiased" suppressHydrationWarning>
         <ViewportFix />
         {/* AdminColorStyle applies server-side color IMMEDIATELY from database (runs first) */}

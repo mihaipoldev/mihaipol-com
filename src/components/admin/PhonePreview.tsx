@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import SmartLinksLanding from "@/features/smart-links/components/SmartLinksLanding";
-import AlbumGradientBackground from "@/components/landing/AlbumGradientBackground";
+import SmartLinksPage from "@/features/smart-links/components/SmartLinksPage";
+import SmartLinksGradientBackground from "@/features/smart-links/layout/SmartLinksGradientBackground";
 import type { Album, AlbumLink } from "@/features/albums/types";
 import type { SmartLink } from "@/features/smart-links/data";
 
@@ -173,7 +173,7 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
 
               {/* Screen Content */}
               <div className="absolute top-[118px] left-0 right-0 bottom-0" style={{ zIndex: 1 }}>
-                <AlbumGradientBackground
+                <SmartLinksGradientBackground
                   coverImageUrl={album.cover_image_url || null}
                   useAbsolutePositioning={true}
                 >
@@ -181,7 +181,7 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
                     <div className="flex flex-col items-center px-4 flex-1">
                       <div className="w-full max-w-sm mx-auto py-6">
                         <div className="flex flex-col">
-                          <SmartLinksLanding
+                          <SmartLinksPage
                             album={{
                               id: album.id,
                               title: album.title,
@@ -208,7 +208,7 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
                       </div>
                     </div>
                   </div>
-                </AlbumGradientBackground>
+                </SmartLinksGradientBackground>
               </div>
             </div>
           </div>

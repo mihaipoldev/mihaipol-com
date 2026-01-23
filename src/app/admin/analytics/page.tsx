@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
-import { DashboardTimeScope } from "@/components/admin/DashboardTimeScope";
+import { AdminPageTitle } from "@/components/admin/ui/AdminPageTitle";
+import { DashboardTimeScope } from "@/components/admin/dashboard/DashboardTimeScope";
 import { getAnalyticsData } from "@/features/smart-links/analytics/data";
 import { AnalyticsDashboard } from "@/features/smart-links/analytics/components/AnalyticsDashboard";
 import { getAnalyticsScope } from "@/lib/analytics-scope";

@@ -35,4 +35,7 @@ export type Album = {
   album_type?: string | null;
   format_type?: string | null;
   description?: string | null;
+  drive_folder_id?: string | null;
+  drive_folder_url?: string | null;
+  audio_files?: Record<string, unknown> | null;
 };

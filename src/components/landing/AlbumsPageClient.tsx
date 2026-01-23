@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import LandingAlbumsList from "./lists/LandingAlbumsList";
+import AlbumsList from "./lists/AlbumsList";
 import AlbumsFilterPopover from "./AlbumsFilterPopover";
 import type { LandingAlbum } from "./types";
 
@@ -122,7 +122,7 @@ export default function AlbumsPageClient({
             </p>
           </div>
         ) : (
-          <LandingAlbumsList
+          <AlbumsList
             albums={filteredAlbums}
             fallbackImage={fallbackImage}
             columns={columns}

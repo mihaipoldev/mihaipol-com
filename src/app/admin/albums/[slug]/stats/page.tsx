@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { getAlbumBySlugAdmin } from "@/features/albums/data";
 import { getEntityAnalyticsData } from "@/features/smart-links/analytics/data";
 import { EntityStatsDashboard } from "@/features/smart-links/analytics/components/EntityStatsDashboard";
-import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
-import { DashboardTimeScope } from "@/components/admin/DashboardTimeScope";
+import { AdminPageTitle } from "@/components/admin/ui/AdminPageTitle";
+import { DashboardTimeScope } from "@/components/admin/dashboard/DashboardTimeScope";
 import { getAnalyticsScope } from "@/lib/analytics-scope";
 
 export const dynamic = "force-dynamic";

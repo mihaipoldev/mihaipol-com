@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
+import { AdminPageTitle } from "@/components/admin/ui/AdminPageTitle";
 
 export default function TestPerformancePage() {
   const [testResults, setTestResults] = useState<{

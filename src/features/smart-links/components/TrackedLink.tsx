@@ -2,7 +2,7 @@
 
 import React from "react";
 import { trackView } from "@/lib/track";
-import { useAlbumColors } from "@/components/landing/AlbumGradientBackground";
+import { useAlbumColors } from "@/features/smart-links/layout/SmartLinksGradientBackground";
 
 type Props = {
   href: string;

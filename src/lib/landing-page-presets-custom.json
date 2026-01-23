@@ -1,0 +1,100 @@
+[
+  {
+    "id": 2,
+    "name": "Cool Minimal (Slate + Blue)",
+    "primary": "210 90% 55%",
+    "secondary": "200 75% 50%",
+    "accent": "260 65% 60%"
+  },
+  {
+    "id": 4,
+    "name": "Soft Tech (Mint + Teal)",
+    "primary": "165 65% 40%",
+    "secondary": "150 25% 35%",
+    "accent": "200 40% 45%"
+  },
+  {
+    "id": 5,
+    "name": "Monochrome Minimal",
+    "primary": "220 15% 20%",
+    "secondary": "220 8% 40%",
+    "accent": "210 20% 30%"
+  },
+  {
+    "id": 7,
+    "name": "Midnight Violet",
+    "primary": "268 55% 48%",
+    "secondary": "260 25% 40%",
+    "accent": "200 50% 52%"
+  },
+  {
+    "id": 10,
+    "name": "Deep Navy & Gold",
+    "primary": "45 85% 56%",
+    "secondary": "215 25% 32%",
+    "accent": "200 55% 50%"
+  },
+  {
+    "id": 11,
+    "name": "Smoke & Coral",
+    "primary": "12 70% 54%",
+    "secondary": "210 8% 40%",
+    "accent": "350 30% 40%"
+  },
+  {
+    "id": 13,
+    "name": "Glacier",
+    "primary": "195 65% 50%",
+    "secondary": "210 14% 40%",
+    "accent": "220 40% 55%"
+  },
+  {
+    "id": 15,
+    "name": "Neon Matrix",
+    "primary": "120 90% 55%",
+    "secondary": "190 90% 55%",
+    "accent": "50 95% 60%"
+  },
+  {
+    "id": 16,
+    "name": "Teal & Sand Luxe",
+    "primary": "185 65% 45%",
+    "secondary": "35 35% 55%",
+    "accent": "15 70% 55%"
+  },
+  {
+    "id": 17,
+    "name": "Mono Ice Minimal",
+    "primary": "210 40% 35%",
+    "secondary": "210 16% 55%",
+    "accent": "200 30% 45%"
+  },
+  {
+    "id": 18,
+    "name": "Soft Sunrise Minimal",
+    "primary": "30 80% 55%",
+    "secondary": "15 60% 52%",
+    "accent": "195 50% 52%"
+  },
+  {
+    "id": 19,
+    "name": "Deep Teal Studio",
+    "primary": "180 55% 38%",
+    "secondary": "200 18% 40%",
+    "accent": "160 40% 45%"
+  },
+  {
+    "id": 21,
+    "name": "Griffith Orange",
+    "primary": "20 85% 56%",
+    "secondary": "220 10% 32%",
+    "accent": "18 40% 50%"
+  },
+  {
+    "id": 22,
+    "name": "Griffith Lime",
+    "primary": "90 80% 56%",
+    "secondary": "210 10% 32%",
+    "accent": "200 45% 50%"
+  }
+]

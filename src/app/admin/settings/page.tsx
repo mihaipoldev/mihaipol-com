@@ -2,29 +2,31 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { SettingsSidebar } from "@/components/admin/settings/SettingsSidebar";
-import { SettingsContent } from "@/components/admin/settings/SettingsContent";
+import { SettingsSidebar } from "@/features/settings/components/SettingsSidebar";
+import { SettingsContent } from "@/features/settings/components/SettingsContent";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faPalette, faGear } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faPalette, faHome, faPlug } from "@fortawesome/free-solid-svg-icons";
 
-type SettingsSection = "account" | "appearance" | "preferences";
+type SettingsSection = "account" | "appearance" | "landing-page" | "integrations";
 
 // Map internal sections to URL-friendly names
 const SECTION_URL_MAP: Record<SettingsSection, string> = {
   account: "account",
   appearance: "appearance",
-  preferences: "preferences",
+  "landing-page": "landing-page",
+  integrations: "integrations",
 };
 
 const URL_SECTION_MAP: Record<string, SettingsSection> = {
   account: "account",
   appearance: "appearance",
-  preferences: "preferences",
+  "landing-page": "landing-page",
+  integrations: "integrations",
 };
 
-const VALID_SECTIONS: SettingsSection[] = ["account", "appearance", "preferences"];
+const VALID_SECTIONS: SettingsSection[] = ["account", "appearance", "landing-page", "integrations"];
 
 function SettingsPageInner() {
   const searchParams = useSearchParams();
@@ -78,7 +80,7 @@ function SettingsPageInner() {
             onValueChange={(value) => handleSectionChange(value as SettingsSection)}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-3 bg-transparent p-1">
+            <TabsList className="grid w-full grid-cols-4 bg-transparent p-1">
               <TabsTrigger 
                 value="account" 
                 className="flex items-center gap-2 data-[state=active]:bg-card/50 data-[state=active]:dark:bg-card/30 data-[state=active]:backdrop-blur-sm data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary/[2%] data-[state=active]:via-primary/[1%] data-[state=active]:to-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
@@ -94,11 +96,18 @@ function SettingsPageInner() {
                 <span className="hidden sm:inline">Appearance</span>
               </TabsTrigger>
               <TabsTrigger 
-                value="preferences" 
+                value="integrations" 
                 className="flex items-center gap-2 data-[state=active]:bg-card/50 data-[state=active]:dark:bg-card/30 data-[state=active]:backdrop-blur-sm data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary/[2%] data-[state=active]:via-primary/[1%] data-[state=active]:to-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
               >
-                <FontAwesomeIcon icon={faGear} className="h-4 w-4" />
-                <span className="hidden sm:inline">Prefs</span>
+                <FontAwesomeIcon icon={faPlug} className="h-4 w-4" />
+                <span className="hidden sm:inline">Integrations</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="landing-page" 
+                className="flex items-center gap-2 data-[state=active]:bg-card/50 data-[state=active]:dark:bg-card/30 data-[state=active]:backdrop-blur-sm data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary/[2%] data-[state=active]:via-primary/[1%] data-[state=active]:to-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              >
+                <FontAwesomeIcon icon={faHome} className="h-4 w-4" />
+                <span className="hidden sm:inline">Landing</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -110,9 +119,11 @@ function SettingsPageInner() {
       ) : (
         // Desktop layout with sidebar
         <div className="flex gap-6">
-          {/* Sidebar */}
+          {/* Sidebar - sticky */}
           <div className="w-64 flex-shrink-0">
-            <SettingsSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+            <div className="sticky top-[88px]">
+              <SettingsSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+            </div>
           </div>
 
           {/* Main Content */}

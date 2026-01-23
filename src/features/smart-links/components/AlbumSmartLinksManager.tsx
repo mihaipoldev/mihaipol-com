@@ -19,18 +19,18 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ShadowButton } from "@/components/admin/ShadowButton";
+import { ShadowButton } from "@/components/admin/forms/ShadowButton";
 import { Button } from "@/components/ui/button";
-import { ShadowInput } from "@/components/admin/ShadowInput";
+import { ShadowInput } from "@/components/admin/forms/ShadowInput";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/admin/ShadowSelect";
+} from "@/components/admin/forms/AdminSelect";
 import { Label } from "@/components/ui/label";
-import { CreatePlatformModal } from "@/components/admin/CreatePlatformModal";
+import { CreatePlatformModal } from "@/features/platforms/components/CreatePlatformModal";
 import { getCardGradient } from "@/lib/gradient-presets";
 import { cn } from "@/lib/utils";
 import type { AlbumLink, Platform } from "@/features/albums/types";

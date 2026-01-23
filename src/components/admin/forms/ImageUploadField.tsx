@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, X, Link as LinkIcon, FileImage } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ShadowInput } from "@/components/admin/ShadowInput";
+import { ShadowInput } from "./ShadowInput";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";

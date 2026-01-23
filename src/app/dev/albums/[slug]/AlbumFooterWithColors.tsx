@@ -1,6 +1,6 @@
 "use client";
 
-import { useAlbumColors } from "@/components/landing/AlbumGradientBackground";
+import { useAlbumColors } from "@/features/smart-links/layout/SmartLinksGradientBackground";
 import Link from "next/link";
 
 export default function AlbumFooterWithColors() {

@@ -145,23 +145,36 @@ export async function updateSitePreference(key: string, value: any): Promise<voi
     const supabaseClient = getServiceSupabaseClient();
 
     // Check if preference exists
-    const { data: existing } = await supabaseClient
+    const { data: existing, error: checkError } = await supabaseClient
       .from("site_preferences")
       .select("key")
       .eq("key", key)
       .maybeSingle();
 
+    if (checkError) {
+      console.error("Error checking preference:", checkError);
+      throw checkError;
+    }
+
     if (existing) {
-      // Update existing preference
+      // Update existing preference - Supabase handles JSONB conversion automatically
       const { error } = await supabaseClient
         .from("site_preferences")
-        .update({ value })
+        .update({ 
+          value: value, // This will be automatically converted to JSONB
+        })
         .eq("key", key);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error updating preference:", error);
+        throw error;
+      }
     } else {
-      // Preference doesn't exist, cannot create via this function
-      throw new Error(`Preference with key "${key}" does not exist`);
+      // Preference doesn't exist - this shouldn't happen if migration ran
+      throw new Error(
+        `Preference with key "${key}" does not exist. ` +
+        `Please ensure the migration has been run to create this preference.`
+      );
     }
   } catch (error) {
     console.error("Error updating site preference:", error);

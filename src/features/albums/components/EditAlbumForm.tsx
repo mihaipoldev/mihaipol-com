@@ -8,9 +8,9 @@ import * as z from "zod";
 import { createAlbum, updateAlbum } from "@/features/albums/mutations";
 import { FormField } from "@/components/admin/forms/FormField";
 import { ImageUploadField } from "@/components/admin/forms/ImageUploadField";
-import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
-import { ShadowInput } from "@/components/admin/ShadowInput";
-import { DatePicker } from "@/components/admin/DatePicker";
+import { AdminPageTitle } from "@/components/admin/ui/AdminPageTitle";
+import { ShadowInput } from "@/components/admin/forms/ShadowInput";
+import { DatePicker } from "@/components/admin/forms/DatePicker";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -19,24 +19,27 @@ import {
   SelectTrigger,
   SelectValue,
   SelectSeparator,
-} from "@/components/admin/ShadowSelect";
+} from "@/components/admin/forms/AdminSelect";
 import { Plus } from "lucide-react";
-import { ShadowButton } from "@/components/admin/ShadowButton";
+import { ShadowButton } from "@/components/admin/forms/ShadowButton";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { PublishStateSwitch } from "@/components/admin/PublishStateSwitch";
+import { PublishStatusControl } from "@/components/admin/PublishStatusControl";
 import { supabase } from "@/lib/supabase";
 import { AlbumSmartLinksManager } from "@/features/smart-links/components/AlbumSmartLinksManager";
 import { PhonePreview } from "@/components/admin/PhonePreview";
-import { CreateLabelModal } from "@/components/admin/CreateLabelModal";
+import { CreateLabelModal } from "@/features/labels/components/CreateLabelModal";
 import { getAllLabels } from "@/features/labels/data";
 import { getAllArtists } from "@/features/artists/data";
-import { ArtistSelect, type Artist, type AlbumArtist } from "@/components/admin/ArtistSelect";
+import { ArtistSelect, type Artist, type AlbumArtist } from "@/features/artists/components/ArtistSelect";
 import type { Album, AlbumLink, Label, Platform } from "@/features/albums/types";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { DriveFolderBadge } from "@/features/google-drive/components/DriveFolderBadge";
+import { DriveFolderModal } from "@/features/google-drive/components/DriveFolderModal";
+import { AutomationTab } from "@/features/automations";
 
 const albumSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -686,6 +689,33 @@ export function EditAlbumForm({
 
   const displayName = isNew ? undefined : initialAlbum?.title || titleValue;
 
+  // Drive folder state for header badge
+  const [driveRefreshKey, setDriveRefreshKey] = useState(0);
+  const [driveHasFolder, setDriveHasFolder] = useState(!!initialAlbum?.drive_folder_id);
+  const [driveCurrentFolderUrl, setDriveCurrentFolderUrl] = useState<string | null>(
+    initialAlbum?.drive_folder_url || null
+  );
+  const [driveModalOpen, setDriveModalOpen] = useState(false);
+
+  const handleDriveRefresh = async () => {
+    try {
+      const response = await fetch(`/api/albums/${id}/drive-folder`);
+      if (response.ok) {
+        const data = await response.json();
+        setDriveHasFolder(data.hasFolder || false);
+        setDriveCurrentFolderUrl(data.folderInfo?.folder_url || null);
+      }
+    } catch (error) {
+      console.error("Error refreshing folder status:", error);
+    }
+    setDriveRefreshKey((prev) => prev + 1);
+  };
+
+  const handleDriveModalSuccess = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await handleDriveRefresh();
+  };
+
   return (
     <div className="w-full max-w-7xl relative">
       <div className="mb-6 md:mb-10 relative">
@@ -701,25 +731,17 @@ export function EditAlbumForm({
             }
           />
           {!isNew && (
-            <div className="flex items-center pt-2 shrink-0">
-              <Controller
-                name="publish_status"
+            <div className="flex items-center gap-3">
+              <DriveFolderBadge
+                albumId={id}
+                refreshKey={driveRefreshKey}
+                onEditClick={() => setDriveModalOpen(true)}
+              />
+              <PublishStatusControl
                 control={control}
                 defaultValue={normalizedInitialStatus as any}
-                render={({ field }) => {
-                  const isPublished =
-                    (field.value as any)?.toString?.().trim?.().toLowerCase?.() === "published";
-                  return (
-                    <PublishStateSwitch
-                      checked={isPublished}
-                      onCheckedChange={(checked) => {
-                        const newStatus = checked ? "published" : "draft";
-
-                        console.log("[AlbumForm] switch publish_status:", newStatus);
-                        field.onChange(newStatus);
-                      }}
-                    />
-                  );
+                onStatusChange={(status) => {
+                  console.log("[AlbumForm] switch publish_status:", status);
                 }}
               />
             </div>
@@ -744,7 +766,7 @@ export function EditAlbumForm({
             style={{ animationDelay: "300ms" }}
           />
           <Tabs defaultValue="details" className="w-full">
-            <TabsList className="grid grid-cols-2 w-full bg-transparent p-0 gap-0 h-auto border-b border-border/30 rounded-none">
+            <TabsList className="grid grid-cols-3 w-full bg-transparent p-0 gap-0 h-auto border-b border-border/30 rounded-none">
               <TabsTrigger
                 value="details"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent h-12 font-medium"
@@ -757,6 +779,13 @@ export function EditAlbumForm({
                 disabled={isNew}
               >
                 Links
+              </TabsTrigger>
+              <TabsTrigger
+                value="automations"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent h-12 font-medium"
+                disabled={isNew}
+              >
+                Automations
               </TabsTrigger>
             </TabsList>
 
@@ -977,6 +1006,15 @@ export function EditAlbumForm({
                 <p className="text-sm text-muted-foreground">Save the album first to add links.</p>
               )}
             </TabsContent>
+
+            <TabsContent value="automations" className="mt-0 p-6 relative">
+              {!isNew ? (
+                <AutomationTab albumId={id} />
+              ) : (
+                <p className="text-sm text-muted-foreground">Save the album first to use automations.</p>
+              )}
+            </TabsContent>
+
           </Tabs>
         </Card>
 
@@ -1000,6 +1038,18 @@ export function EditAlbumForm({
         onOpenChange={setIsCreateLabelModalOpen}
         onSuccess={handleLabelCreated}
       />
+
+      {/* Drive Folder Modal - accessible from header badge */}
+      {!isNew && (
+        <DriveFolderModal
+          open={driveModalOpen}
+          onOpenChange={setDriveModalOpen}
+          albumId={id}
+          currentFolderUrl={driveCurrentFolderUrl}
+          hasFolder={driveHasFolder}
+          onSuccess={handleDriveModalSuccess}
+        />
+      )}
     </div>
   );
 }

@@ -336,7 +336,7 @@ export async function getAlbumById(id: string) {
       .from("albums")
       .select(
         `
-        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description,
+        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description, drive_folder_id, drive_folder_url, audio_files,
         labels (
           id,
           name

@@ -8,8 +8,8 @@ import * as z from "zod";
 import { createUpdate, updateUpdate } from "@/features/updates/mutations";
 import { FormField } from "@/components/admin/forms/FormField";
 import { ImageUploadField } from "@/components/admin/forms/ImageUploadField";
-import { AdminPageTitle } from "@/components/admin/AdminPageTitle";
-import { ShadowInput } from "@/components/admin/ShadowInput";
+import { AdminPageTitle } from "@/components/admin/ui/AdminPageTitle";
+import { ShadowInput } from "@/components/admin/forms/ShadowInput";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -17,8 +17,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/admin/ShadowSelect";
-import { ShadowButton } from "@/components/admin/ShadowButton";
+} from "@/components/admin/forms/AdminSelect";
+import { ShadowButton } from "@/components/admin/forms/ShadowButton";
 import { PublishStateSwitch } from "@/components/admin/PublishStateSwitch";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";

@@ -28,7 +28,7 @@ export type SitePreference = {
   key: string;
   value: any;
   description: string | null;
-  category: "events" | "albums" | "updates" | "general" | "griffith" | "feature";
+  category: "events" | "albums" | "updates" | "general" | "griffith" | "feature" | "integrations";
   created_at: string;
   updated_at: string;
 };

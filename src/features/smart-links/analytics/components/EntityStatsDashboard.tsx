@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AdminMetricTab } from "@/components/admin/AdminMetricTab";
+import { AdminMetricTab } from "@/components/admin/dashboard/AdminMetricTab";
 import { AnalyticsLineChart } from "./AnalyticsLineChart";
 import { getCardGradient } from "@/lib/gradient-presets";
 import { cn } from "@/lib/utils";

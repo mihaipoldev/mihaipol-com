@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { getAlbumSmartLinksBySlug } from "@/features/smart-links";
 import TrackView from "@/features/smart-links/analytics/components/TrackView";
 import LinksLogger from "@/components/dev/LinksLogger";
-import { SmartLinksLanding } from "@/features/smart-links";
-import AlbumGradientBackground from "@/components/landing/AlbumGradientBackground";
+import { SmartLinksPage } from "@/features/smart-links";
+import SmartLinksGradientBackground from "@/features/smart-links/layout/SmartLinksGradientBackground";
 import AlbumFooterWithColors from "./AlbumFooterWithColors";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ export default async function AlbumDetailPage({ params }: AlbumDetailPageProps) 
 
   const { album, links } = data;
   return (
-    <AlbumGradientBackground coverImageUrl={album.coverImageUrl}>
+    <SmartLinksGradientBackground coverImageUrl={album.coverImageUrl}>
       <TrackView
         eventType="page_view"
         entityType="album"
@@ -36,12 +36,12 @@ export default async function AlbumDetailPage({ params }: AlbumDetailPageProps) 
         <div className="flex flex-col items-center px-4 w-full">
           <div className="w-full max-w-sm mx-auto py-6">
             <div className="flex flex-col">
-              <SmartLinksLanding album={album} links={links} />
+              <SmartLinksPage album={album} links={links} />
             </div>
           </div>
         </div>
         <AlbumFooterWithColors />
       </div>
-    </AlbumGradientBackground>
+    </SmartLinksGradientBackground>
   );
 }
