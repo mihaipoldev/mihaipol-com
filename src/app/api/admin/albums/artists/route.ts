@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { batchUpdateAlbumArtists } from "@/features/albums/mutations";
+import { getAlbumArtists } from "@/features/albums/data";
 import { ok, badRequest, serverError } from "@/lib/api";
 import { requireAdmin } from "@/lib/auth";
 import { z } from "zod";
@@ -15,6 +16,26 @@ const batchUpdateArtistsSchema = z.object({
     })
   ),
 });
+
+export async function GET(request: NextRequest) {
+  try {
+    const guard = await requireAdmin(request);
+    if ("status" in (guard as any)) return guard as any;
+
+    const { searchParams } = new URL(request.url);
+    const albumId = searchParams.get("albumId");
+
+    if (!albumId) {
+      return badRequest("albumId is required");
+    }
+
+    const artists = await getAlbumArtists(albumId);
+    return ok(artists);
+  } catch (error: any) {
+    console.error("Error fetching album artists:", error);
+    return serverError("Failed to fetch album artists", error?.message);
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {

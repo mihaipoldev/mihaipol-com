@@ -22,7 +22,7 @@ export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <div className="mb-4 relative">
+      <div className="mb-2 relative">
         <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/20 via-primary/10 to-transparent rounded-full" />
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">

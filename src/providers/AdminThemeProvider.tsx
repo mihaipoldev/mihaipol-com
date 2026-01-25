@@ -9,9 +9,9 @@ export function AdminThemeProvider({ children, ...props }: AdminThemeProviderPro
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="light"
+      defaultTheme="system"
       storageKey="admin-theme"
-      enableSystem={false}
+      enableSystem={true}
       disableTransitionOnChange
       {...props}
     >

@@ -32,44 +32,18 @@ function applyPrimaryColor(hexColor: string) {
 
   // Apply inline styles IMMEDIATELY for instant visual feedback
   // This runs AFTER React hydration, so no hydration mismatch issues
-  const startTime = performance.now();
-  console.log("[usePrimaryColor] applyPrimaryColor called at", startTime.toFixed(2) + "ms");
-  console.log("[usePrimaryColor] Color:", hexColor, "HSL:", hsl);
-  console.log("[usePrimaryColor] Document readyState:", document.readyState);
-
   const primaryValue = `${hsl.h} ${hsl.s}% ${hsl.l}%`;
-
-  // Check what's currently applied
-  const currentH = document.documentElement.style.getPropertyValue("--brand-h");
-  const currentPrimary = document.documentElement.style.getPropertyValue("--primary");
-  console.log("[usePrimaryColor] Current --brand-h:", currentH || "(none)");
-  console.log("[usePrimaryColor] Current --primary:", currentPrimary || "(none)");
 
   // Apply to documentElement (doesn't cause hydration issues since React already hydrated)
   if (document.documentElement) {
-    console.log("[usePrimaryColor] Applying inline styles to documentElement");
     document.documentElement.style.setProperty("--brand-h", hsl.h.toString(), "important");
     document.documentElement.style.setProperty("--brand-s", `${hsl.s}%`, "important");
     document.documentElement.style.setProperty("--brand-l", `${hsl.l}%`, "important");
     document.documentElement.style.setProperty("--primary", primaryValue, "important");
-
-    // Verify
-    const appliedH = document.documentElement.style.getPropertyValue("--brand-h");
-    console.log("[usePrimaryColor] Verified --brand-h after apply:", appliedH);
   }
 
   // Also inject style tag for persistence
   injectColorOverrideStyle(hsl);
-
-  const endTime = performance.now();
-  console.log(
-    "[usePrimaryColor] ✅ Applied color:",
-    hexColor,
-    "HSL:",
-    hsl,
-    "in",
-    (endTime - startTime).toFixed(2) + "ms"
-  );
 
   // Force a reflow to ensure visual update
   void body.offsetHeight;

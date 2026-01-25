@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import React from "react";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 import {
   AdminTable,
   TableHeader,
@@ -22,11 +23,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { EditEventModal } from "./EditEventModal";
 
 type Event = {
   id: string;
   title: string;
   slug: string;
+  description: string | null;
   venue: string | null;
   city: string | null;
   country: string | null;
@@ -45,6 +48,22 @@ type EventsListProps = {
 export function EventsList({ initialEvents }: EventsListProps) {
   const [events, setEvents] = useState<Event[]>(initialEvents);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleEdit = (event: Event) => {
+    setEditingEvent(event);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    setEditingEvent(null);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    window.location.reload();
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -85,29 +104,42 @@ export function EventsList({ initialEvents }: EventsListProps) {
   });
 
   return (
-    <div className="w-full">
-      <div className="mb-6 md:mb-8 relative">
+    <motion.div
+      className="w-full"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div
+        className="mb-4 md:mb-6 relative"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.05 }}
+      >
         <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/20 via-primary/10 to-transparent rounded-full" />
         <AdminPageTitle
           title="Events"
           description="Manage your upcoming and past events, including venues, dates, and ticket information."
         />
-      </div>
-      <div className="space-y-3 md:space-y-4">
+      </motion.div>
+      <motion.div
+        className="space-y-3 md:space-y-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
         <AdminToolbar
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
           searchPlaceholder="Search events..."
         >
           <Button
-            asChild
             variant="ghost"
             className="rounded-full w-10 h-10 p-0 bg-transparent text-muted-foreground hover:text-primary hover:bg-transparent border-0 shadow-none transition-colors"
             title="New Event"
+            onClick={handleCreate}
           >
-            <Link href="/admin/events/new/edit">
-              <FontAwesomeIcon icon={faPlus} className="h-5 w-5" />
-            </Link>
+            <FontAwesomeIcon icon={faPlus} className="h-5 w-5" />
           </Button>
         </AdminToolbar>
 
@@ -130,7 +162,7 @@ export function EventsList({ initialEvents }: EventsListProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredEvents.map((event) => {
+              filteredEvents.map((event, index) => {
                 const location = [event.city, event.country].filter(Boolean).join(", ") || null;
                 const description =
                   [event.venue, location].filter(Boolean).join(" / ") || undefined;
@@ -143,11 +175,22 @@ export function EventsList({ initialEvents }: EventsListProps) {
                     ? `${event.title} @ ${locationParts.join(" / ")}`
                     : event.title;
                 return (
-                  <>
+                  <React.Fragment key={event.id}>
+                    <motion.div
+                      style={{ display: "contents" }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: index * 0.02, duration: 0.2 }}
+                    >
                     {/* Mobile Layout */}
                     <TableRow
                       key={`${event.id}-mobile`}
                       className="md:hidden group cursor-pointer hover:bg-muted/50 border-b border-border/50"
+                      onClick={(e) => {
+                        if (!(e.target as HTMLElement).closest("[data-action-menu]")) {
+                          // No navigation on row click
+                        }
+                      }}
                       onMouseDown={(e) => {
                         if (e.button === 1) {
                           e.preventDefault();
@@ -155,83 +198,75 @@ export function EventsList({ initialEvents }: EventsListProps) {
                         }
                       }}
                     >
-                      <Link
-                        href={`/admin/events/${event.slug}/edit`}
-                        className="contents"
-                        onClick={(e) => {
-                          if (
-                            (e.target as HTMLElement).closest("[data-action-menu]") ||
-                            (e.target as HTMLElement).closest("a[href]")
-                          ) {
-                            e.preventDefault();
-                          }
-                        }}
-                      >
-                        <TableCell className="px-3 md:pl-4 md:pr-4 py-4" colSpan={6}>
-                          <div className="flex items-start gap-3 md:gap-4">
-                            <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-muted shadow-md flex-shrink-0">
-                              {event.flyer_image_url ? (
-                                <img
-                                  src={event.flyer_image_url}
-                                  alt={event.title}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <span className="text-xs font-semibold text-muted-foreground">
-                                  {event.title
-                                    .split(/\s+/)
-                                    .map((w) => w[0])
-                                    .join("")
-                                    .substring(0, 2)
-                                    .toUpperCase()}
-                                </span>
+                      <TableCell className="px-3 md:pl-4 md:pr-4 py-4" colSpan={6}>
+                        <div className="flex items-start gap-3 md:gap-4">
+                          <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-muted shadow-md flex-shrink-0">
+                            {event.flyer_image_url ? (
+                              <img
+                                src={event.flyer_image_url}
+                                alt={event.title}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-xs font-semibold text-muted-foreground">
+                                {event.title
+                                  .split(/\s+/)
+                                  .map((w) => w[0])
+                                  .join("")
+                                  .substring(0, 2)
+                                  .toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-base mb-1.5 break-words">
+                              {nameAtLocation}
+                            </div>
+                            <div className="text-sm text-muted-foreground space-y-0.5">
+                              {event.date && (
+                                <div>{format(new Date(event.date), "MMM d, yyyy")}</div>
+                              )}
+                              {event.tickets_url && event.ticket_label && (
+                                <div>
+                                  <a
+                                    href={event.tickets_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {event.ticket_label}
+                                  </a>
+                                </div>
                               )}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-base mb-1.5 break-words">
-                                {nameAtLocation}
-                              </div>
-                              <div className="text-sm text-muted-foreground space-y-0.5">
-                                {event.date && (
-                                  <div>{format(new Date(event.date), "MMM d, yyyy")}</div>
-                                )}
-                                {event.tickets_url && event.ticket_label && (
-                                  <div>
-                                    <a
-                                      href={event.tickets_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-primary hover:underline"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      {event.ticket_label}
-                                    </a>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="mt-2">
-                                <StateBadge state={event.publish_status} />
-                              </div>
-                            </div>
-                            <div className="flex-shrink-0 ml-2" data-action-menu>
-                              <ActionMenu
-                                itemId={event.id}
-                                editHref={`/admin/events/${event.slug}/edit`}
-                                openPageHref={`/dev/events/${event.slug}`}
-                                statsHref={`/admin/events/${event.slug}/stats`}
-                                onDelete={handleDelete}
-                                deleteLabel={`event "${event.title}"`}
-                              />
+                            <div className="mt-2">
+                              <StateBadge state={event.publish_status} />
                             </div>
                           </div>
-                        </TableCell>
-                      </Link>
+                          <div className="flex-shrink-0 ml-2" data-action-menu>
+                            <ActionMenu
+                              itemId={event.id}
+                              onEdit={() => handleEdit(event)}
+                              openPageHref={`/dev/events/${event.slug}`}
+                              statsHref={`/admin/events/${event.slug}/stats`}
+                              onDelete={handleDelete}
+                              deleteLabel={`event "${event.title}"`}
+                            />
+                          </div>
+                        </div>
+                      </TableCell>
                     </TableRow>
 
                     {/* Desktop Layout */}
                     <TableRow
                       key={`${event.id}-desktop`}
                       className="hidden md:table-row group cursor-pointer hover:bg-muted/50"
+                      onClick={(e) => {
+                        if (!(e.target as HTMLElement).closest("[data-action-menu]")) {
+                          // No navigation on row click
+                        }
+                      }}
                       onMouseDown={(e) => {
                         if (e.button === 1) {
                           e.preventDefault();
@@ -239,71 +274,67 @@ export function EventsList({ initialEvents }: EventsListProps) {
                         }
                       }}
                     >
-                      <Link
-                        href={`/admin/events/${event.slug}/edit`}
-                        className="contents"
-                        onClick={(e) => {
-                          if (
-                            (e.target as HTMLElement).closest("[data-action-menu]") ||
-                            (e.target as HTMLElement).closest("a[href]")
-                          ) {
-                            e.preventDefault();
-                          }
-                        }}
-                      >
-                        <CoverImageCell
-                          imageUrl={event.flyer_image_url}
-                          title={event.title}
-                          showInitials={true}
-                          className="pl-4"
+                      <CoverImageCell
+                        imageUrl={event.flyer_image_url}
+                        title={event.title}
+                        showInitials={true}
+                        className="pl-4"
+                      />
+                      <TableTitleCell
+                        title={event.title}
+                        imageUrl={undefined}
+                        showInitials={false}
+                        description={description}
+                        href={`/dev/events/${event.slug}`}
+                      />
+                      <TableCell>
+                        {event.date ? format(new Date(event.date), "MMM d, yyyy") : "-"}
+                      </TableCell>
+                      <TableCell>
+                        {event.tickets_url && event.ticket_label ? (
+                          <a
+                            href={event.tickets_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {event.ticket_label}
+                          </a>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <StateBadge state={event.publish_status} />
+                      </TableCell>
+                      <TableCell className="text-right pr-4" data-action-menu>
+                        <ActionMenu
+                          itemId={event.id}
+                          onEdit={() => handleEdit(event)}
+                          openPageHref={`/dev/events/${event.slug}`}
+                          statsHref={`/admin/events/${event.slug}/stats`}
+                          onDelete={handleDelete}
+                          deleteLabel={`event "${event.title}"`}
                         />
-                        <TableTitleCell
-                          title={event.title}
-                          imageUrl={undefined}
-                          showInitials={false}
-                          description={description}
-                          href={`/dev/events/${event.slug}`}
-                        />
-                        <TableCell>
-                          {event.date ? format(new Date(event.date), "MMM d, yyyy") : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {event.tickets_url && event.ticket_label ? (
-                            <a
-                              href={event.tickets_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:underline"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {event.ticket_label}
-                            </a>
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <StateBadge state={event.publish_status} />
-                        </TableCell>
-                        <TableCell className="text-right pr-4" data-action-menu>
-                          <ActionMenu
-                            itemId={event.id}
-                            editHref={`/admin/events/${event.slug}/edit`}
-                            openPageHref={`/dev/events/${event.slug}`}
-                            statsHref={`/admin/events/${event.slug}/stats`}
-                            onDelete={handleDelete}
-                            deleteLabel={`event "${event.title}"`}
-                          />
-                        </TableCell>
-                      </Link>
+                      </TableCell>
                     </TableRow>
-                  </>
+                    </motion.div>
+                  </React.Fragment>
                 );
               })
             )}
           </TableBody>
         </AdminTable>
-      </div>
-    </div>
+      </motion.div>
+      {isEditModalOpen && (
+        <EditEventModal
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          event={editingEvent}
+          onSuccess={handleEditSuccess}
+        />
+      )}
+    </motion.div>
   );
 }

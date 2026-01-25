@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import PageTransition from "./PageTransition";
-import Footer from "@/components/landing/Footer";
-import Header from "@/components/landing/Header";
+import Footer from "./Footer";
+import Header from "./Header";
 import { PresetCSSInjector } from "@/components/landing/PresetCSSInjector";
 
 type PageLayoutProps = {
@@ -16,6 +16,9 @@ type PageLayoutProps = {
 
 export function PageLayout({ children, landingPagePreset = 19 }: PageLayoutProps) {
   const gradientBgRef = useRef<HTMLDivElement>(null);
+  // Initialize to false to ensure server and client match during hydration
+  // Will be set to true in useEffect after mount
+  const [presetReady, setPresetReady] = useState(false);
 
   useEffect(() => {
     // Simple solution: Just ensure the background covers extra scrollable space
@@ -59,6 +62,14 @@ export function PageLayout({ children, landingPagePreset = 19 }: PageLayoutProps
       clearTimeout(timeoutId);
       window.removeEventListener("resize", updateBackgroundHeight);
     };
+  }, []);
+
+  // Use useLayoutEffect to set presetReady synchronously before paint
+  // This ensures the content is visible as soon as possible while avoiding hydration mismatch
+  useLayoutEffect(() => {
+    // CSS is injected by middleware server-side, so it should be ready
+    // Set to true immediately to show content
+    setPresetReady(true);
   }, []);
 
   useEffect(() => {
@@ -122,6 +133,9 @@ export function PageLayout({ children, landingPagePreset = 19 }: PageLayoutProps
         )}
         style={{
           scrollBehavior: "smooth",
+          visibility: presetReady ? "visible" : "hidden",
+          opacity: presetReady ? 1 : 0,
+          transition: presetReady ? "opacity 0.2s ease-in" : "none",
         }}
       >
       {/* Animated Background */}
@@ -130,13 +144,6 @@ export function PageLayout({ children, landingPagePreset = 19 }: PageLayoutProps
         className="fixed inset-0 bg-gradient-sunset opacity-10 animate-gradient-shift"
         style={{ backgroundSize: "200% 200%", zIndex: 0 }}
       />
-
-      {/* Floating Background Shapes */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 1 }}>
-        <div className="absolute top-20 left-10 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-float-slow" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-glow-pulse" />
-      </div>
 
       <Header />
       <PageTransition>

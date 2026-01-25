@@ -91,7 +91,7 @@ body.preset-landing-page-${preset.id} {
   --foreground: ${primaryHue} 15% 95%;
   --card: ${primaryHue} 15% 10%;
   --card-foreground: ${primaryHue} 15% 95%;
-  --popover: ${primaryHue} 15% 10%;
+  --popover: ${primaryHue} 15% 20%;
   --popover-foreground: ${primaryHue} 15% 95%;
   --primary: ${preset.primary};
   --primary-foreground: 0 0% 100%;

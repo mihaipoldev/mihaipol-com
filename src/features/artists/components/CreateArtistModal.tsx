@@ -4,19 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { ModalShell } from "@/components/ui/modal-shell";
 import { FormField } from "@/components/admin/forms/FormField";
 import { ImageUploadField } from "@/components/admin/forms/ImageUploadField";
 import { ShadowInput } from "@/components/admin/forms/ShadowInput";
 import { ShadowTextarea } from "@/components/admin/forms/ShadowTextarea";
 import { ShadowButton } from "@/components/admin/forms/ShadowButton";
 import { toast } from "sonner";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUsers } from "@fortawesome/free-solid-svg-icons";
 import { supabase } from "@/lib/supabase";
 
 const artistSchema = z.object({
@@ -270,22 +266,24 @@ export function CreateArtistModal({ open, onOpenChange, onSuccess }: CreateArtis
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Create New Artist</DialogTitle>
-          <DialogDescription>
-            Add a new artist profile. It will be available immediately for selection.
-          </DialogDescription>
-        </DialogHeader>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleSubmit(onSubmit)(e);
-          }}
-          className="space-y-6 mt-4"
-        >
+    <ModalShell
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Create New Artist"
+      titleIcon={<FontAwesomeIcon icon={faUsers} className="w-5 h-5 md:w-6 md:h-6" />}
+      description="Add a new artist profile. It will be available immediately for selection."
+      maxWidth="2xl"
+      maxHeight="90vh"
+      showScroll={true}
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleSubmit(onSubmit)(e);
+        }}
+        className="space-y-6 mt-4"
+      >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField label="Name" required error={errors.name?.message}>
               <ShadowInput {...register("name")} placeholder="Artist name" />
@@ -329,7 +327,6 @@ export function CreateArtistModal({ open, onOpenChange, onSuccess }: CreateArtis
             </ShadowButton>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+    </ModalShell>
   );
 }

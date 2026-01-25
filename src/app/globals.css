@@ -446,7 +446,7 @@ body {
   --card: var(--brand-h) 2% 12%;
   --card-foreground: var(--brand-h) 15% 85%;
 
-  --popover: var(--brand-h) 0% 9%;
+  --popover: var(--brand-h) 0% 5%;
   --popover-foreground: var(--brand-h) 0% 85%;
 
   /* Primary keeps brand hue */
@@ -586,18 +586,29 @@ body[data-brand="charcoal"] { --brand-h: 200; --brand-s: 25%; --brand-l: 20%; }
   .bg-gradient-sunset {
     background: linear-gradient(
       135deg,
-      hsl(var(--gradient-start)) 0%,
-      hsl(var(--gradient-mid)) 50%,
-      hsl(var(--gradient-end)) 100%
+      hsl(var(--primary)) 0%,
+      hsl(var(--secondary)) 20%,
+      hsl(var(--secondary)) 80%,
+      hsl(var(--accent)) 100%
     );
   }
 
   .bg-gradient-sunset-vertical {
     background: linear-gradient(
       180deg,
-      hsl(var(--gradient-start)) 0%,
-      hsl(var(--gradient-mid)) 50%,
-      hsl(var(--gradient-end)) 100%
+      hsl(var(--secondary)) 0%,
+      hsl(var(--secondary)) 30%,
+      hsl(var(--accent)) 70%,
+      hsl(var(--accent)) 100%
+    );
+  }
+
+  .bg-gradient-accent {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--secondary)) 50%,
+      hsl(var(--accent)) 100%
     );
   }
 
@@ -663,8 +674,8 @@ button.no-shadow:active {
 body.preset-balanced [role="menu"],
 body.preset-balanced [data-radix-dropdown-menu-content],
 body.preset-balanced div[role="menu"] {
-  background-color: hsl(var(--background)) !important;
-  color: hsl(var(--foreground)) !important;
+  background-color: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
 }
 
 /* React Colorful Color Picker Styles */

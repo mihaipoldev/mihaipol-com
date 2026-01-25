@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UpdatesList from "../lists/UpdatesList";
+import ScrollReveal from "../animations/ScrollReveal";
 import type { LandingUpdate } from "../types";
 import type { UpdateCardVariant } from "../items/UpdateItem";
 
@@ -23,10 +24,12 @@ export default function UpdatesSection({
   return (
     <section id="updates" className="py-10 md:py-20 px-6">
       <div className="container mx-auto px-0 md:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">Updates</h2>
-          <p className="text-muted-foreground">Recent activity and upcoming moves.</p>
-        </div>
+        <ScrollReveal>
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">Updates</h2>
+            <p className="text-muted-foreground">Recent activity and upcoming moves.</p>
+          </div>
+        </ScrollReveal>
         <UpdatesList
           updates={updates}
           fallbackImage={fallbackImage}

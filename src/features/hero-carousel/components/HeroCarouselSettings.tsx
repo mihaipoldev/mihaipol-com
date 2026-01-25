@@ -6,13 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Image, Plus, Trash2, Loader2, GripVertical, Save } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { ModalShell } from "@/components/ui/modal-shell";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -670,22 +664,23 @@ export function HeroCarouselSettings({ onSaveRef }: HeroCarouselSettingsProps = 
       </div>
 
       {/* Add Image Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Hero Image</DialogTitle>
-            <DialogDescription>
-              Add a new image to the hero carousel. It will be added to the end of the carousel.
-            </DialogDescription>
-          </DialogHeader>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleSubmit(onSubmit)(e);
-            }}
-            className="space-y-6 mt-4"
-          >
+      <ModalShell
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        title="Add New Hero Image"
+        description="Add a new image to the hero carousel. It will be added to the end of the carousel."
+        maxWidth="2xl"
+        maxHeight="90vh"
+        showScroll={true}
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSubmit(onSubmit)(e);
+          }}
+          className="space-y-6 mt-4"
+        >
             <FormField label="Image" required error={errors.image_url?.message}>
               <ImageUploadField
                 value={watch("image_url") || null}
@@ -713,8 +708,7 @@ export function HeroCarouselSettings({ onSaveRef }: HeroCarouselSettingsProps = 
               </ShadowButton>
             </div>
           </form>
-        </DialogContent>
-      </Dialog>
+      </ModalShell>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

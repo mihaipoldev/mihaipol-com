@@ -2,6 +2,14 @@
 
 import * as React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCompactDisc,
+  faUsers,
+  faCalendar,
+  faTag,
+  faNewspaper,
+  faRadio,
+} from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -29,12 +37,12 @@ export function NewButton({ className, options = [] }: NewButtonProps) {
     options.length > 0
       ? options
       : [
-          { label: "Album", href: "/admin/albums/new/edit" },
-          { label: "Artist", href: "/admin/artists/new/edit" },
-          { label: "Event", href: "/admin/events/new/edit" },
-          { label: "Label", href: "/admin/labels/new/edit" },
-          { label: "Update", href: "/admin/updates/new/edit" },
-          { label: "Platform", href: "/admin/platforms/new/edit" },
+          { label: "Album", href: "/admin/albums/new", icon: faCompactDisc },
+          { label: "Artist", href: "/admin/artists/new/edit", icon: faUsers },
+          { label: "Event", href: "/admin/events/new/edit", icon: faCalendar },
+          { label: "Label", href: "/admin/labels/new/edit", icon: faTag },
+          { label: "Update", href: "/admin/updates/new/edit", icon: faNewspaper },
+          { label: "Platform", href: "/admin/platforms/new/edit", icon: faRadio },
         ];
 
   return (
@@ -77,14 +85,28 @@ export function NewButton({ className, options = [] }: NewButtonProps) {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <DropdownMenuContent align="end" className="bg-background border border-border">
+        <DropdownMenuContent 
+          align="end"
+          sideOffset={0}
+          className="px-0 py-2 border-0 w-48"
+          style={{
+            boxShadow: 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px'
+          }}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
           {defaultOptions.map((option, index) => (
             <DropdownMenuItem key={index} asChild>
               <Link
                 href={option.href}
-                className="hover:bg-accent hover:text-accent-foreground cursor-pointer"
+                className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
               >
-                {option.icon && <span className="mr-2">{option.icon}</span>}
+                {option.icon ? (
+                  React.isValidElement(option.icon) ? (
+                    <span className="mr-2">{option.icon}</span>
+                  ) : (
+                    <FontAwesomeIcon icon={option.icon as any} className="mr-2 h-4 w-4" />
+                  )
+                ) : null}
                 {option.label}
               </Link>
             </DropdownMenuItem>

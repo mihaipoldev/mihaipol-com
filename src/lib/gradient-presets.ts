@@ -10,7 +10,7 @@ export const gradientPresets = {
   header: {
     name: "Header",
     description: "Header background gradient",
-    classes: "backdrop-blur-sm bg-transparent",
+    classes: "backdrop-blur-sm bg-background/30",
   },
   sidebar: {
     name: "Sidebar",

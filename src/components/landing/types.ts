@@ -21,6 +21,7 @@ export type LandingAlbum = {
   album_type?: string | null;
   format_type?: string | null;
   description?: string | null;
+  cover_shape?: 'square' | 'circle';
 };
 
 export type LandingUpdate = {

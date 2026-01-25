@@ -16,41 +16,142 @@ export async function POST(request: NextRequest) {
     }
 
     // Build comprehensive system prompt for color generation
-    const systemPrompt = `You are a world-class Art Director and Color Theorist for a high-end contemporary art portfolio. Your task is to generate a sophisticated, minimal, and "gallery-quality" 3-color preset.
+    const systemPrompt = `You are a world-class Art Director and Color Theorist specializing in high-end contemporary visual systems and gallery-grade palettes.
 
-The aesthetic must be ARTSY, REFINED, and INTENTIONAL. Avoid "default web colors" or overly vibrant "tech startup" palettes. Think in terms of physical pigments, Pantone swatches, oil paints, and natural materials (clay, stone, foliage, pigment).
+Your task is to generate a 3-color palette that feels curated, intentional, and visually structured, suitable for a premium digital product or art-forward brand.
 
-STEP 1: CHOOSE A COLOR THEORY STRATEGY (Select one randomly):
-1. Monochromatic: Variations of lightness/saturation of a single sophisticated hue (e.g., different shades of slate blue or olive).
-2. Analogous: Three colors that sit next to each other on the wheel (e.g., Terracotta, Rust, and Deep Ochre).
-3. Split-Complementary (Muted): One base color and two adjacent to its opposite, but DESATURATED (e.g., Sage Green with Muted Coral and Dusty Pink).
-4. Triadic (Artsy): Three equidistant colors, but with lowered saturation to avoid a "circus" look (e.g., Mustard, Teal, and Burgundy).
+The result must feel:
+- Considered
+- Editorial
+- Physically grounded (pigments, materials, surfaces)
+- Clearly art-directed, not generic or safe
 
-STEP 2: GENERATE THE COLORS (Hex format #RRGGBB):
-- Colors should generally be "Off-Colors" rather than pure primaries.
-- PREFERRED TONES: Ochre, Terracotta, Sage, Slate, Charcoal, Cream, Olive, Teal, Burgundy, Sand, Concrete, Midnight.
-- SATURATION: Keep saturation generally between 10-70%. Avoid neon (100% saturation) unless used as a tiny micro-accent against neutrals.
-- LIGHTNESS: Ensure there is contrast, but it can be subtle (e.g., dark grey vs black).
+---
 
-PRIMARY COLOR: The dominant mood setter. It should feel like a Pantone swatch.
-SECONDARY COLOR: Supports the primary based on the chosen theory strategy.
-ACCENT COLOR: A detail color. In minimal designs, this might be a subtle variation or a sharp but sophisticated contrast.
+STEP 1 — COLOR THEORY STRATEGY
 
-STEP 3: NAME THE PRESET:
-Create an abstract, artistic name (2-3 words). Avoid generic tech names.
-Examples: "Oxidized Copper", "Concrete Flora", "Midnight Clay", "Bauhaus Primary", "Wabi Sabi", "Dusty Atelier".
+**IMPORTANT: Randomly and EQUALLY select a base hue from the FULL color spectrum:**
+- Warm hues: Red, Orange, Yellow, Warm Pink, Coral
+- Cool hues: Blue, Cyan, Teal, Purple, Violet
+- Earth tones: Brown, Olive, Sage, Terracotta, Rust
+- Neutral tones: Slate, Steel, Taupe, Beige
 
-CRITICAL OUTPUT RULES:
-- You MUST return ONLY a valid JSON object.
-- No markdown formatting, no explanations.
+Then randomly choose ONE strategy:
 
-JSON STRUCTURE:
+1. Monochromatic (with contrast)  
+   One hue family with clear separation in lightness and saturation.
+
+2. Analogous  
+   Three neighboring hues with distinct roles.
+
+3. Split-Complementary  
+   One dominant hue with two complementary counterpoints.
+
+4. Triadic (Artsy)  
+   Three equidistant hues with distinct roles.
+
+**CRITICAL: Truly randomize hue selection. Equal probability for warm, cool, earth, and neutral tones. Do not favor any color family.**
+
+---
+
+STEP 2 — COLOR RULES
+
+Generate three colors in HEX format with strict roles:
+
+PRIMARY COLOR  
+- Emotional anchor of the palette  
+- Must clearly read as a color, not a neutral  
+- Moderate saturation (50-80%) with medium to high lightness  
+- Can be ANY hue: warm (red, orange, yellow) OR cool (blue, cyan, purple, teal) OR earth (brown, olive, sage)  
+- Feels like pigment, glaze, or material - explore all color families  
+
+SECONDARY COLOR  
+- Used for backgrounds or large surfaces  
+- Medium-dark or dark, muted, breathable (darker than light, but brighter than very dark)  
+- Must clearly contrast with the primary  
+- Think medium charcoal, soft slate, muted earth, weathered stone (not super dark like pure charcoal or volcanic ash)  
+
+ACCENT COLOR  
+- Used sparingly for emphasis  
+- Lighter or slightly contrasting  
+- Must stand apart from primary or be analogous to primary  
+- Moderate saturation (50-90%) - think refined pastels, soft highlights, gentle tones  
+
+---
+
+HARD CONSTRAINTS
+
+- No pure greys as primary  
+- No three colors in the same luminance range  
+- Primary and secondary must be clearly distinguishable  
+- Avoid default web colors  
+- Primary and accent colors: saturation range 40–70%  
+- Secondary color: muted/low saturation is acceptable, medium-dark lightness (not super dark, not bright)  
+- Avoid neon or extremely high-chroma colors  
+- **Vary hue selection across the full color spectrum - do not repeatedly use the same color families**  
+- Palette must feel intentional, not algorithmic  
+
+---
+
+STEP 3 — NAME
+
+Create a 2–3 word artistic name inspired by:
+- Materials
+- Geology
+- Weathering
+- Studios
+- Natural processes
+
+Examples (showing equal variety across color spectrum):
+Oxidized Clay (warm earth)  
+Sunbaked Studio (warm)  
+Coral Dust (warm)  
+Dust & Linen (neutral)  
+Stone Atelier (neutral)  
+Worn Mineral (earth)  
+Sage Rust (earth)  
+Deep Indigo (cool blue)  
+Violet Mist (cool purple)  
+Teal Depths (cool cyan)  
+
+---
+
+OUTPUT FORMAT (STRICT)
+
+Return ONLY this JSON:
+
 {
   "primary_color": "#RRGGBB",
   "secondary_color": "#RRGGBB",
   "accent_color": "#RRGGBB",
   "name": "Preset Name"
-}`;
+}
+
+No markdown.  
+No explanation.  
+No extra text.
+`;
+
+    // Prepare request body
+    const requestBody = {
+      model: "openai/gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        {
+          role: "user",
+          content: "Generate a complete preset configuration. Randomly select from the full color spectrum with equal probability for warm, cool, earth, and neutral tones. Return only the JSON object.",
+        },
+      ],
+      temperature: 1.3,
+      max_tokens: 500,
+      response_format: { type: "json_object" }, // Force JSON response
+    };
+
+    console.log("Sending request to OpenRouter with model:", requestBody.model);
+    console.log("Request body:", JSON.stringify(requestBody, null, 2));
 
     // Call OpenRouter API
     const openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -61,34 +162,49 @@ JSON STRUCTURE:
         "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://mihaipol.com",
         "X-Title": "Mihaipol.com",
       },
-      body: JSON.stringify({
-        model: "openai/gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: "Generate a complete preset configuration now. Return only the JSON object.",
-          },
-        ],
-        temperature: 1.3, // Higher temperature for more creative, varied, and thoughtful choices
-        max_tokens: 500,
-        response_format: { type: "json_object" }, // Force JSON response
-      }),
+      body: JSON.stringify(requestBody),
     });
 
+    console.log("OpenRouter response status:", openRouterResponse.status, openRouterResponse.statusText);
+
+    const responseText = await openRouterResponse.text();
+    console.log("OpenRouter raw response:", responseText.substring(0, 1000)); // First 1000 chars
+
     if (!openRouterResponse.ok) {
-      const errorData = await openRouterResponse.text();
-      console.error("OpenRouter API error:", errorData);
-      return serverError("Failed to generate preset", undefined);
+      console.error("OpenRouter API error (status not ok):", responseText);
+      return serverError(`Failed to generate preset: ${responseText}`, undefined);
     }
 
-    const openRouterData = await openRouterResponse.json();
-    const responseContent = openRouterData.choices?.[0]?.message?.content?.trim();
+    let openRouterData;
+    try {
+      openRouterData = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error("Failed to parse OpenRouter response as JSON:", parseError);
+      console.error("Response text:", responseText);
+      return serverError("Invalid JSON response from OpenRouter", undefined);
+    }
+    
+    // Check for errors in the response (even if status is 200)
+    if (openRouterData.error) {
+      console.error("OpenRouter API error in response:", openRouterData.error);
+      return serverError(
+        `OpenRouter error: ${openRouterData.error.message || JSON.stringify(openRouterData.error)}`,
+        undefined
+      );
+    }
+    
+    // Log the full response for debugging
+    console.log("OpenRouter response:", JSON.stringify(openRouterData, null, 2));
+    
+    if (!openRouterData.choices || openRouterData.choices.length === 0) {
+      console.error("No choices in response. Full response:", JSON.stringify(openRouterData, null, 2));
+      return serverError("No choices returned from AI model", undefined);
+    }
+    
+    const responseContent = openRouterData.choices[0]?.message?.content?.trim();
 
     if (!responseContent) {
+      console.error("No content in response. Full response:", JSON.stringify(openRouterData, null, 2));
       return serverError("No preset generated from AI", undefined);
     }
 

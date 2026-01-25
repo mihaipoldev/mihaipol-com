@@ -91,11 +91,8 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
   }
 
   return (
-    <div className="hidden lg:block lg:col-span-2">
-      <div
-        className="sticky top-6 flex justify-center"
-        style={{ maxHeight: "600px", overflow: "hidden" }}
-      >
+    <div className="hidden lg:block w-full">
+      <div className="sticky top-6 flex justify-center items-start w-full">
         <div
           className="relative"
           style={{ transform: "scale(0.6)", transformOrigin: "top center", marginTop: "-14px" }}
@@ -130,20 +127,20 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
               {/* Status Bar */}
               <div className="absolute top-[-0px] h-24 text-center align-middle left-0 right-0 h-8 bg-white/95 z-20 flex text-sm font-semibold text-foreground">
                 <span className="ml-12 text-xl text-black font-bold pt-[34px]">10:24</span>
-                <div className="flex items-center gap-1 ml-[165px] -mt-[4px]">
+                <div className="flex items-center gap-1 ml-[165px] mt-[46px]">
                   {/* Signal bars */}
-                  <img src="/apple-signal.png" alt="Signal" className="h-5 w-auto object-contain" />
+                  <img src="/apple-signal.png" alt="Signal" className="h-5 w-auto object-contain bg-transparent" />
                   {/* Wi-Fi icon */}
                   <img
                     src="/apple-wifi-icon-17.jpg"
                     alt="Wi-Fi"
-                    className="h-6 -ml-[4px] -mt-[4px] w-auto object-contain"
+                    className="h-6 -ml-[4px] -mt-[4px] w-auto object-contain bg-transparent"
                   />
                   {/* Battery */}
                   <img
                     src="/apple-battery.jpg"
                     alt="Battery"
-                    className="h-8 w-auto object-contain ml-[2px]"
+                    className="h-8 w-auto object-contain ml-[2px] bg-transparent"
                   />
                 </div>
               </div>

@@ -7,14 +7,8 @@ import { FormField } from "@/components/admin/forms/FormField";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Link2, Unlink, Loader2, FolderPlus } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ModalShell } from "@/components/ui/modal-shell";
+import { DialogFooter } from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -174,16 +168,13 @@ export function DriveFolderModal({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Google Drive Folder</DialogTitle>
-            <DialogDescription>
-              Link an existing folder or create a new one for this album.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
+      <ModalShell
+        open={open}
+        onOpenChange={onOpenChange}
+        title="Edit Google Drive Folder"
+        description="Link an existing folder or create a new one for this album."
+      >
+        <div className="space-y-4 py-4">
             <FormField label="Google Drive Folder URL">
               <ShadowInput
                 type="url"
@@ -275,8 +266,7 @@ export function DriveFolderModal({
             </ShadowButton>
             </div>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      </ModalShell>
     </>
   );
 }

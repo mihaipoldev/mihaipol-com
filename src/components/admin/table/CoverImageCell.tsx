@@ -31,12 +31,12 @@ export function CoverImageCell({
   const showInitialsFallback = (!imageUrl || imageError) && showInitials;
 
   return (
-    <TableCell className={cn(horizontal ? "py-4 px-2" : "w-24 py-4 px-2", className)}>
+    <TableCell className={cn(horizontal ? "py-4 px-2" : "p-4", className)}>
       <div
         className={cn(
           horizontal
             ? "h-8 flex items-center justify-start"
-            : "h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-muted shadow-md",
+            : "h-[49px] w-[49px] rounded-full overflow-hidden flex items-center justify-center bg-muted shadow-md",
           showInitialsFallback && "bg-primary/10 text-xs font-semibold text-muted-foreground"
         )}
       >

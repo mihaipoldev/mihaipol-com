@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import { Music, Disc3, Sparkles, ExternalLink } from "lucide-react";
@@ -5,6 +7,7 @@ import { Music, Disc3, Sparkles, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import ScrollReveal from "../animations/ScrollReveal";
 import type { LandingAlbum } from "../types";
 
 type FeatureSectionProps = {
@@ -23,16 +26,17 @@ export default function FeatureSection({
   return (
     <section id="feature" className="py-8 md:py-16 px-6 relative overflow-hidden">
       <div className="container mx-auto px-0 md:px-8 relative">
-        <div className="max-w-[1200px] mx-auto">
+        <ScrollReveal>
+          <div className="max-w-[1200px] mx-auto">
           <Card className="overflow-hidden shadow-card-hover border-2 border-primary/20 bg-card/80 backdrop-blur">
             <div className="grid lg:grid-cols-2 gap-0">
-              <div className="relative aspect-square lg:aspect-auto">
+              <div className="relative aspect-square lg:aspect-auto p-6 md:p-6 lg:p-10">
                 <img
                   src={featured?.cover_image_url ?? fallbackImage}
                   alt={featured?.title ?? "Featured release"}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-lg"
                 />
-                <Badge className="absolute top-4 left-4 bg-gradient-sunset text-white border-0">
+                <Badge className="absolute top-4 left-4 bg-gradient-accent text-white border-0">
                   <Sparkles className="w-3 h-3" />
                   Featured Release
                 </Badge>
@@ -77,7 +81,8 @@ export default function FeatureSection({
               </div>
             </div>
           </Card>
-        </div>
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   );

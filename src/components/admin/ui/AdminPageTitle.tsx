@@ -35,7 +35,7 @@ export function AdminPageTitle({
     return (
       <div>
         <h1 className="text-4xl font-bold text-foreground">
-          {entityName} <span className="text-muted-foreground text-base font-normal">EDIT</span>
+          {entityName}
         </h1>
         {description && <p className="text-muted-foreground mt-2 text-base">{description}</p>}
       </div>

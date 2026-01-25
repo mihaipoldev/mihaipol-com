@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { hslToCss, type LandingPagePreset } from "@/lib/landing-page-presets";
-import { Edit2, Trash2, Plus, ChevronDown, Check } from "lucide-react";
+import { Edit2, Trash2, Plus, ChevronDown, Check, Copy } from "lucide-react";
 import { PresetForm } from "../presets/PresetForm";
 import {
   AlertDialog,
@@ -179,6 +179,41 @@ export function LandingPagePresetSelect({ value, onChange, disabled }: LandingPa
     }
   };
 
+  const handleDuplicate = async (preset: LandingPagePreset) => {
+    try {
+      const duplicateName = `Copy of ${preset.name}`;
+      
+      const response = await fetch("/api/admin/settings/presets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: duplicateName,
+          primary: preset.primary,
+          secondary: preset.secondary,
+          accent: preset.accent,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to duplicate preset");
+      }
+
+      const newPreset = await response.json();
+      toast.success("Preset duplicated successfully");
+      
+      // Refresh presets list
+      const refreshResponse = await fetch("/api/admin/settings/presets");
+      if (refreshResponse.ok) {
+        const data = await refreshResponse.json();
+        const presets = Array.isArray(data) ? data : (data?.data || []);
+        setAllPresets([...presets].sort((a, b) => a.id - b.id));
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to duplicate preset");
+    }
+  };
+
   const handleDelete = async () => {
     if (!deletingPreset) return;
 
@@ -311,6 +346,18 @@ export function LandingPagePresetSelect({ value, onChange, disabled }: LandingPa
                       
                       {/* Action buttons - positioned absolutely on top of text, overlaying it */}
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity bg-popover/100 px-1 rounded z-20 pointer-events-auto">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 hover:bg-transparent"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicate(preset);
+                          }}
+                          title="Duplicate preset"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"

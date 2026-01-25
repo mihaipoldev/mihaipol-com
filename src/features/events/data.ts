@@ -33,7 +33,6 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
     // Filter by start date if provided (for last 2 weeks)
     if (startDate) {
       query = query.gte("date", startDate);
-      console.log(`🔍 [DB] Applying date filter: date >= ${startDate}`);
     }
 
     // Filter by event status and date (optimized for idx_events_status_date)
@@ -60,9 +59,6 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
     const dataCount = data?.length || 0;
-    console.log(
-      `🔍 [DB] events query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`
-    );
 
     if (queryTime > 1000) {
       console.warn(`⚠️ [DB] SLOW QUERY: events fetch took ${queryTime.toFixed(0)}ms`);
@@ -140,7 +136,6 @@ export async function getEventBySlug(slug: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] event by slug query completed in ${queryTime.toFixed(0)}ms`);
 
     if (error) throw error;
     return data || null;
@@ -168,9 +163,6 @@ export async function getAllEventsUnfiltered() {
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
     const dataCount = data?.length || 0;
-    console.log(
-      `🔍 [DB] all events (unfiltered) query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`
-    );
 
     if (queryTime > 1000) {
       console.warn(`⚠️ [DB] SLOW QUERY: all events (unfiltered) took ${queryTime.toFixed(0)}ms`);
@@ -201,7 +193,6 @@ export async function getEventById(id: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] event by id query completed in ${queryTime.toFixed(0)}ms`);
 
     if (error) throw error;
     return data || null;
@@ -228,7 +219,6 @@ export async function getEventBySlugAdmin(slug: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] event by slug (admin) query completed in ${queryTime.toFixed(0)}ms`);
 
     if (error) throw error;
     return data || null;

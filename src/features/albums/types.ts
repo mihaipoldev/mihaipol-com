@@ -22,6 +22,34 @@ export type AlbumLink = {
   platforms: Platform | null;
 };
 
+export type AlbumImage = {
+  id: string;
+  album_id: string;
+  title: string | null;
+  image_url: string;
+  crop_shape: 'circle' | 'square';
+  content_type?: string | null;
+  content_group?: string | null;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type AlbumAudio = {
+  id: string;
+  album_id: string;
+  title: string | null;
+  audio_url: string;
+  duration: number | null;
+  file_size: number | null;
+  highlight_start_time: number | null;
+  waveform_peaks?: number[] | null; // Pre-computed waveform peaks for fast visualization
+  content_group?: string | null;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type Album = {
   id: string;
   title: string;
@@ -38,4 +66,7 @@ export type Album = {
   drive_folder_id?: string | null;
   drive_folder_url?: string | null;
   audio_files?: Record<string, unknown> | null;
+  cover_shape?: 'square' | 'circle';
+  album_images?: AlbumImage[];
+  album_audios?: AlbumAudio[];
 };

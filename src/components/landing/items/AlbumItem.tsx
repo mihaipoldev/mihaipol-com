@@ -2,19 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { LandingAlbum } from "../types";
 
 type AlbumItemProps = {
   album: LandingAlbum;
   fallbackImage: string;
-  isCircular?: boolean;
 };
 
 export default function AlbumItem({
   album,
   fallbackImage,
-  isCircular = false,
 }: AlbumItemProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [underlineWidth, setUnderlineWidth] = useState<number | null>(null);
@@ -155,26 +154,27 @@ export default function AlbumItem({
   }, [album.title]);
 
   return (
-    <div
-      className="group transition-all duration-300 hover:-translate-y-2"
+    <motion.div
+      className="group"
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link href={`/dev/albums/${album.slug}`}>
         <div
           className={cn(
-            "aspect-square overflow-hidden relative mb-4 transition-shadow duration-300",
-            "group-hover:shadow-card-hover",
+            "aspect-square overflow-hidden relative mb-4",
             "isolate",
-            isCircular ? "rounded-full" : "rounded-lg"
+            "rounded-lg"
           )}
         >
           <img
             src={album.cover_image_url ?? fallbackImage}
             alt={`${album.title} on ${album.labelName || "Independent"}`}
             className={cn(
-              "w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 will-change-transform",
-              isCircular ? "rounded-full" : "rounded-lg"
+              "w-full h-full object-cover opacity-100 group-hover:opacity-100 transition-opacity duration-300",
+              "rounded-lg"
             )}
           />
           <div className="absolute bottom-3 right-3">
@@ -191,22 +191,27 @@ export default function AlbumItem({
         >
           {album.title}
           {underlineWidth !== null && (
-            <span
-              className="absolute bottom-0 h-[1px] rounded-full bg-muted-foreground transition-all duration-300"
+            <motion.span
+              className="absolute bottom-0 h-[1px] rounded-full bg-muted-foreground"
               style={{
                 width: `${underlineWidth}px`,
                 left: "50%",
-                transform: `translateX(-50%) translateY(${isHovered ? "0" : "0.25rem"})`,
-                opacity: isHovered ? 1 : 0,
               }}
-            ></span>
+              initial={{ opacity: 0, y: 4, x: "-50%" }}
+              animate={{ 
+                opacity: isHovered ? 1 : 0, 
+                y: isHovered ? 0 : 4,
+                x: "-50%"
+              }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            ></motion.span>
           )}
         </h3>
         <p className="text-sm text-muted-foreground">{releaseInfo}</p>
-        {formatType && (
-          <p className="text-xs text-muted-foreground/70 uppercase tracking-wide">{formatType}</p>
-        )}
+          {formatType && (
+            <p className="text-xs text-muted-foreground/70 uppercase tracking-wide">{formatType}</p>
+          )}
       </div>
-    </div>
+    </motion.div>
   );
 }

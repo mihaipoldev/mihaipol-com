@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import React from "react";
+import { motion } from "framer-motion";
 import {
   AdminTable,
   TableHeader,
@@ -20,6 +21,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { EditPlatformModal } from "./EditPlatformModal";
 
 type Platform = {
   id: string;
@@ -45,6 +47,22 @@ function generateSlug(name: string): string {
 export function PlatformsList({ initialPlatforms }: PlatformsListProps) {
   const [platforms, setPlatforms] = useState<Platform[]>(initialPlatforms);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingPlatform, setEditingPlatform] = useState<Platform | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleEdit = (platform: Platform) => {
+    setEditingPlatform(platform);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    setEditingPlatform(null);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    window.location.reload();
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -78,29 +96,42 @@ export function PlatformsList({ initialPlatforms }: PlatformsListProps) {
   });
 
   return (
-    <div className="w-full">
-      <div className="mb-6 md:mb-8 relative">
+    <motion.div
+      className="w-full"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div
+        className="mb-4 md:mb-6 relative"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.05 }}
+      >
         <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/20 via-primary/10 to-transparent rounded-full" />
         <AdminPageTitle
           title="Platforms"
           description="Manage music streaming platforms and distribution channels where your music is available."
         />
-      </div>
-      <div className="space-y-3 md:space-y-4">
+      </motion.div>
+      <motion.div
+        className="space-y-3 md:space-y-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
         <AdminToolbar
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
           searchPlaceholder="Search platforms..."
         >
           <Button
-            asChild
             variant="ghost"
             className="rounded-full w-10 h-10 p-0 bg-transparent text-muted-foreground hover:text-primary hover:bg-transparent border-0 shadow-none transition-colors"
             title="New Platform"
+            onClick={handleCreate}
           >
-            <Link href="/admin/platforms/new/edit">
-              <FontAwesomeIcon icon={faPlus} className="h-5 w-5" />
-            </Link>
+            <FontAwesomeIcon icon={faPlus} className="h-5 w-5" />
           </Button>
         </AdminToolbar>
 
@@ -122,14 +153,25 @@ export function PlatformsList({ initialPlatforms }: PlatformsListProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredPlatforms.map((platform) => {
+              filteredPlatforms.map((platform, index) => {
                 const platformSlug = platform.slug || generateSlug(platform.name);
                 return (
-                  <>
+                  <React.Fragment key={platform.id}>
+                    <motion.div
+                      style={{ display: "contents" }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: index * 0.02, duration: 0.2 }}
+                    >
                     {/* Mobile Layout */}
                     <TableRow
                       key={`${platform.id}-mobile`}
                       className="md:hidden group cursor-pointer hover:bg-muted/50 border-b border-border/50"
+                      onClick={(e) => {
+                        if (!(e.target as HTMLElement).closest("[data-action-menu]")) {
+                          // No navigation on row click
+                        }
+                      }}
                       onMouseDown={(e) => {
                         if (e.button === 1) {
                           e.preventDefault();
@@ -137,65 +179,60 @@ export function PlatformsList({ initialPlatforms }: PlatformsListProps) {
                         }
                       }}
                     >
-                      <Link
-                        href={`/admin/platforms/${platformSlug}/edit`}
-                        className="contents"
-                        onClick={(e) => {
-                          if ((e.target as HTMLElement).closest("[data-action-menu]")) {
-                            e.preventDefault();
-                          }
-                        }}
-                      >
-                        <TableCell className="px-3 md:pl-4 md:pr-4 py-4" colSpan={5}>
-                          <div className="flex items-start gap-3 md:gap-4">
-                            <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-muted shadow-md flex-shrink-0">
-                              {platform.icon_url ? (
-                                <img
-                                  src={platform.icon_url}
-                                  alt={platform.name}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <span className="text-xs font-semibold text-muted-foreground">
-                                  {platform.name
-                                    .split(/\s+/)
-                                    .map((w) => w[0])
-                                    .join("")
-                                    .substring(0, 2)
-                                    .toUpperCase()}
-                                </span>
+                      <TableCell className="px-3 md:pl-4 md:pr-4 py-4" colSpan={5}>
+                        <div className="flex items-start gap-3 md:gap-4">
+                          <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-muted shadow-md flex-shrink-0">
+                            {platform.icon_url ? (
+                              <img
+                                src={platform.icon_url}
+                                alt={platform.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-xs font-semibold text-muted-foreground">
+                                {platform.name
+                                  .split(/\s+/)
+                                  .map((w) => w[0])
+                                  .join("")
+                                  .substring(0, 2)
+                                  .toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-base mb-1.5 break-words">
+                              {platform.name}
+                            </div>
+                            <div className="text-sm text-muted-foreground space-y-0.5">
+                              {platform.default_cta_label && (
+                                <div className="truncate">CTA: {platform.default_cta_label}</div>
+                              )}
+                              {platform.base_url && (
+                                <div className="truncate text-xs">{platform.base_url}</div>
                               )}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-base mb-1.5 break-words">
-                                {platform.name}
-                              </div>
-                              <div className="text-sm text-muted-foreground space-y-0.5">
-                                {platform.default_cta_label && (
-                                  <div className="truncate">CTA: {platform.default_cta_label}</div>
-                                )}
-                                {platform.base_url && (
-                                  <div className="truncate text-xs">{platform.base_url}</div>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex-shrink-0 ml-2" data-action-menu>
-                              <ActionMenu
-                                itemId={platform.id}
-                                editHref={`/admin/platforms/${platformSlug}/edit`}
-                                onDelete={handleDelete}
-                                deleteLabel={`platform "${platform.name}"`}
-                              />
-                            </div>
                           </div>
-                        </TableCell>
-                      </Link>
+                          <div className="flex-shrink-0 ml-2" data-action-menu>
+                            <ActionMenu
+                              itemId={platform.id}
+                              onEdit={() => handleEdit(platform)}
+                              onDelete={handleDelete}
+                              deleteLabel={`platform "${platform.name}"`}
+                            />
+                          </div>
+                        </div>
+                      </TableCell>
                     </TableRow>
 
                     {/* Desktop Layout */}
                     <TableRow
                       key={`${platform.id}-desktop`}
                       className="hidden md:table-row group cursor-pointer hover:bg-muted/50"
+                      onClick={(e) => {
+                        if (!(e.target as HTMLElement).closest("[data-action-menu]")) {
+                          // No navigation on row click
+                        }
+                      }}
                       onMouseDown={(e) => {
                         if (e.button === 1) {
                           e.preventDefault();
@@ -203,51 +240,50 @@ export function PlatformsList({ initialPlatforms }: PlatformsListProps) {
                         }
                       }}
                     >
-                      <Link
-                        href={`/admin/platforms/${platformSlug}/edit`}
-                        className="contents"
-                        onClick={(e) => {
-                          if ((e.target as HTMLElement).closest("[data-action-menu]")) {
-                            e.preventDefault();
-                          }
-                        }}
-                      >
-                        <CoverImageCell
-                          imageUrl={platform.icon_url}
-                          title={platform.name}
-                          showInitials={true}
-                          className="pl-4"
+                      <CoverImageCell
+                        imageUrl={platform.icon_url}
+                        title={platform.name}
+                        showInitials={true}
+                        className="pl-4"
+                      />
+                      <TableTitleCell
+                        title={platform.name}
+                        imageUrl={undefined}
+                        showInitials={false}
+                        className="w-64"
+                      />
+                      <CoverImageCell
+                        imageUrl={platform.icon_horizontal_url}
+                        title={platform.name}
+                        showInitials={true}
+                        horizontal={true}
+                      />
+                      <TableCell>{platform.default_cta_label || "-"}</TableCell>
+                      <TableCell className="text-right pr-4" data-action-menu>
+                        <ActionMenu
+                          itemId={platform.id}
+                          onEdit={() => handleEdit(platform)}
+                          onDelete={handleDelete}
+                          deleteLabel={`platform "${platform.name}"`}
                         />
-                        <TableTitleCell
-                          title={platform.name}
-                          imageUrl={undefined}
-                          showInitials={false}
-                          className="w-64"
-                        />
-                        <CoverImageCell
-                          imageUrl={platform.icon_horizontal_url}
-                          title={platform.name}
-                          showInitials={true}
-                          horizontal={true}
-                        />
-                        <TableCell>{platform.default_cta_label || "-"}</TableCell>
-                        <TableCell className="text-right pr-4" data-action-menu>
-                          <ActionMenu
-                            itemId={platform.id}
-                            editHref={`/admin/platforms/${platformSlug}/edit`}
-                            onDelete={handleDelete}
-                            deleteLabel={`platform "${platform.name}"`}
-                          />
-                        </TableCell>
-                      </Link>
+                      </TableCell>
                     </TableRow>
-                  </>
+                    </motion.div>
+                  </React.Fragment>
                 );
               })
             )}
           </TableBody>
         </AdminTable>
-      </div>
-    </div>
+      </motion.div>
+      {isEditModalOpen && (
+        <EditPlatformModal
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          platform={editingPlatform}
+          onSuccess={handleEditSuccess}
+        />
+      )}
+    </motion.div>
   );
 }

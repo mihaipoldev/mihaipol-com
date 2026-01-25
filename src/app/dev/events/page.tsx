@@ -15,7 +15,7 @@ export default async function EventsPage() {
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">Upcoming Events</h1>
             <p className="text-muted-foreground">Catch Mihai on tour.</p>
-            <div className="w-24 h-1 bg-gradient-sunset mx-auto mt-6 rounded-full" />
+            <div className="w-24 h-1 bg-gradient-accent mx-auto mt-6 rounded-full" />
           </div>
 
           {events.length === 0 ? (

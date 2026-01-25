@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { ModalShell } from "@/components/ui/modal-shell";
+import { DialogFooter } from "@/components/ui/dialog";
 import { PresetColorPicker } from "./PresetColorPicker";
 import type { LandingPagePreset } from "@/lib/landing-page-presets";
 import { Loader2, Sparkles } from "lucide-react";
@@ -104,13 +105,15 @@ export function PresetForm({ isOpen, onClose, onSubmit, initialPreset, mode }: P
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{mode === "create" ? "Create Preset" : "Edit Preset"}</DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <ModalShell
+      open={isOpen}
+      onOpenChange={onClose}
+      title={mode === "create" ? "Create Preset" : "Edit Preset"}
+      maxWidth="2xl"
+      maxHeight="90vh"
+      showScroll={true}
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
           {/* Generate with AI Button - Only show in create mode */}
           {mode === "create" && (
             <div className="flex justify-end">
@@ -204,7 +207,6 @@ export function PresetForm({ isOpen, onClose, onSubmit, initialPreset, mode }: P
             </Button>
           </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+    </ModalShell>
   );
 }

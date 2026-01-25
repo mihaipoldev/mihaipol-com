@@ -14,13 +14,6 @@
     "accent": "200 40% 45%"
   },
   {
-    "id": 5,
-    "name": "Monochrome Minimal",
-    "primary": "220 15% 20%",
-    "secondary": "220 8% 40%",
-    "accent": "210 20% 30%"
-  },
-  {
     "id": 10,
     "name": "Deep Navy & Gold",
     "primary": "45 85% 56%",
@@ -91,41 +84,6 @@
     "accent": "40 84% 68%"
   },
   {
-    "id": 24,
-    "name": "Driftwood Mist",
-    "primary": "212 7% 57%",
-    "secondary": "30 40% 66%",
-    "accent": "15 20% 54%"
-  },
-  {
-    "id": 25,
-    "name": "asdf",
-    "primary": "107 40% 38%",
-    "secondary": "248 55% 55%",
-    "accent": "269 64% 47%"
-  },
-  {
-    "id": 26,
-    "name": "Silk Horizon",
-    "primary": "215 14% 49%",
-    "secondary": "30 18% 56%",
-    "accent": "29 57% 76%"
-  },
-  {
-    "id": 27,
-    "name": "Mossy Preserve",
-    "primary": "148 17% 37%",
-    "secondary": "86 25% 63%",
-    "accent": "42 38% 73%"
-  },
-  {
-    "id": 28,
-    "name": "Slate Meadow",
-    "primary": "153 6% 30%",
-    "secondary": "344 8% 56%",
-    "accent": "39 33% 64%"
-  },
-  {
     "id": 29,
     "name": "Terracotta Dusk",
     "primary": "6 9% 43%",
@@ -138,5 +96,89 @@
     "primary": "150 16% 38%",
     "secondary": "25 31% 56%",
     "accent": "18 36% 77%"
+  },
+  {
+    "id": 31,
+    "name": "asd",
+    "primary": "195 72% 67%",
+    "secondary": "210 24% 16%",
+    "accent": "156 72% 67%"
+  },
+  {
+    "id": 32,
+    "name": "asdf",
+    "primary": "156 72% 67%",
+    "secondary": "156 36% 18%",
+    "accent": "10 72% 67%"
+  },
+  {
+    "id": 33,
+    "name": "Copy of asd",
+    "primary": "178 48% 44%",
+    "secondary": "215 8% 45%",
+    "accent": "171 64% 69%"
+  },
+  {
+    "id": 34,
+    "name": "asd",
+    "primary": "178 48% 44%",
+    "secondary": "213 14% 12%",
+    "accent": "171 64% 69%"
+  },
+  {
+    "id": 35,
+    "name": "Copy of Deep Navy & Gold",
+    "primary": "200 55% 50%",
+    "secondary": "215 25% 32%",
+    "accent": "45 85% 56%"
+  },
+  {
+    "id": 36,
+    "name": "Terracotta Whisper",
+    "primary": "7 55% 47%",
+    "secondary": "323 15% 22%",
+    "accent": "23 38% 72%"
+  },
+  {
+    "id": 37,
+    "name": "Steel Silence",
+    "primary": "215 42% 43%",
+    "secondary": "263 9% 18%",
+    "accent": "16 56% 75%"
+  },
+  {
+    "id": 38,
+    "name": "Arctic Horizon",
+    "primary": "235 74% 65%",
+    "secondary": "217 23% 27%",
+    "accent": "193 57% 72%"
+  },
+  {
+    "id": 39,
+    "name": "Indigo Glacier",
+    "primary": "217 45% 49%",
+    "secondary": "230 17% 28%",
+    "accent": "189 50% 68%"
+  },
+  {
+    "id": 40,
+    "name": "Cobalt Studio",
+    "primary": "224 33% 51%",
+    "secondary": "224 17% 35%",
+    "accent": "200 57% 86%"
+  },
+  {
+    "id": 41,
+    "name": "Weathered Indigo",
+    "primary": "224 55% 73%",
+    "secondary": "219 18% 36%",
+    "accent": "50 46% 80%"
+  },
+  {
+    "id": 42,
+    "name": "Glacial Extraction",
+    "primary": "208 79% 38%",
+    "secondary": "202 21% 41%",
+    "accent": "35 58% 76%"
   }
 ]

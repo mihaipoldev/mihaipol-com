@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { LandingAlbum, LandingEvent } from "../types";
 
 type HeroSectionProps = {
@@ -34,35 +35,16 @@ export default function HeroSection({
   };
 
   const [currentImageIndex, setCurrentImageIndex] = useState(() => getInitialIndex());
-  const [nextImageIndex, setNextImageIndex] = useState<number | null>(null);
   const [buttonsOpacity, setButtonsOpacity] = useState(1);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const autoAdvanceIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const currentImageIndexRef = useRef(currentImageIndex);
-  const isTransitioningRef = useRef(isTransitioning);
   const currentImage = HERO_IMAGES[currentImageIndex] || FALLBACK_IMAGE;
-  const nextImage = nextImageIndex !== null ? HERO_IMAGES[nextImageIndex] || FALLBACK_IMAGE : null;
 
   // Keep refs in sync with state
   useEffect(() => {
     currentImageIndexRef.current = currentImageIndex;
   }, [currentImageIndex]);
-
-  useEffect(() => {
-    isTransitioningRef.current = isTransitioning;
-  }, [isTransitioning]);
-
-  // Trigger fade transition after next image is mounted
-  useEffect(() => {
-    if (nextImageIndex !== null) {
-      // Small delay to ensure the next image is in the DOM
-      const timer = setTimeout(() => {
-        setIsTransitioning(true);
-      }, 10);
-      return () => clearTimeout(timer);
-    }
-  }, [nextImageIndex]);
 
   // Load saved index from localStorage on mount
   useEffect(() => {
@@ -76,11 +58,9 @@ export default function HeroSection({
   }, []);
 
   const handlePrevious = () => {
-    if (isTransitioningRef.current) return;
     const currentIdx = currentImageIndexRef.current;
     const newIndex = currentIdx === 0 ? HERO_IMAGES.length - 1 : currentIdx - 1;
-    setNextImageIndex(newIndex);
-    setIsTransitioning(false); // Start with transition false, useEffect will trigger it
+    setCurrentImageIndex(newIndex);
 
     // Reset auto-advance timer after manual navigation
     if (autoAdvanceIntervalRef.current) {
@@ -89,21 +69,12 @@ export default function HeroSection({
     autoAdvanceIntervalRef.current = setInterval(() => {
       handleNext();
     }, 10000);
-
-    // After transition completes, update current and clean up
-    setTimeout(() => {
-      setCurrentImageIndex(newIndex);
-      setNextImageIndex(null);
-      setIsTransitioning(false);
-    }, 610); // Slightly longer than transition duration
   };
 
   const handleNext = () => {
-    if (isTransitioningRef.current) return;
     const currentIdx = currentImageIndexRef.current;
     const newIndex = currentIdx === HERO_IMAGES.length - 1 ? 0 : currentIdx + 1;
-    setNextImageIndex(newIndex);
-    setIsTransitioning(false); // Start with transition false, useEffect will trigger it
+    setCurrentImageIndex(newIndex);
 
     // Reset auto-advance timer after manual navigation
     if (autoAdvanceIntervalRef.current) {
@@ -112,13 +83,6 @@ export default function HeroSection({
     autoAdvanceIntervalRef.current = setInterval(() => {
       handleNext();
     }, 10000);
-
-    // After transition completes, update current and clean up
-    setTimeout(() => {
-      setCurrentImageIndex(newIndex);
-      setNextImageIndex(null);
-      setIsTransitioning(false);
-    }, 610); // Slightly longer than transition duration
   };
 
   // Save current image index to localStorage whenever it changes
@@ -185,56 +149,33 @@ export default function HeroSection({
     <section ref={sectionRef} className="relative min-h-screen w-full overflow-hidden">
       {/* Full width image - glued to top with fade at bottom */}
       <div className="absolute inset-0 w-full h-full">
-        {/* Current image - fades out during transition */}
-        <div
-          key={`current-${currentImageIndex}`}
-          className={`absolute inset-0 w-full h-full transition-opacity ease-in-out ${
-            isTransitioning ? "opacity-0" : "opacity-100"
-          }`}
-          style={{
-            transitionDuration: "600ms",
-            maskImage:
-              "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.15) 80%, transparent 100%)",
-            WebkitMaskImage:
-              "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.15) 80%, transparent 100%)",
-          }}
-        >
-          <Image
-            src={currentImage}
-            alt={releaseTitle}
-            fill
-            priority={currentImageIndex === 0}
-            quality={90}
-            sizes="100vw"
-            className="object-cover"
-            unoptimized={currentImage.startsWith("http")}
-          />
-        </div>
-        {/* Next image - fades in during transition */}
-        {nextImage && (
-          <div
-            key={`next-${nextImageIndex}`}
-            className="absolute inset-0 w-full h-full transition-opacity ease-in-out opacity-0"
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentImageIndex}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+            className="absolute inset-0 w-full h-full"
             style={{
-              transitionDuration: "600ms",
-              opacity: isTransitioning ? 1 : 0,
               maskImage:
-                "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.15) 80%, transparent 100%)",
+                "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0.5) 65%, rgba(0,0,0,0.2) 80%, transparent 95%)",
               WebkitMaskImage:
-                "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.15) 80%, transparent 100%)",
+                "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0.5) 65%, rgba(0,0,0,0.2) 80%, transparent 95%)",
             }}
           >
             <Image
-              src={nextImage}
+              src={currentImage}
               alt={releaseTitle}
               fill
+              priority={currentImageIndex === 0}
               quality={90}
               sizes="100vw"
               className="object-cover"
-              unoptimized={nextImage.startsWith("http")}
+              unoptimized={currentImage.startsWith("http")}
             />
-          </div>
-        )}
+          </motion.div>
+        </AnimatePresence>
         {/* Logo overlay - blended as texture/shadow */}
         <div className="absolute bottom-[30%] left-[10%] pointer-events-none hidden md:block">
           <img
@@ -250,35 +191,51 @@ export default function HeroSection({
 
       {/* Overlay content on top of image */}
       <div className="relative z-10 w-full h-full min-h-screen flex flex-col">
-        {/* Vertical text on the right side - centered vertically, positioned at screen edge */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center pr-6 md:pr-8 z-20">
-          <div
-            className="text-[0.6rem] uppercase tracking-[0.6em] text-white/70 rotate-180 whitespace-nowrap"
-            style={{ 
-              writingMode: "vertical-rl",
-              fontFamily: "var(--font-roboto, var(--font-family-heading, var(--font-geist-sans)))"
-            }}
-          >
-            Mihai Pol — live edits in motion
-          </div>
-        </div>
-
         {/* Container matching Navbar constraints - full height */}
         <div className="relative flex-1 w-full max-w-[1200px] mx-auto px-6 md:px-6 lg:px-6 h-full">
           {/* Text content overlay - positioned at bottom, aligned with container padding */}
           <div className="absolute bottom-12 left-0 right-0 flex items-end px-6 md:px-6 lg:px-6">
             {/* Release metadata */}
-            <div className="space-y-3 text-white max-w-xl" style={{ fontFamily: "var(--font-roboto, var(--font-family-heading, var(--font-geist-sans)))" }}>
-              <p className="text-xs uppercase tracking-[0.4em] text-white/80">{releaseLabel}</p>
-              <h1 className="text-3xl md:text-4xl font-semibold text-white">{releaseTitle}</h1>
-              <p className="text-sm tracking-[0.2em] uppercase text-white/70">{formattedMeta}</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              className="space-y-3 text-white max-w-xl"
+              style={{ fontFamily: "var(--font-roboto, var(--font-family-heading, var(--font-geist-sans)))" }}
+            >
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                className="text-xs uppercase tracking-[0.4em] text-white/80"
+              >
+                {releaseLabel}
+              </motion.p>
+              <motion.h1
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                className="text-3xl md:text-4xl font-semibold text-white"
+              >
+                {releaseTitle}
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                className="text-sm tracking-[0.2em] uppercase text-white/70"
+              >
+                {formattedMeta}
+              </motion.p>
+            </motion.div>
           </div>
 
           {/* Carousel navigation buttons - bottom right, aligned with container padding */}
-          <div
-            className="absolute bottom-12 right-0 flex items-center gap-4 z-20 transition-opacity duration-500 pr-6 md:pr-6 lg:pr-6"
-            style={{ opacity: buttonsOpacity, pointerEvents: buttonsOpacity > 0 ? "auto" : "none" }}
+          <motion.div
+            className="absolute bottom-12 right-0 flex items-center gap-4 z-20 pr-6 md:pr-6 lg:pr-6"
+            animate={{ opacity: buttonsOpacity }}
+            transition={{ duration: 0.5 }}
+            style={{ pointerEvents: buttonsOpacity > 0 ? "auto" : "none" }}
           >
             <button
               onClick={handlePrevious}
@@ -298,7 +255,7 @@ export default function HeroSection({
               <span className="hidden md:inline">NEXT</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

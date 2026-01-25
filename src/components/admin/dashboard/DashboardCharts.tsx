@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { DashboardData } from "@/features/admin/dashboard/data";
+import { motion } from "framer-motion";
 
 type DashboardChartsProps = {
   data: DashboardData;
@@ -17,17 +18,47 @@ type DashboardChartsProps = {
 
 export function DashboardCharts({ data }: DashboardChartsProps) {
   return (
-    <div className="space-y-8">
+    <motion.div
+      className="space-y-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
       {/* Website Visits and Section Clicks Tabs */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.6, duration: 0.4 }}
+      >
       <Card className="relative overflow-hidden shadow-lg transition-all duration-300">
         {/* Decorative gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
 
         {/* Sparkle decorations */}
-        <div className="absolute top-4 right-4 w-2 h-2 bg-primary/20 rounded-full blur-sm animate-pulse" />
-        <div
-          className="absolute top-12 right-12 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm animate-pulse"
-          style={{ animationDelay: "300ms" }}
+          <motion.div
+            className="absolute top-4 right-4 w-2 h-2 bg-primary/20 rounded-full blur-sm"
+            animate={{
+              opacity: [0.3, 0.6, 0.3],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute top-12 right-12 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm"
+            animate={{
+              opacity: [0.2, 0.5, 0.2],
+              scale: [1, 1.3, 1],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.3,
+            }}
         />
 
         <Tabs defaultValue="visits" className="w-full relative">
@@ -74,9 +105,15 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
           </TabsContent>
         </Tabs>
       </Card>
+      </motion.div>
 
       {/* Top Performing Pages Section */}
-      <section className="space-y-3">
+      <motion.section
+        className="space-y-3"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7, duration: 0.4 }}
+      >
         <h2 className="text-xl font-semibold">Top Performing Page</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -123,11 +160,17 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
                     }
                   };
 
-                  return data.topPerformingPages.map((page) => {
+                  return data.topPerformingPages.map((page, index) => {
                     const colors = getTypeColor(page.type);
                     const statsHref = `/admin/${page.type}s/${page.slug}/stats`;
                     return (
-                      <tr key={`${page.type}-${page.id}`} className="border-t">
+                      <motion.tr
+                        key={`${page.type}-${page.id}`}
+                        className="border-t hover:bg-primary/5 transition-colors"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.8 + index * 0.05, duration: 0.3 }}
+                      >
                         <td className="py-2 pr-4">
                           <Link
                             href={statsHref}
@@ -179,9 +222,9 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
                           </div>
                         </td>
                         <td className="py-2 pr-4 w-24">
-                          <span className="text-sm text-muted-foreground">{page.clicks}</span>
+                          <span className="text-sm text-muted-foreground">{page.clicks}                          </span>
                         </td>
-                      </tr>
+                      </motion.tr>
                     );
                   });
                 })()
@@ -195,7 +238,7 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
             </tbody>
           </table>
         </div>
-      </section>
-    </div>
+      </motion.section>
+    </motion.div>
   );
 }

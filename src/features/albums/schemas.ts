@@ -11,6 +11,7 @@ export const albumCreateSchema = z.object({
   format_type: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   publish_status: z.enum(["draft", "scheduled", "published", "archived"]).optional(),
+  cover_shape: z.enum(["square", "circle"]).optional(),
 });
 
 // More lenient UUID validation that accepts any UUID-like string

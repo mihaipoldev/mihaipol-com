@@ -1,8 +1,17 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Trash2, ExternalLink, BarChart3 } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEllipsis,
+  faPencil,
+  faTrash,
+  faExternalLink,
+  faChartLine,
+} from "@fortawesome/free-solid-svg-icons";
+import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +31,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
+export type CustomMenuItem = {
+  label: string;
+  icon?: ReactNode;
+  onClick: () => void;
+  destructive?: boolean;
+  disabled?: boolean;
+  separator?: boolean;
+};
+
 type ActionMenuProps = {
   itemId: string;
   onEdit?: () => void;
@@ -30,6 +48,9 @@ type ActionMenuProps = {
   openPageHref?: string;
   statsHref?: string;
   deleteLabel?: string;
+  customItems?: CustomMenuItem[];
+  showDelete?: boolean;
+  disabled?: boolean;
 };
 
 export function ActionMenu({
@@ -40,9 +61,29 @@ export function ActionMenu({
   openPageHref,
   statsHref,
   deleteLabel = "this item",
+  customItems,
+  showDelete = true,
+  disabled = false,
 }: ActionMenuProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains("dark"));
+    };
+    
+    checkDarkMode();
+    
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    
+    return () => observer.disconnect();
+  }, []);
 
   const handleOpenPage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -81,39 +122,48 @@ export function ActionMenu({
               size="icon"
               className="no-shadow !shadow-[0_0_0_0_transparent] hover:!shadow-[0_0_0_0_transparent] dark:!shadow-[0_0_0_0_transparent] dark:hover:!shadow-[0_0_0_0_transparent] h-10 w-10 focus-visible:ring-0 hover:bg-transparent dark:hover:bg-transparent [&:hover_svg]:text-primary"
               style={{ boxShadow: "none" }}
+              disabled={disabled}
             >
-              <MoreHorizontal className="h-5 w-5 transition-colors duration-150" />
+              <FontAwesomeIcon icon={faEllipsis} className="h-5 w-5 transition-colors duration-150" />
               <span className="sr-only">Open menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent 
+            align="end"
+            sideOffset={0}
+            className="px-0 py-2 border-0 w-48 bg-popover"
+            style={{
+              boxShadow: isDarkMode ? 'none' : 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;'
+            }}
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
             {onEdit ? (
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit();
                 }}
-                className="cursor-pointer"
+                className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
               >
-                <Pencil className="mr-2 h-4 w-4" />
+                <FontAwesomeIcon icon={faPencil} className="mr-2 h-4 w-4" />
                 Edit
               </DropdownMenuItem>
             ) : editHref ? (
               <DropdownMenuItem asChild>
                 <Link
                   href={editHref}
-                  className="cursor-pointer"
+                  className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Pencil className="mr-2 h-4 w-4" />
+                  <FontAwesomeIcon icon={faPencil} className="mr-2 h-4 w-4" />
                   Edit
                 </Link>
               </DropdownMenuItem>
             ) : null}
             {openPageHref && (
               <>
-                <DropdownMenuItem onClick={handleOpenPage} className="cursor-pointer">
-                  <ExternalLink className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={handleOpenPage} className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground">
+                  <FontAwesomeIcon icon={faExternalLink} className="mr-2 h-4 w-4" />
                   Open Page
                 </DropdownMenuItem>
               </>
@@ -122,22 +172,53 @@ export function ActionMenu({
               <DropdownMenuItem asChild>
                 <Link
                   href={statsHref}
-                  className="cursor-pointer"
+                  className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <BarChart3 className="mr-2 h-4 w-4" />
+                  <FontAwesomeIcon icon={faChartLine} className="mr-2 h-4 w-4" />
                   Stats
                 </Link>
               </DropdownMenuItem>
             )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={handleDeleteClick}
-              className="text-destructive focus:text-destructive cursor-pointer"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
+            {customItems && customItems.length > 0 && (
+              <>
+                {(onEdit || editHref || openPageHref || statsHref) && <DropdownMenuSeparator />}
+                {customItems.map((item, index) => {
+                  if (item.separator) {
+                    return <DropdownMenuSeparator key={`custom-separator-${index}`} />;
+                  }
+                  return (
+                    <DropdownMenuItem
+                      key={`custom-${index}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        item.onClick();
+                      }}
+                      disabled={item.disabled}
+                      className={cn(
+                        "cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground",
+                        item.destructive && "text-destructive focus:text-destructive"
+                      )}
+                    >
+                      {item.icon && <span className="mr-2">{item.icon}</span>}
+                      {item.label}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </>
+            )}
+            {showDelete && onDelete && (
+              <>
+                {(onEdit || editHref || openPageHref || statsHref || (customItems && customItems.length > 0)) && <DropdownMenuSeparator />}
+                <DropdownMenuItem
+                  onClick={handleDeleteClick}
+                  className="text-destructive focus:text-destructive cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
+                >
+                  <FontAwesomeIcon icon={faTrash} className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -106,7 +106,7 @@ export function ShowMoreMenu({
                     <DropdownMenuSubTrigger
                       disabled={option.disabled}
                       className={cn(
-                        "cursor-pointer hover:bg-accent hover:text-accent-foreground [&[data-state='open']]:bg-accent [&[data-state='open']]:text-accent-foreground",
+                        "cursor-pointer",
                         option.variant === "destructive" &&
                           "text-destructive focus:text-destructive"
                       )}

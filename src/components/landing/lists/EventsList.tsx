@@ -1,4 +1,7 @@
+"use client";
+
 import EventItem from "../items/EventItem";
+import StaggerContainer from "../animations/StaggerContainer";
 import type { LandingEvent } from "../types";
 
 type EventsListProps = {
@@ -11,7 +14,7 @@ export default function EventsList({
   showPastStrikethrough,
 }: EventsListProps) {
   return (
-    <div className="space-y-0">
+    <StaggerContainer className="space-y-0">
       {events.map((event) => (
         <EventItem
           key={event.id}
@@ -19,6 +22,6 @@ export default function EventsList({
           showPastStrikethrough={showPastStrikethrough}
         />
       ))}
-    </div>
+    </StaggerContainer>
   );
 }

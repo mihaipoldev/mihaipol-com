@@ -1,4 +1,7 @@
+"use client";
+
 import UpdateItem, { type UpdateCardVariant } from "../items/UpdateItem";
+import StaggerContainer from "../animations/StaggerContainer";
 import type { LandingUpdate } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +26,7 @@ export default function UpdatesList({
         : "grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1200px] mx-auto";
 
   return (
-    <div className={cn(gridClasses)}>
+    <StaggerContainer className={cn(gridClasses)}>
       {updates.map((update) => (
         <UpdateItem
           key={update.id}
@@ -32,6 +35,6 @@ export default function UpdatesList({
           variant={variant}
         />
       ))}
-    </div>
+    </StaggerContainer>
   );
 }

@@ -48,17 +48,19 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
               <AdminSidebar />
             </aside>
             {/* Main Content Area */}
-            <main className="flex-1 flex flex-col lg:pl-64 overflow-y-auto min-h-0">
-              <div className="mx-auto w-full max-w-[1400px] flex flex-col">
-                <AdminHeader />
-                <AdminPageTransition>
-                  <div className="flex flex-col pt-6 pb-0 md:pb-0 px-4 md:px-10 lg:px-12 space-y-4 md:space-y-6">
-                    {children}
-                  </div>
-                </AdminPageTransition>
-                <AdminFooter />
-                {/* Mobile bottom spacer - creates scrollable space */}
-                <div className="h-40 md:h-0 flex-shrink-0" aria-hidden="true" />
+            <main className="flex-1 flex flex-col lg:pl-64 min-h-0">
+              <div className="flex-1 overflow-y-auto min-h-0">
+                <div className="mx-auto w-full max-w-[1400px] flex flex-col min-h-full">
+                  <AdminHeader />
+                  <AdminPageTransition>
+                    <div className="flex-1 flex flex-col pt-4 pb-0 md:pb-0 px-4 md:px-10 lg:px-12 space-y-4 md:space-y-6">
+                      {children}
+                    </div>
+                  </AdminPageTransition>
+                  <AdminFooter />
+                  {/* Mobile bottom spacer - creates scrollable space */}
+                  <div className="h-40 md:h-0 flex-shrink-0" aria-hidden="true" />
+                </div>
               </div>
             </main>
           </div>

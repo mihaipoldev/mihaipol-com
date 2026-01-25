@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { formatUpdateDate } from "../utils";
@@ -31,13 +34,19 @@ export default function UpdateItem({
   // Card-badge variant - Original design with badge
   if (variant === "card-badge") {
     return (
-      <Card className="overflow-hidden group hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 bg-card/80 backdrop-blur">
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        whileHover={{ y: -4, scale: 1.01 }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      >
+        <Card className="overflow-hidden group bg-card/80 backdrop-blur">
         <Link href={`/dev/updates/${update.slug}`}>
           <div className="aspect-video overflow-hidden">
             <img
               src={imageUrl}
               alt={update.title}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              className="w-full h-full object-cover"
             />
           </div>
         </Link>
@@ -59,21 +68,28 @@ export default function UpdateItem({
           </div>
         </div>
       </Card>
+      </motion.div>
     );
   }
 
   // Default variant - Vertical stack
   if (variant === "default") {
     return (
-      <div className="transition-all duration-300 hover:-translate-y-2 h-full">
+      <motion.div
+        className="h-full"
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        whileHover={{ y: -8, scale: 1.02 }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      >
         <Link href={`/dev/updates/${update.slug}`} className="group h-full block">
           <div className="rounded-lg transition-all duration-200 h-full flex flex-col">
             {imageUrl && (
-              <div className="aspect-video bg-muted overflow-hidden rounded-lg transition-shadow duration-300 group-hover:shadow-card-hover isolate">
+              <div className="aspect-video bg-muted overflow-hidden rounded-lg isolate">
                 <img
                   src={imageUrl}
                   alt={update.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 rounded-lg"
+                  className="w-full h-full object-cover rounded-lg"
                 />
               </div>
             )}
@@ -95,7 +111,7 @@ export default function UpdateItem({
             </div>
           </div>
         </Link>
-      </div>
+      </motion.div>
     );
   }
 
@@ -103,13 +119,13 @@ export default function UpdateItem({
   if (variant === "horizontal") {
     return (
       <Link href={`/dev/updates/${update.slug}`} className="group h-full">
-        <Card className="overflow-hidden group hover:shadow-card-hover transition-all duration-300 h-full flex gap-4 p-4">
+        <Card className="overflow-hidden group transition-all duration-300 h-full flex gap-4 p-4">
           {imageUrl && (
             <div className="w-32 h-32 flex-shrink-0 bg-muted overflow-hidden rounded-lg">
               <img
                 src={imageUrl}
                 alt={update.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg"
+                className="w-full h-full object-cover rounded-lg"
               />
             </div>
           )}
@@ -142,7 +158,7 @@ export default function UpdateItem({
               <img
                 src={imageUrl}
                 alt={update.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg"
+                className="w-full h-full object-cover rounded-lg"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-lg" />
               <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
@@ -186,15 +202,21 @@ export default function UpdateItem({
   // Compact variant - Smaller, more condensed (horizontal/rectangular)
   if (variant === "compact") {
     return (
-      <div className="group transition-all duration-300 hover:-translate-y-2 h-full">
+      <motion.div
+        className="group h-full"
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        whileHover={{ y: -8, scale: 1.02 }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      >
         <Link href={`/dev/updates/${update.slug}`} className="h-full block">
           <div className="rounded-lg transition-all duration-200 h-full flex flex-col">
             {imageUrl && (
-              <div className="aspect-video bg-muted overflow-hidden rounded-lg transition-shadow duration-300 group-hover:shadow-card-hover isolate">
+              <div className="aspect-video bg-muted overflow-hidden rounded-lg isolate">
                 <img
                   src={imageUrl}
                   alt={update.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 rounded-lg"
+                  className="w-full h-full object-cover rounded-lg"
                 />
               </div>
             )}
@@ -216,22 +238,28 @@ export default function UpdateItem({
             </div>
           </div>
         </Link>
-      </div>
+      </motion.div>
     );
   }
 
   // Compact-square variant - Smaller, more condensed (square image)
   if (variant === "compact-square") {
     return (
-      <div className="group transition-all duration-300 hover:-translate-y-2 h-full">
+      <motion.div
+        className="group h-full"
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        whileHover={{ y: -8, scale: 1.02 }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      >
         <Link href={`/dev/updates/${update.slug}`} className="h-full block">
           <div className="rounded-lg transition-all duration-200 h-full flex flex-col">
             {imageUrl && (
-              <div className="aspect-square bg-muted overflow-hidden rounded-lg transition-shadow duration-300 group-hover:shadow-card-hover isolate">
+              <div className="aspect-square bg-muted overflow-hidden rounded-lg isolate">
                 <img
                   src={imageUrl}
                   alt={update.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 rounded-lg"
+                  className="w-full h-full object-cover rounded-lg"
                 />
               </div>
             )}
@@ -253,7 +281,7 @@ export default function UpdateItem({
             </div>
           </div>
         </Link>
-      </div>
+      </motion.div>
     );
   }
 
@@ -267,7 +295,7 @@ export default function UpdateItem({
               <img
                 src={imageUrl}
                 alt={update.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg"
+                className="w-full h-full object-cover rounded-lg"
               />
             </div>
           )}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EventsList from "../lists/EventsList";
+import ScrollReveal from "../animations/ScrollReveal";
 import type { LandingEvent } from "../types";
 
 type EventsSectionProps = {
@@ -18,11 +19,13 @@ export default function EventsSection({
   return (
     <section id="events" className="py-24 pb-16 px-6 relative">
       <div className="max-w-[1264px] mx-auto px-0 md:px-8 relative z-10">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">Upcoming Events</h2>
-          <p className="text-muted-foreground">Catch Mihai on tour.</p>
-          <div className="w-24 h-1 bg-gradient-sunset mx-auto mt-6 rounded-full" />
-        </div>
+        <ScrollReveal>
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">Upcoming Events</h2>
+            <p className="text-muted-foreground">Catch Mihai on tour.</p>
+            <div className="w-24 h-1 bg-gradient-accent mx-auto mt-6 rounded-full" />
+          </div>
+        </ScrollReveal>
         <EventsList events={events} showPastStrikethrough={showPastStrikethrough} />
         <div className="text-center mt-12">
           <Button

@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { AdminSidebarMobile } from "./AdminSidebar";
 import { AdminBreadcrumb } from "./AdminBreadcrumb";
-import { NotificationButton } from "../ui/NotificationButton";
 import { SettingsButton } from "../ui/SettingsButton";
+import { ThemeSwitcherButton } from "../ui/ThemeSwitcherButton";
 import { NewButton } from "../NewButton";
 import { ShowMoreMenu } from "../ShowMoreMenu";
 import { getHeaderGradient } from "@/lib/gradient-presets";
@@ -44,7 +44,7 @@ export function AdminHeader() {
       <div className="flex flex-1 items-center gap-4 h-full">
         <AdminBreadcrumb />
         <div className="flex flex-1 items-center justify-end gap-2 h-full">
-          <NotificationButton />
+          <ThemeSwitcherButton />
           <SettingsButton />
           <NewButton />
           <ShowMoreMenu />

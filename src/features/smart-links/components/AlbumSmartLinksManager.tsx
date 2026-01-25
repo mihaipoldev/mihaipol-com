@@ -62,6 +62,9 @@ function SortableLinkItem({
     id: link.id,
   });
 
+  // Filter out aria-describedby to prevent hydration mismatches
+  const { "aria-describedby": _, ...filteredAttributes } = attributes;
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -99,7 +102,7 @@ function SortableLinkItem({
     >
       {/* Drag Handle */}
       <div
-        {...attributes}
+        {...filteredAttributes}
         {...listeners}
         className="flex items-center justify-center cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors"
       >

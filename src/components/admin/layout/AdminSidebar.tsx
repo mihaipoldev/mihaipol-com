@@ -19,6 +19,8 @@ import {
   faChevronDown,
   faChevronLeft,
   faMusic,
+  faSitemap,
+  faLayerGroup,
 } from "@fortawesome/free-solid-svg-icons";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,19 @@ const overviewItems = [
     title: "Events",
     href: "/admin/events",
     icon: faCalendar,
+  },
+];
+
+const adminItems = [
+  {
+    title: "Entity Types",
+    href: "/admin/entity-types",
+    icon: faLayerGroup,
+  },
+  {
+    title: "Workflows",
+    href: "/admin/workflows",
+    icon: faSitemap,
   },
 ];
 
@@ -140,7 +155,7 @@ function MusicCollapsible({
           "[&>svg]:shrink-0",
           "[&>span:last-child]:truncate",
           isMusicActive
-            ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+            ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg ${isMobile ? "px-5" : "px-4"}`
             : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
         )}
       >
@@ -173,7 +188,7 @@ function MusicCollapsible({
             "[&>svg]:shrink-0",
             "[&>span:last-child]:truncate",
             isMusicActive
-              ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+              ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
               : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
           )}
         >
@@ -208,7 +223,7 @@ function MusicCollapsible({
                   "[&>svg]:shrink-0",
                   "[&>span:last-child]:truncate",
                   isActive
-                    ? `${getSidebarAccentGradient()} relative font-semibold hover:font-semibold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-6 pr-4" : "pl-5 pr-3"}`
+                    ? `${getSidebarAccentGradient()} relative font-semibold hover:font-semibold text-primary rounded-lg before:content-none ${isMobile ? "pl-6 pr-4" : "pl-5 pr-3"}`
                     : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-4" : "px-3"}`
                 )}
               >
@@ -339,7 +354,7 @@ function SidebarContent({
                     "[&>svg]:shrink-0",
                     "[&>span:last-child]:truncate",
                     isActive
-                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
                       : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
                   )}
                 >
@@ -363,13 +378,53 @@ function SidebarContent({
                 "[&>svg]:shrink-0",
                 "[&>span:last-child]:truncate",
                 pathname === updatesItem.href || pathname.startsWith(updatesItem.href + "/")
-                  ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+                  ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
                   : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
               )}
             >
               <FontAwesomeIcon icon={updatesItem.icon} />
               <span>{updatesItem.title}</span>
             </Link>
+          </div>
+        </div>
+
+        {/* Admin Category */}
+        <div className={cn("space-y-2.5", isMobile ? "space-y-3 mt-8" : "mt-0")}>
+          <div
+            className={cn(
+              "font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-1",
+              isMobile ? "text-xs" : "text-xs px-3"
+            )}
+          >
+            Admin
+          </div>
+          <div className="flex flex-col gap-0.5">
+            {adminItems.map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={handleLinkClick}
+                  data-active={isActive}
+                  className={cn(
+                    `peer/menu-button flex w-full items-center overflow-hidden text-left font-medium outline-none ring-sidebar-ring transition-all duration-200 ease-in-out focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ${hoverGradientClasses} hover:text-primary`,
+                    isMobile
+                      ? "py-3 text-[17px] h-12 gap-6 [&>svg]:size-5"
+                      : "py-2.5 text-[15px] h-10 gap-5 [&>svg]:size-4",
+                    "[&>svg]:shrink-0",
+                    "[&>span:last-child]:truncate",
+                    isActive
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+                      : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
+                  )}
+                >
+                  <FontAwesomeIcon icon={item.icon} />
+                  <span>{item.title}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -401,7 +456,7 @@ function SidebarContent({
                     "[&>svg]:shrink-0",
                     "[&>span:last-child]:truncate",
                     isActive
-                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-r-lg rounded-l-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
                       : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
                   )}
                 >

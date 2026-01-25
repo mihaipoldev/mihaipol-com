@@ -27,7 +27,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
     className={cn(
-      "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+      "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-primary/10 data-[state=open]:bg-primary/10 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 transition-colors",
       inset && "pl-8",
       className
     )}
@@ -44,8 +44,8 @@ const DropdownMenuSubContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
 >(({ className, ...props }, ref) => {
   // Get the background color from the preset-balanced element if it exists
-  const [bgColor, setBgColor] = React.useState("hsl(var(--background))");
-  const [textColor, setTextColor] = React.useState("hsl(var(--foreground))");
+  const [bgColor, setBgColor] = React.useState("hsl(var(--popover))");
+  const [textColor, setTextColor] = React.useState("hsl(var(--popover-foreground))");
 
   React.useEffect(() => {
     // Find the preset-balanced element to get its CSS variable values
@@ -53,8 +53,8 @@ const DropdownMenuSubContent = React.forwardRef<
     if (presetElement) {
       const computed = getComputedStyle(presetElement);
       // Get CSS variable values
-      const bgVar = computed.getPropertyValue("--background").trim();
-      const fgVar = computed.getPropertyValue("--foreground").trim();
+      const bgVar = computed.getPropertyValue("--popover").trim();
+      const fgVar = computed.getPropertyValue("--popover-foreground").trim();
 
       // Construct HSL color strings from the variable values
       // Variables are in format: "199 0% 100%" or "199 1% 10%"
@@ -67,8 +67,8 @@ const DropdownMenuSubContent = React.forwardRef<
     } else {
       // Fallback: try to get from body if preset-balanced doesn't exist
       const bodyComputed = getComputedStyle(document.body);
-      const bgVar = bodyComputed.getPropertyValue("--background").trim();
-      const fgVar = bodyComputed.getPropertyValue("--foreground").trim();
+      const bgVar = bodyComputed.getPropertyValue("--popover").trim();
+      const fgVar = bodyComputed.getPropertyValue("--popover-foreground").trim();
       if (bgVar) {
         setBgColor(`hsl(${bgVar})`);
       }
@@ -100,7 +100,7 @@ const DropdownMenuSubContent = React.forwardRef<
         "z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 backdrop-blur-xl",
         "shadow-xl",
         "!shadow-[0_8px_30px_rgba(0,0,0,0.12),0_4px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.04)]",
-        "dark:!shadow-[0_8px_30px_rgba(0,0,0,0.4),0_4px_12px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.2)]",
+        "dark:!shadow-none",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
         className
       )}
@@ -115,8 +115,8 @@ const DropdownMenuContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
 >(({ className, sideOffset = 4, ...props }, ref) => {
   // Get the background color from the preset-balanced element if it exists
-  const [bgColor, setBgColor] = React.useState("hsl(var(--background))");
-  const [textColor, setTextColor] = React.useState("hsl(var(--foreground))");
+  const [bgColor, setBgColor] = React.useState("hsl(var(--popover))");
+  const [textColor, setTextColor] = React.useState("hsl(var(--popover-foreground))");
 
   React.useEffect(() => {
     const updateColors = () => {
@@ -125,8 +125,8 @@ const DropdownMenuContent = React.forwardRef<
       if (presetElement) {
         const computed = getComputedStyle(presetElement);
         // Get CSS variable values
-        const bgVar = computed.getPropertyValue("--background").trim();
-        const fgVar = computed.getPropertyValue("--foreground").trim();
+        const bgVar = computed.getPropertyValue("--popover").trim();
+        const fgVar = computed.getPropertyValue("--popover-foreground").trim();
 
         // Construct HSL color strings from the variable values
         // Variables are in format: "199 0% 100%" or "199 1% 10%"
@@ -139,8 +139,8 @@ const DropdownMenuContent = React.forwardRef<
       } else {
         // Fallback: try to get from body if preset-balanced doesn't exist
         const bodyComputed = getComputedStyle(document.body);
-        const bgVar = bodyComputed.getPropertyValue("--background").trim();
-        const fgVar = bodyComputed.getPropertyValue("--foreground").trim();
+        const bgVar = bodyComputed.getPropertyValue("--popover").trim();
+        const fgVar = bodyComputed.getPropertyValue("--popover-foreground").trim();
         if (bgVar) {
           setBgColor(`hsl(${bgVar})`);
         }
@@ -184,10 +184,10 @@ const DropdownMenuContent = React.forwardRef<
           color: textColor,
         }}
         className={cn(
-          "z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border p-1 backdrop-blur-xl",
+          "z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-sm border p-1 backdrop-blur-xl",
           "shadow-xl",
           "!shadow-[0_8px_30px_rgba(0,0,0,0.12),0_4px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.04)]",
-          "dark:!shadow-[0_8px_30px_rgba(0,0,0,0.4),0_4px_12px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.2)]",
+          "dark:!shadow-none",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
           className
         )}
@@ -207,7 +207,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
+      "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-primary/10 focus:text-foreground data-[highlighted]:bg-primary/10 data-[highlighted]:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
       inset && "pl-8",
       className
     )}
@@ -223,7 +223,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
   <DropdownMenuPrimitive.CheckboxItem
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-primary/10 focus:text-foreground data-[highlighted]:bg-primary/10 data-[highlighted]:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     checked={checked}
@@ -246,7 +246,7 @@ const DropdownMenuRadioItem = React.forwardRef<
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-primary/10 focus:text-foreground data-[highlighted]:bg-primary/10 data-[highlighted]:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     {...props}
@@ -281,7 +281,7 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Separator
     ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-muted", className)}
+    className={cn("-mx-1 my-1 h-px bg-muted-foreground/20", className)}
     {...props}
   />
 ));

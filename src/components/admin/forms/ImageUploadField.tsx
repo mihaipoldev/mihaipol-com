@@ -1,8 +1,16 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Upload, X, Link as LinkIcon, FileImage } from "lucide-react";
+import { Upload, X, Link as LinkIcon, FileImage, Square, Circle } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEllipsis } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ShadowInput } from "./ShadowInput";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -15,6 +23,10 @@ type ImageUploadFieldProps = {
   folderPath: string; // e.g., "artists/123" or "albums/456"
   error?: string;
   placeholder?: string;
+  shapeControl?: {
+    value: "square" | "circle";
+    onChange: (value: "square" | "circle") => void;
+  };
 };
 
 export function ImageUploadField({
@@ -24,6 +36,7 @@ export function ImageUploadField({
   folderPath,
   error,
   placeholder = "https://example.com/image.jpg",
+  shapeControl,
 }: ImageUploadFieldProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [urlInput, setUrlInput] = useState("");
@@ -257,6 +270,59 @@ export function ImageUploadField({
               Browse
             </Button>
             <span className="text-[10px]">JPG, PNG, WebP, GIF, SVG (max 10MB)</span>
+            {shapeControl && (
+              <div className="flex items-center gap-2 ml-auto" onClick={(e) => e.stopPropagation()}>
+                <span className="text-xs text-muted-foreground">Cover Shape:</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="no-shadow !shadow-[0_0_0_0_transparent] hover:!shadow-[0_0_0_0_transparent] dark:!shadow-[0_0_0_0_transparent] dark:hover:!shadow-[0_0_0_0_transparent] h-7 w-7 focus-visible:ring-0 hover:bg-transparent dark:hover:bg-transparent [&:hover_svg]:text-primary"
+                      style={{ boxShadow: "none" }}
+                    >
+                      {shapeControl.value === "square" ? (
+                        <Square className="h-4 w-4 transition-colors duration-150" />
+                      ) : (
+                        <Circle className="h-4 w-4 transition-colors duration-150" />
+                      )}
+                      <span className="sr-only">Cover shape</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    align="end"
+                    sideOffset={0}
+                    className="px-0 py-2 border-0 w-48 bg-foreground"
+                    style={{
+                      boxShadow: 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;'
+                    }}
+                    onCloseAutoFocus={(e) => e.preventDefault()}
+                  >
+                    <DropdownMenuItem
+                      onClick={() => shapeControl.onChange("square")}
+                      className={cn(
+                        "cursor-pointer !rounded-none px-4 py-2",
+                        shapeControl.value === "square" && "bg-accent"
+                      )}
+                    >
+                      <Square className="h-4 w-4 mr-2" />
+                      Square
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => shapeControl.onChange("circle")}
+                      className={cn(
+                        "cursor-pointer !rounded-none px-4 py-2",
+                        shapeControl.value === "circle" && "bg-accent"
+                      )}
+                    >
+                      <Circle className="h-4 w-4 mr-2" />
+                      Circle
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
           </div>
         </div>
       </div>

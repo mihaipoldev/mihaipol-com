@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AlbumsList from "../lists/AlbumsList";
+import ScrollReveal from "../animations/ScrollReveal";
 import type { LandingAlbum } from "../types";
 
 type GriffithAlbumsSectionProps = {
@@ -22,10 +23,12 @@ export default function GriffithAlbumsSection({
   return (
     <section id="griffith-albums" className="pt-0 md:pt-16 px-6">
       <div className="container mx-auto px-0 md:px-8 pb-10 md:pb-20">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">Griffith Records</h2>
-          <p className="text-muted-foreground">Releases from Griffith Records.</p>
-        </div>
+        <ScrollReveal>
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">Griffith Records</h2>
+            <p className="text-muted-foreground">Releases from Griffith Records.</p>
+          </div>
+        </ScrollReveal>
         <AlbumsList albums={albums} fallbackImage={fallbackImage} columns={columns} />
         <div className="text-center mt-12">
           <Button

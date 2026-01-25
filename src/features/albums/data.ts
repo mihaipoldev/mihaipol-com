@@ -55,7 +55,7 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
     const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
     // Select only needed columns and use join if labels are needed
-    const baseColumns = `id, title, slug, cover_image_url, release_date, publish_status, label_id, catalog_number, album_type, format_type`;
+    const baseColumns = `id, title, slug, cover_image_url, release_date, publish_status, label_id, catalog_number, album_type, format_type, cover_shape`;
     const selectColumns = includeLabels ? `${baseColumns}, labels(id, name, slug)` : baseColumns;
 
     let query = supabaseClient.from("albums").select(selectColumns);
@@ -86,9 +86,6 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
     const dataCount = albums?.length || 0;
-    console.log(
-      `🔍 [DB] albums query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`
-    );
 
     if (queryTime > 1000) {
       console.warn(`⚠️ [DB] SLOW QUERY: albums fetch took ${queryTime.toFixed(0)}ms`);
@@ -192,7 +189,7 @@ export async function getLatestAlbumByLabelId(labelId: string) {
     const { data, error } = await supabaseClient
       .from("albums")
       .select(
-        `id, title, slug, cover_image_url, release_date, publish_status, label_id, catalog_number, album_type, format_type, description, labels(id, name)`
+        `id, title, slug, cover_image_url, release_date, publish_status, label_id, catalog_number, album_type, format_type, description, cover_shape, labels(id, name)`
       )
       .eq("label_id", labelId)
       .eq("publish_status", "published")
@@ -202,7 +199,6 @@ export async function getLatestAlbumByLabelId(labelId: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] latest album by label_id query completed in ${queryTime.toFixed(0)}ms`);
 
     if (error) {
       // If no album found, return null instead of throwing
@@ -247,7 +243,7 @@ export async function getAlbumBySlug(slug: string) {
     const { data, error } = await supabaseClient
       .from("albums")
       .select(
-        "id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description"
+        "id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description, cover_shape"
       )
       .eq("slug", slug)
       .eq("publish_status", "published")
@@ -255,7 +251,6 @@ export async function getAlbumBySlug(slug: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] album by slug query completed in ${queryTime.toFixed(0)}ms`);
 
     if (queryTime > 1000) {
       console.warn(`⚠️ [DB] SLOW QUERY: album by slug took ${queryTime.toFixed(0)}ms`);
@@ -284,7 +279,7 @@ export async function getAllAlbumsWithLabels() {
       .from("albums")
       .select(
         `
-        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status,
+        id, title, slug, catalog_number, album_type, format_type, description, cover_image_url, release_date, label_id, publish_status, cover_shape,
         labels (
           id,
           name
@@ -296,9 +291,6 @@ export async function getAllAlbumsWithLabels() {
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
     const dataCount = data?.length || 0;
-    console.log(
-      `🔍 [DB] all albums with labels query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`
-    );
 
     if (queryTime > 1000) {
       console.warn(`⚠️ [DB] SLOW QUERY: all albums with labels took ${queryTime.toFixed(0)}ms`);
@@ -336,10 +328,36 @@ export async function getAlbumById(id: string) {
       .from("albums")
       .select(
         `
-        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description, drive_folder_id, drive_folder_url, audio_files,
+        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description, drive_folder_id, drive_folder_url, audio_files, cover_shape,
         labels (
           id,
           name
+        ),
+        album_images (
+          id,
+          album_id,
+          title,
+          image_url,
+          crop_shape,
+          content_type,
+          content_group,
+          sort_order,
+          created_at,
+          updated_at
+        ),
+        album_audios (
+          id,
+          album_id,
+          title,
+          audio_url,
+          duration,
+          file_size,
+          highlight_start_time,
+          waveform_peaks,
+          content_group,
+          sort_order,
+          created_at,
+          updated_at
         )
       `
       )
@@ -348,7 +366,6 @@ export async function getAlbumById(id: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] album by id query completed in ${queryTime.toFixed(0)}ms`);
 
     if (error) throw error;
 
@@ -360,10 +377,22 @@ export async function getAlbumById(id: string) {
           : null
         : data.labels || null;
 
+      // Normalize album_images: Supabase returns array
+      const normalizedImages = Array.isArray(data.album_images)
+        ? data.album_images.sort((a: any, b: any) => a.sort_order - b.sort_order)
+        : [];
+
+      // Normalize album_audios: Supabase returns array
+      const normalizedAudios = Array.isArray(data.album_audios)
+        ? data.album_audios.sort((a: any, b: any) => a.sort_order - b.sort_order)
+        : [];
+
       return {
         ...data,
         labelName: normalizedLabel?.name || null,
         labels: normalizedLabel,
+        album_images: normalizedImages,
+        album_audios: normalizedAudios,
       } as AlbumWithLabel;
     }
 
@@ -385,10 +414,36 @@ export async function getAlbumBySlugAdmin(slug: string) {
       .from("albums")
       .select(
         `
-        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description,
+        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description, cover_shape, drive_folder_id, drive_folder_url,
         labels (
           id,
           name
+        ),
+        album_images (
+          id,
+          album_id,
+          title,
+          image_url,
+          crop_shape,
+          content_type,
+          content_group,
+          sort_order,
+          created_at,
+          updated_at
+        ),
+        album_audios (
+          id,
+          album_id,
+          title,
+          audio_url,
+          duration,
+          file_size,
+          highlight_start_time,
+          waveform_peaks,
+          content_group,
+          sort_order,
+          created_at,
+          updated_at
         )
       `
       )
@@ -397,12 +452,21 @@ export async function getAlbumBySlugAdmin(slug: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] album by slug (admin) query completed in ${queryTime.toFixed(0)}ms`);
 
     if (error) throw error;
 
     // Normalize labels: Supabase returns array even for one-to-one relationships
     if (data) {
+      // Normalize album_images: Supabase returns array
+      const normalizedImages = Array.isArray(data.album_images)
+        ? data.album_images.sort((a: any, b: any) => a.sort_order - b.sort_order)
+        : [];
+
+      // Normalize album_audios: Supabase returns array
+      const normalizedAudios = Array.isArray(data.album_audios)
+        ? data.album_audios.sort((a: any, b: any) => a.sort_order - b.sort_order)
+        : [];
+
       const normalizedData = {
         ...data,
         labels: Array.isArray(data.labels)
@@ -410,6 +474,8 @@ export async function getAlbumBySlugAdmin(slug: string) {
             ? data.labels[0]
             : null
           : data.labels || null,
+        album_images: normalizedImages,
+        album_audios: normalizedAudios,
       };
       return normalizedData;
     }
@@ -418,6 +484,81 @@ export async function getAlbumBySlugAdmin(slug: string) {
   } catch (error) {
     console.error("Error fetching album by slug (admin):", error);
     return null;
+  }
+}
+
+export async function getAlbumImages(albumId: string) {
+  try {
+    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
+    const supabase = getServiceSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("album_images")
+      .select("*")
+      .eq("album_id", albumId)
+      .order("sort_order", { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching album images:", error);
+    return [];
+  }
+}
+
+/**
+ * Get a single album image by ID
+ */
+export async function getAlbumImageById(imageId: string) {
+  try {
+    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
+    const supabase = getServiceSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("album_images")
+      .select("*")
+      .eq("id", imageId)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        return null;
+      }
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error("Error fetching album image by id:", error);
+    return null;
+  }
+}
+
+/**
+ * Get multiple album audios by IDs
+ */
+export async function getAlbumAudiosByIds(audioIds: string[]) {
+  try {
+    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
+    const supabase = getServiceSupabaseClient();
+
+    if (audioIds.length === 0) {
+      return [];
+    }
+
+    const { data, error } = await supabase
+      .from("album_audios")
+      .select("*")
+      .in("id", audioIds)
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching album audios by ids:", error);
+    return [];
   }
 }
 
@@ -444,7 +585,6 @@ export async function getAlbumLinks(albumId: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] album links query completed in ${queryTime.toFixed(0)}ms`);
 
     if (error) throw error;
 
@@ -492,7 +632,6 @@ export async function getAlbumArtists(albumId: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] album artists query completed in ${queryTime.toFixed(0)}ms`);
 
     if (error) throw error;
 
@@ -607,5 +746,53 @@ export async function getAlbumWithLinksBySlug(slug: string) {
   } catch (error) {
     console.error("Error fetching album with links by slug:", error);
     return null;
+  }
+}
+
+/**
+ * Get unique content groups from both album_images and album_audios for a given album
+ * Used for autocomplete suggestions in forms
+ */
+export async function getAlbumContentGroups(albumId: string): Promise<string[]> {
+  try {
+    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
+    const supabase = getServiceSupabaseClient();
+
+    // Get unique content_group values from images
+    const { data: images, error: imagesError } = await supabase
+      .from("album_images")
+      .select("content_group")
+      .eq("album_id", albumId)
+      .not("content_group", "is", null);
+
+    if (imagesError) {
+      console.error("Error fetching image content groups:", imagesError);
+    }
+
+    // Get unique content_group values from audios
+    const { data: audios, error: audiosError } = await supabase
+      .from("album_audios")
+      .select("content_group")
+      .eq("album_id", albumId)
+      .not("content_group", "is", null);
+
+    if (audiosError) {
+      console.error("Error fetching audio content groups:", audiosError);
+    }
+
+    // Combine and deduplicate
+    const imageGroups = (images || [])
+      .map((img) => img.content_group)
+      .filter((group): group is string => group !== null && group !== undefined);
+    
+    const audioGroups = (audios || [])
+      .map((audio) => audio.content_group)
+      .filter((group): group is string => group !== null && group !== undefined);
+
+    const allGroups = [...imageGroups, ...audioGroups];
+    return [...new Set(allGroups)]; // Remove duplicates
+  } catch (error) {
+    console.error("Error fetching album content groups:", error);
+    return [];
   }
 }

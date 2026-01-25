@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PresetForm } from "./PresetForm";
 import type { LandingPagePreset } from "@/lib/landing-page-presets";
 import { hslToCss } from "@/lib/landing-page-presets";
-import { Edit2, Trash2, Plus, Sparkles, Loader2 } from "lucide-react";
+import { Edit2, Trash2, Plus, Sparkles, Loader2, Copy } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -86,6 +86,33 @@ export function PresetList({ presets, onRefresh }: PresetListProps) {
     } catch (error: any) {
       toast.error(error.message || "Failed to update preset");
       throw error;
+    }
+  };
+
+  const handleDuplicate = async (preset: LandingPagePreset) => {
+    try {
+      const duplicateName = `Copy of ${preset.name}`;
+      
+      const response = await fetch("/api/admin/settings/presets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: duplicateName,
+          primary: preset.primary,
+          secondary: preset.secondary,
+          accent: preset.accent,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to duplicate preset");
+      }
+
+      toast.success("Preset duplicated successfully");
+      onRefresh();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to duplicate preset");
     }
   };
 
@@ -308,6 +335,14 @@ export function PresetList({ presets, onRefresh }: PresetListProps) {
                       ) : (
                         <Sparkles className="h-4 w-4" />
                       )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDuplicate(preset)}
+                      title="Duplicate preset"
+                    >
+                      <Copy className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"

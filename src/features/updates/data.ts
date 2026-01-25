@@ -40,9 +40,6 @@ async function fetchUpdates(options: FetchUpdatesOptions = {}) {
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
     const dataCount = data?.length || 0;
-    console.log(
-      `🔍 [DB] updates query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`
-    );
 
     if (queryTime > 1000) {
       console.warn(`⚠️ [DB] SLOW QUERY: updates fetch took ${queryTime.toFixed(0)}ms`);
@@ -80,7 +77,6 @@ export async function getUpdateBySlug(slug: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] update by slug query completed in ${queryTime.toFixed(0)}ms`);
 
     if (error) throw error;
     return data || null;
@@ -98,15 +94,12 @@ export async function getAllUpdatesUnfiltered() {
 
     const { data, error } = await supabase
       .from("updates")
-      .select("id, title, slug, subtitle, date, publish_status, image_url")
+      .select("id, title, slug, subtitle, date, publish_status, image_url, description, read_more_url")
       .order("date", { ascending: false, nullsFirst: false });
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
     const dataCount = data?.length || 0;
-    console.log(
-      `🔍 [DB] all updates (unfiltered) query completed in ${queryTime.toFixed(0)}ms → ${dataCount} records`
-    );
 
     if (queryTime > 1000) {
       console.warn(`⚠️ [DB] SLOW QUERY: all updates (unfiltered) took ${queryTime.toFixed(0)}ms`);
@@ -133,7 +126,6 @@ export async function getUpdateById(id: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] update by id query completed in ${queryTime.toFixed(0)}ms`);
 
     if (error) throw error;
     return data || null;
@@ -158,7 +150,6 @@ export async function getUpdateBySlugAdmin(slug: string) {
 
     const queryTime =
       (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    console.log(`🔍 [DB] update by slug (admin) query completed in ${queryTime.toFixed(0)}ms`);
 
     if (error) throw error;
     return data || null;

@@ -510,7 +510,7 @@ export function PreferencesSettings() {
             transition={{ duration: 0.2 }}
             className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-sm shadow-lg"
           >
-            <div className="max-w-[1400px] mx-auto px-4 lg:pl-64 py-4">
+            <div className="max-w-[1400px] mx-auto px-4 md:px-10 lg:pl-64 lg:pr-12 py-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 text-sm">
@@ -528,13 +528,12 @@ export function PreferencesSettings() {
                 <div className="flex items-center gap-2">
                   <Button 
                     variant="outline" 
-                    size="sm" 
                     onClick={() => window.location.reload()}
                     disabled={isSaving}
                   >
                     Discard
                   </Button>
-                  <Button onClick={handleSaveAll} disabled={isSaving} size="sm">
+                  <Button onClick={handleSaveAll} disabled={isSaving}>
                     {isSaving ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />

@@ -41,7 +41,7 @@ export default function AlbumsFilterPopover({
           variant="ghost"
           size="icon"
           className={cn(
-            "h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors",
+            "h-8 w-8 text-muted-foreground hover:text-foreground/80 hover:bg-transparent transition-colors",
             activeFilterCount > 0 && "text-foreground"
           )}
           aria-label="Filter albums"
@@ -60,26 +60,13 @@ export default function AlbumsFilterPopover({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-72 bg-black/30 backdrop-blur-lg border-0 shadow-lg relative overflow-hidden p-0 text-card-foreground"
+        className="w-72 bg-secondary/30 backdrop-blur-md border-none shadow-lg relative overflow-hidden p-0 text-card-foreground"
         align="end"
         sideOffset={8}
       >
-        {/* Background with gradient using theme colors */}
-        <div
-          className="absolute inset-0 rounded-md"
-          style={{
-            background: `linear-gradient(135deg, 
-              hsl(var(--primary) / 0.1) 0%, 
-              hsl(var(--accent) / 0.5) 50%, 
-              hsl(var(--primary) / 0.1) 100%
-            )`,
-          }}
-        />
-        {/* Additional gradient overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[4%] via-accent/[2%] to-primary/[3%] pointer-events-none rounded-md" />
         <div className="space-y-4 relative z-10 p-4">
           {/* Header */}
-          <div className="flex items-center justify-between h-8 pb-2">
+          <div className="flex items-center justify-between h-4 pb-0">
             <h3 className="font-semibold text-sm text-card-foreground">Filters</h3>
             {activeFilterCount > 0 && (
               <Button
@@ -103,18 +90,19 @@ export default function AlbumsFilterPopover({
                 {availableAlbumTypes.map((type) => (
                   <div
                     key={type}
-                    className="flex items-center space-x-3 group cursor-pointer"
+                    className="flex items-center space-x-3 group cursor-pointer relative z-10"
                     onClick={() => onAlbumTypeToggle(type)}
                   >
                     <Checkbox
                       id={`album-type-${type}`}
                       checked={selectedAlbumTypes.has(type)}
                       onCheckedChange={() => onAlbumTypeToggle(type)}
-                      className="border-primary/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                      className="border-primary/30 group-hover:border-primary/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-colors relative z-10"
                     />
                     <label
                       htmlFor={`album-type-${type}`}
-                      className="text-sm font-medium text-card-foreground cursor-pointer flex-1 group-hover:text-foreground transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-sm font-medium text-card-foreground/70 cursor-pointer flex-1 group-hover:text-foreground transition-colors relative z-10"
                     >
                       {type}
                     </label>
@@ -134,18 +122,19 @@ export default function AlbumsFilterPopover({
                 {availableFormatTypes.map((type) => (
                   <div
                     key={type}
-                    className="flex items-center space-x-3 group cursor-pointer"
+                    className="flex items-center space-x-3 group cursor-pointer relative z-10"
                     onClick={() => onFormatTypeToggle(type)}
                   >
                     <Checkbox
                       id={`format-type-${type}`}
                       checked={selectedFormatTypes.has(type)}
                       onCheckedChange={() => onFormatTypeToggle(type)}
-                      className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                      className="border-primary/30 group-hover:border-primary/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-colors relative z-10"
                     />
                     <label
                       htmlFor={`format-type-${type}`}
-                      className="text-sm font-medium text-card-foreground cursor-pointer flex-1 group-hover:text-foreground transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-sm font-medium text-card-foreground/70 cursor-pointer flex-1 group-hover:text-foreground transition-colors relative z-10"
                     >
                       {type}
                     </label>

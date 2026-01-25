@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Folder, Pencil, AlertCircle, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ShadowButton } from "@/components/admin/forms/ShadowButton";
@@ -10,6 +10,10 @@ type DriveFolderBadgeProps = {
   albumId: string;
   refreshKey?: number;
   onEditClick: () => void;
+  // Initial data from server to avoid blocking render
+  initialHasFolder?: boolean;
+  initialFolderUrl?: string | null;
+  initialFolderId?: string | null;
 };
 
 type StatusData = {
@@ -22,41 +26,138 @@ type StatusData = {
   } | null;
 };
 
-export function DriveFolderBadge({ albumId, refreshKey, onEditClick }: DriveFolderBadgeProps) {
+export function DriveFolderBadge({ 
+  albumId, 
+  refreshKey, 
+  onEditClick,
+  initialHasFolder = false,
+  initialFolderUrl = null,
+  initialFolderId = null,
+}: DriveFolderBadgeProps) {
   const [status, setStatus] = useState<StatusData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [folderNameLoading, setFolderNameLoading] = useState(false);
+  const hasInitializedRef = useRef(false);
 
+  // Initialize with server data immediately if available
   useEffect(() => {
-    fetchStatus();
-  }, [albumId, refreshKey]);
-
-  async function fetchStatus() {
-    try {
-      setLoading(true);
-      const [authResponse, folderResponse] = await Promise.all([
-        fetch("/api/auth/google/status"),
-        fetch(`/api/albums/${albumId}/drive-folder`),
-      ]);
-
-      if (!authResponse.ok || !folderResponse.ok) {
-        console.error("Error fetching status:", { auth: authResponse.status, folder: folderResponse.status });
-        return;
-      }
-
-      const authData = await authResponse.json();
-      const folderData = await folderResponse.json();
-
+    if (hasInitializedRef.current) return;
+    
+    if (initialHasFolder && initialFolderId && initialFolderUrl) {
+      // We have folder data from server - show badge immediately
       setStatus({
-        authenticated: authData.authenticated || false,
-        hasFolder: folderData.hasFolder || false,
-        folderInfo: folderData.folderInfo || null,
+        authenticated: true, // Assume authenticated if we have folder data
+        hasFolder: true,
+        folderInfo: {
+          folder_id: initialFolderId,
+          folder_url: initialFolderUrl,
+          folder_name: "", // Will be fetched lazily
+        },
       });
-    } catch (error) {
-      console.error("Error fetching Drive status:", error);
-    } finally {
       setLoading(false);
+      hasInitializedRef.current = true;
+      
+      // Fetch folder name in the background (non-blocking)
+      async function fetchFolderName() {
+        if (!initialFolderId) return;
+        
+        try {
+          setFolderNameLoading(true);
+          const response = await fetch(`/api/albums/${albumId}/drive-folder`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.folderInfo?.folder_name) {
+              setStatus((prev) => {
+                if (!prev || !prev.folderInfo) return prev;
+                return {
+                  ...prev,
+                  folderInfo: {
+                    ...prev.folderInfo,
+                    folder_name: data.folderInfo.folder_name,
+                  },
+                };
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching folder name:", error);
+        } finally {
+          setFolderNameLoading(false);
+        }
+      }
+      
+      fetchFolderName();
+    } else {
+      // No initial folder data - need to check auth and folder status
+      async function fetchStatus() {
+        try {
+          setLoading(true);
+          const [authResponse, folderResponse] = await Promise.all([
+            fetch("/api/auth/google/status"),
+            fetch(`/api/albums/${albumId}/drive-folder`),
+          ]);
+
+          if (!authResponse.ok || !folderResponse.ok) {
+            console.error("Error fetching status:", { auth: authResponse.status, folder: folderResponse.status });
+            return;
+          }
+
+          const authData = await authResponse.json();
+          const folderData = await folderResponse.json();
+
+          setStatus({
+            authenticated: authData.authenticated || false,
+            hasFolder: folderData.hasFolder || false,
+            folderInfo: folderData.folderInfo || null,
+          });
+        } catch (error) {
+          console.error("Error fetching Drive status:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+      
+      fetchStatus();
+      hasInitializedRef.current = true;
     }
-  }
+  }, [albumId, initialHasFolder, initialFolderId, initialFolderUrl]);
+
+  // Handle refresh key changes (e.g., after folder is linked/unlinked)
+  useEffect(() => {
+    if (!hasInitializedRef.current) return;
+    
+    async function fetchStatus() {
+      try {
+        setLoading(true);
+        const [authResponse, folderResponse] = await Promise.all([
+          fetch("/api/auth/google/status"),
+          fetch(`/api/albums/${albumId}/drive-folder`),
+        ]);
+
+        if (!authResponse.ok || !folderResponse.ok) {
+          console.error("Error fetching status:", { auth: authResponse.status, folder: folderResponse.status });
+          return;
+        }
+
+        const authData = await authResponse.json();
+        const folderData = await folderResponse.json();
+
+        setStatus({
+          authenticated: authData.authenticated || false,
+          hasFolder: folderData.hasFolder || false,
+          folderInfo: folderData.folderInfo || null,
+        });
+      } catch (error) {
+        console.error("Error fetching Drive status:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    if (refreshKey !== undefined) {
+      fetchStatus();
+    }
+  }, [refreshKey, albumId]);
 
   function handleConnect() {
     window.location.href = "/api/auth/google/login";
@@ -96,13 +197,19 @@ export function DriveFolderBadge({ albumId, refreshKey, onEditClick }: DriveFold
           <Badge
             variant="outline"
             className={cn(
-              "group relative flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-muted transition-colors",
-              "border-primary/20 hover:border-primary/40"
+              "group -ml-2 relative flex items-center gap-2 py-1 px-2 cursor-pointer hover:bg-muted transition-colors",
+              "border-none"
             )}
             onClick={handleFolderClick}
           >
             <Folder className="h-4 w-4" />
-            <span className="text-sm font-medium">{status.folderInfo.folder_name}</span>
+            {folderNameLoading ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <span className="text-sm font-medium">
+                {status.folderInfo.folder_name || "Drive Folder"}
+              </span>
+            )}
             <button
               type="button"
               onClick={(e) => {
