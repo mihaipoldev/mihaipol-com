@@ -4,181 +4,207 @@
     "name": "Cool Minimal (Slate + Blue)",
     "primary": "210 90% 55%",
     "secondary": "200 75% 50%",
-    "accent": "260 65% 60%"
+    "accent": "260 65% 60%",
+    "favorite": false
   },
   {
     "id": 4,
     "name": "Soft Tech (Mint + Teal)",
     "primary": "165 65% 40%",
     "secondary": "150 25% 35%",
-    "accent": "200 40% 45%"
+    "accent": "200 40% 45%",
+    "favorite": false
   },
   {
     "id": 10,
     "name": "Deep Navy & Gold",
     "primary": "45 85% 56%",
     "secondary": "215 25% 32%",
-    "accent": "200 55% 50%"
+    "accent": "200 55% 50%",
+    "favorite": false
   },
   {
     "id": 11,
     "name": "Smoke & Coral",
     "primary": "12 70% 54%",
     "secondary": "210 8% 40%",
-    "accent": "350 30% 40%"
+    "accent": "350 30% 40%",
+    "favorite": true
   },
   {
     "id": 13,
     "name": "Glacier",
     "primary": "195 65% 50%",
     "secondary": "210 14% 40%",
-    "accent": "220 40% 55%"
-  },
-  {
-    "id": 16,
-    "name": "Teal & Sand Luxe",
-    "primary": "185 65% 45%",
-    "secondary": "35 35% 55%",
-    "accent": "15 70% 55%"
+    "accent": "220 40% 55%",
+    "favorite": false
   },
   {
     "id": 17,
     "name": "Mono Ice Minimal",
     "primary": "210 40% 35%",
     "secondary": "210 16% 55%",
-    "accent": "200 30% 45%"
+    "accent": "200 30% 45%",
+    "favorite": false
   },
   {
     "id": 18,
     "name": "Soft Sunrise Minimal",
     "primary": "30 80% 55%",
     "secondary": "15 60% 52%",
-    "accent": "195 50% 52%"
+    "accent": "195 50% 52%",
+    "favorite": false
   },
   {
     "id": 19,
     "name": "Deep Teal Studio",
     "primary": "180 55% 38%",
     "secondary": "200 18% 40%",
-    "accent": "160 40% 45%"
+    "accent": "160 40% 45%",
+    "favorite": false
   },
   {
     "id": 21,
-    "name": "Griffith Orange",
+    "name": "Griffith Orange ***",
     "primary": "20 85% 56%",
     "secondary": "220 10% 32%",
-    "accent": "18 40% 50%"
-  },
-  {
-    "id": 22,
-    "name": "Griffith Lime",
-    "primary": "90 80% 56%",
-    "secondary": "210 10% 32%",
-    "accent": "200 45% 50%"
-  },
-  {
-    "id": 23,
-    "name": "Vibrant Harmony",
-    "primary": "2 67% 57%",
-    "secondary": "140 33% 46%",
-    "accent": "40 84% 68%"
-  },
-  {
-    "id": 29,
-    "name": "Terracotta Dusk",
-    "primary": "6 9% 43%",
-    "secondary": "16 23% 56%",
-    "accent": "155 14% 76%"
-  },
-  {
-    "id": 30,
-    "name": "Weathered Stones",
-    "primary": "150 16% 38%",
-    "secondary": "25 31% 56%",
-    "accent": "18 36% 77%"
+    "accent": "18 40% 50%",
+    "favorite": true
   },
   {
     "id": 31,
     "name": "asd",
     "primary": "195 72% 67%",
     "secondary": "210 24% 16%",
-    "accent": "156 72% 67%"
-  },
-  {
-    "id": 32,
-    "name": "asdf",
-    "primary": "156 72% 67%",
-    "secondary": "156 36% 18%",
-    "accent": "10 72% 67%"
+    "accent": "156 72% 67%",
+    "favorite": false
   },
   {
     "id": 33,
-    "name": "Copy of asd",
+    "name": "Copy of asd **",
     "primary": "178 48% 44%",
     "secondary": "215 8% 45%",
-    "accent": "171 64% 69%"
+    "accent": "171 64% 69%",
+    "favorite": true
   },
   {
     "id": 34,
     "name": "asd",
     "primary": "178 48% 44%",
     "secondary": "213 14% 12%",
-    "accent": "171 64% 69%"
+    "accent": "171 64% 69%",
+    "favorite": false
   },
   {
     "id": 35,
     "name": "Copy of Deep Navy & Gold",
     "primary": "200 55% 50%",
     "secondary": "215 25% 32%",
-    "accent": "45 85% 56%"
+    "accent": "45 85% 56%",
+    "favorite": false
   },
   {
     "id": 36,
     "name": "Terracotta Whisper",
     "primary": "7 55% 47%",
     "secondary": "323 15% 22%",
-    "accent": "23 38% 72%"
+    "accent": "23 38% 72%",
+    "favorite": false
   },
   {
     "id": 37,
     "name": "Steel Silence",
     "primary": "215 42% 43%",
     "secondary": "263 9% 18%",
-    "accent": "16 56% 75%"
+    "accent": "16 56% 75%",
+    "favorite": false
   },
   {
     "id": 38,
     "name": "Arctic Horizon",
     "primary": "235 74% 65%",
     "secondary": "217 23% 27%",
-    "accent": "193 57% 72%"
+    "accent": "193 57% 72%",
+    "favorite": true
   },
   {
     "id": 39,
     "name": "Indigo Glacier",
     "primary": "217 45% 49%",
     "secondary": "230 17% 28%",
-    "accent": "189 50% 68%"
+    "accent": "189 50% 68%",
+    "favorite": true
   },
   {
     "id": 40,
     "name": "Cobalt Studio",
     "primary": "224 33% 51%",
     "secondary": "224 17% 35%",
-    "accent": "200 57% 86%"
+    "accent": "200 57% 86%",
+    "favorite": true
   },
   {
     "id": 41,
-    "name": "Weathered Indigo",
-    "primary": "224 55% 73%",
-    "secondary": "219 18% 36%",
-    "accent": "50 46% 80%"
+    "name": "Aged Ceramic",
+    "primary": "27 42% 54%",
+    "secondary": "212 15% 22%",
+    "accent": "109 22% 70%",
+    "favorite": true
   },
   {
     "id": 42,
-    "name": "Glacial Extraction",
-    "primary": "208 79% 38%",
-    "secondary": "202 21% 41%",
-    "accent": "35 58% 76%"
+    "name": "Dynamic Sparks",
+    "primary": "11 100% 60%",
+    "secondary": "247 31% 26%",
+    "accent": "54 100% 50%",
+    "favorite": false
+  },
+  {
+    "id": 43,
+    "name": "Dynamic Surf",
+    "primary": "198 63% 54%",
+    "secondary": "203 30% 26%",
+    "accent": "28 91% 59%",
+    "favorite": true
+  },
+  {
+    "id": 44,
+    "name": "Energetic Pulse",
+    "primary": "205 100% 50%",
+    "secondary": "232 66% 25%",
+    "accent": "92 100% 60%",
+    "favorite": false
+  },
+  {
+    "id": 45,
+    "name": "Dynamic Ember",
+    "primary": "11 100% 60%",
+    "secondary": "197 100% 25%",
+    "accent": "52 100% 60%",
+    "favorite": false
+  },
+  {
+    "id": 46,
+    "name": "regtre",
+    "primary": "0 36% 56%",
+    "secondary": "223 53% 40%",
+    "accent": "113 48% 40%",
+    "favorite": false
+  },
+  {
+    "id": 47,
+    "name": "Earthen Sheen",
+    "primary": "11 28% 53%",
+    "secondary": "36 11% 35%",
+    "accent": "157 31% 85%",
+    "favorite": false
+  },
+  {
+    "id": 48,
+    "name": "Dynamic Shadeburst",
+    "primary": "217 91% 60%",
+    "secondary": "12 36% 30%",
+    "accent": "337 92% 54%",
+    "favorite": false
   }
 ]

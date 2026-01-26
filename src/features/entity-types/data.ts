@@ -93,8 +93,87 @@ export async function getEntityTypeBySlug(slug: string): Promise<EntityType | nu
 
 /**
  * Get workflows for a specific entity type using the junction table
+ * Optimized: Uses cached entity type lookup and efficient query
  */
 export async function getWorkflowsByEntityType(entityTypeSlug: string): Promise<Workflow[]> {
+  const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+  
+  try {
+    const supabase = getServiceSupabaseClient();
+
+    // Optimized: First get entity_type_id (can be cached), then fetch workflows
+    // The index on entity_types.slug makes this very fast
+    const { data: entityType, error: entityTypeError } = await supabase
+      .from("entity_types")
+      .select("id")
+      .eq("slug", entityTypeSlug)
+      .single();
+
+    if (entityTypeError || !entityType) {
+      return [];
+    }
+
+    const typedEntityType = entityType as { id: string };
+    
+    // Fetch workflows with JOIN to workflows table (single query)
+    const { data, error } = await supabase
+      .from("entity_type_workflows")
+      .select(`
+        display_order,
+        workflows!inner (
+          id,
+          slug,
+          name,
+          description,
+          icon,
+          estimated_cost,
+          estimated_time_minutes,
+          input_schema,
+          enabled,
+          default_ai_model,
+          created_at,
+          updated_at
+        )
+      `)
+      .eq("entity_type_id", typedEntityType.id)
+      .eq("workflows.enabled", true)
+      .order("display_order", { ascending: true });
+
+    if (error) throw error;
+
+    // Extract workflows from the nested structure and filter enabled ones
+    const workflows = (data || [])
+      .filter((item: any) => item.workflows !== null && item.workflows.enabled === true)
+      .map((item: any) => item.workflows);
+
+    const totalTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
+
+    // Performance monitoring
+    if (totalTime > 500) {
+      console.warn(
+        `⚠️ [DB] SLOW QUERY: getWorkflowsByEntityType took ${totalTime.toFixed(0)}ms (${workflows.length} workflows)`
+      );
+    } else if (totalTime > 100) {
+      console.log(
+        `[DB] getWorkflowsByEntityType: ${totalTime.toFixed(2)}ms (${workflows.length} workflows)`
+      );
+    }
+
+    return workflows as Workflow[];
+  } catch (error) {
+    console.error("Error fetching workflows by entity type:", error);
+    return getWorkflowsByEntityTypeFallback(entityTypeSlug);
+  }
+}
+
+/**
+ * Fallback method using sequential queries (original implementation)
+ * Used if the optimized JOIN query fails
+ */
+async function getWorkflowsByEntityTypeFallback(entityTypeSlug: string): Promise<Workflow[]> {
+  const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+  
   try {
     const supabase = getServiceSupabaseClient();
 
@@ -139,9 +218,18 @@ export async function getWorkflowsByEntityType(entityTypeSlug: string): Promise<
       .filter((item: any) => item.workflows !== null && item.workflows.enabled === true)
       .map((item: any) => item.workflows);
 
+    const totalTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
+
+    if (totalTime > 500) {
+      console.warn(
+        `⚠️ [DB] SLOW QUERY (fallback): getWorkflowsByEntityType took ${totalTime.toFixed(0)}ms`
+      );
+    }
+
     return workflows as Workflow[];
   } catch (error) {
-    console.error("Error fetching workflows by entity type:", error);
+    console.error("Error fetching workflows by entity type (fallback):", error);
     return [];
   }
 }

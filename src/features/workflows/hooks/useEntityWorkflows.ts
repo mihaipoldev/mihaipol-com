@@ -9,12 +9,27 @@ type UseEntityWorkflowsResult = {
   error: string | null;
 };
 
-export function useEntityWorkflows(entityType: string): UseEntityWorkflowsResult {
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+/**
+ * Hook to fetch workflows for an entity type
+ * If initialWorkflows are provided, uses them immediately and skips the API call
+ * (for server-side pre-fetched data, similar to how images/audios work)
+ */
+export function useEntityWorkflows(
+  entityType: string,
+  initialWorkflows?: Workflow[]
+): UseEntityWorkflowsResult {
+  // Initialize with pre-fetched workflows if available (instant loading!)
+  const [workflows, setWorkflows] = useState<Workflow[]>(initialWorkflows || []);
+  const [isLoading, setIsLoading] = useState(!initialWorkflows); // No loading if we have initial data
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // If we have initial workflows, skip the fetch (data already loaded server-side)
+    if (initialWorkflows) {
+      setIsLoading(false);
+      return;
+    }
+
     if (!entityType) {
       setIsLoading(false);
       return;
@@ -39,7 +54,7 @@ export function useEntityWorkflows(entityType: string): UseEntityWorkflowsResult
     };
 
     fetchWorkflows();
-  }, [entityType]);
+  }, [entityType, initialWorkflows]);
 
   return { workflows, isLoading, error };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { X, Plus, GripVertical, Pencil, Trash2, Circle, Square, ZoomIn, Loader2, Upload, Download, Copy, ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -26,6 +27,7 @@ import { ShadowInput } from "@/components/admin/forms/ShadowInput";
 import { ShadowButton } from "@/components/admin/forms/ShadowButton";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { ModalShell } from "@/components/ui/modal-shell";
 import { DialogFooter } from "@/components/ui/dialog";
 import { MediaPreviewModal } from "@/features/workflows/components/ImagePreviewModal";
@@ -90,7 +92,9 @@ function SortableImageItem({
   const [isSavingTitle, setIsSavingTitle] = useState(false);
   const [metadata, setMetadata] = useState<ImageMetadata>({ dimensions: null, fileSize: null });
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -98,9 +102,30 @@ function SortableImageItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // Fetch image dimensions and file size
+  // Lazy load metadata when card becomes visible
   useEffect(() => {
-    if (!image.image_url) {
+    if (!cardRef.current || !image.image_url) {
+      setIsLoadingMetadata(false);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "100px" } // Start loading 100px before visible
+    );
+
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, [image.image_url]);
+
+  // Fetch image dimensions and file size (only when visible)
+  useEffect(() => {
+    if (!image.image_url || !isVisible) {
       setIsLoadingMetadata(false);
       return;
     }
@@ -142,7 +167,7 @@ function SortableImageItem({
     };
     
     img.src = image.image_url;
-  }, [image.image_url]);
+  }, [image.image_url, isVisible]);
 
   const handleTitleClick = () => {
     setIsEditingTitle(true);
@@ -217,13 +242,28 @@ function SortableImageItem({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        setNodeRef(node);
+        cardRef.current = node;
+      }}
       style={style}
       className={cn(
-        "relative group border rounded-lg bg-card shadow-sm hover:shadow-md transition-shadow",
-        isDragging && "shadow-lg"
+        "relative group rounded-xl bg-card/50 dark:bg-card/30 backdrop-blur-sm",
+        "bg-gradient-to-br from-primary/[2%] via-primary/[1%] to-transparent",
+        "shadow-lg overflow-hidden",
+        "transition-all duration-300",
+        isDragging && "shadow-xl opacity-50"
       )}
     >
+      {/* Decorative gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
+
+      {/* Sparkle decorations */}
+      <div className="absolute top-2 right-2 w-1 h-1 bg-primary/30 rounded-full blur-sm animate-pulse opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div
+        className="absolute top-4 right-4 w-0.5 h-0.5 bg-primary/20 rounded-full blur-sm animate-pulse opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ animationDelay: "300ms" }}
+      />
       {/* Drag Handle - Top Left */}
       <div
         {...attributes}
@@ -234,7 +274,19 @@ function SortableImageItem({
         <GripVertical className="h-4 w-4" />
       </div>
 
-      {/* Thumbnail Container */}
+      {/* Drag Handle - Top Left */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-2 left-2 z-10 flex items-center justify-center cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors bg-background/80 backdrop-blur-sm rounded p-1 opacity-0 group-hover:opacity-100"
+        aria-label="Drag to reorder"
+      >
+        <GripVertical className="h-4 w-4" />
+      </div>
+
+      {/* Content wrapper with relative positioning */}
+      <div className="relative z-[5]">
+        {/* Thumbnail Container */}
       <div className="relative aspect-square w-full overflow-hidden rounded-t-lg">
         {image.image_url ? (
           <div 
@@ -443,10 +495,17 @@ function SortableImageItem({
                     {image.content_group}
                   </Badge>
                 )}
+                <Badge 
+                  variant={image.is_public ? "default" : "outline"} 
+                  className="text-xs"
+                >
+                  {image.is_public ? "Public" : "Private"}
+                </Badge>
               </div>
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );
@@ -476,6 +535,7 @@ export function AlbumImagesManager({
   const [editContentGroup, setEditContentGroup] = useState<string>("");
   const [editImageUrl, setEditImageUrl] = useState<string | null>(null);
   const [editSelectedFile, setEditSelectedFile] = useState<File | null>(null);
+  const [editIsPublic, setEditIsPublic] = useState<boolean>(false);
   const [imageToDelete, setImageToDelete] = useState<AlbumImage | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -537,6 +597,7 @@ export function AlbumImagesManager({
                   crop_shape: img.crop_shape,
                   content_type: img.content_type || null,
                   content_group: img.content_group || null,
+                  is_public: img.is_public ?? false,
                   sort_order: img.sort_order,
                 })),
             }),
@@ -625,6 +686,7 @@ export function AlbumImagesManager({
     setEditContentType(image.content_type || null);
     setEditContentGroup(image.content_group || "");
     setEditImageUrl(image.image_url);
+    setEditIsPublic(image.is_public ?? false);
     setEditSelectedFile(null);
     setIsEditModalOpen(true);
   };
@@ -636,6 +698,7 @@ export function AlbumImagesManager({
     setEditContentType(null);
     setEditContentGroup("");
     setEditImageUrl(null);
+    setEditIsPublic(false);
     setEditSelectedFile(null);
     setIsEditModalOpen(true);
   };
@@ -695,6 +758,7 @@ export function AlbumImagesManager({
               crop_shape: editShape,
               content_type: editContentType || null,
               content_group: editContentGroup.trim() || null,
+              is_public: editIsPublic,
             }),
           });
 
@@ -716,6 +780,7 @@ export function AlbumImagesManager({
                   content_type: editContentType || null,
                   content_group: editContentGroup.trim() || null,
                   image_url: finalImageUrl!,
+                  is_public: editIsPublic,
                 }
               : img
           );
@@ -737,6 +802,7 @@ export function AlbumImagesManager({
                 content_type: editContentType || null,
                 content_group: editContentGroup.trim() || null,
                 image_url: finalImageUrl!,
+                is_public: editIsPublic,
               }
             : img
         );
@@ -762,6 +828,7 @@ export function AlbumImagesManager({
               crop_shape: editShape,
               content_type: editContentType || null,
               content_group: editContentGroup.trim() || null,
+              is_public: editIsPublic,
               sort_order: localImages.length,
             }),
           });
@@ -782,6 +849,7 @@ export function AlbumImagesManager({
             crop_shape: editShape,
             content_type: editContentType || null,
             content_group: editContentGroup.trim() || null,
+            is_public: editIsPublic,
           }];
           updateImages(updatedImages);
           toast.success("Image added successfully");
@@ -800,6 +868,7 @@ export function AlbumImagesManager({
           crop_shape: editShape,
           content_type: editContentType || null,
           content_group: editContentGroup.trim() || null,
+          is_public: editIsPublic,
           sort_order: localImages.length,
         };
         const updatedImages = [...localImages, newImage];
@@ -815,6 +884,7 @@ export function AlbumImagesManager({
     setEditContentType(null);
     setEditContentGroup("");
     setEditImageUrl(null);
+    setEditIsPublic(false);
     setEditSelectedFile(null);
   };
 
@@ -824,6 +894,7 @@ export function AlbumImagesManager({
     setEditTitle("");
     setEditShape("circle");
     setEditImageUrl(null);
+    setEditIsPublic(false);
     setEditSelectedFile(null);
   };
 
@@ -836,12 +907,20 @@ export function AlbumImagesManager({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between mb-6">
-        <Label className="text-base font-semibold">Content Images</Label>
-        <Button type="button" onClick={handleAddNew} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Image
-        </Button>
+      <div className="mb-5">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+            <span className="w-1.5 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full"></span>
+            Content Images
+          </h2>
+          <Button type="button" onClick={handleAddNew} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Image
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground ml-5">
+          Upload and manage images for your album content
+        </p>
       </div>
 
       {localImages.length === 0 ? (
@@ -859,17 +938,27 @@ export function AlbumImagesManager({
             items={localImages.map((img) => img.id)}
             strategy={rectSortingStrategy}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {localImages.map((image) => (
-                <SortableImageItem
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {localImages.map((image, index) => (
+                <motion.div
                   key={image.id}
-                  image={image}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onView={handleView}
-                  onTitleUpdate={handleTitleUpdate}
-                  albumId={albumId}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: 0.2 + index * 0.05,
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
+                >
+                  <SortableImageItem
+                    image={image}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onView={handleView}
+                    onTitleUpdate={handleTitleUpdate}
+                    albumId={albumId}
+                  />
+                </motion.div>
               ))}
             </div>
           </SortableContext>
@@ -983,6 +1072,20 @@ export function AlbumImagesManager({
                 coverImageUrl={coverImageUrl}
                 cropShape={editShape}
                 placeholder="https://example.com/content-image.jpg"
+              />
+            </div>
+
+            <div className="flex items-center justify-between space-x-2">
+              <div className="space-y-0.5">
+                <Label htmlFor="is-public-toggle-image">Public Visibility</Label>
+                <p className="text-xs text-muted-foreground">
+                  Make this image publicly visible on the website
+                </p>
+              </div>
+              <Switch
+                id="is-public-toggle-image"
+                checked={editIsPublic}
+                onCheckedChange={setEditIsPublic}
               />
             </div>
           </div>

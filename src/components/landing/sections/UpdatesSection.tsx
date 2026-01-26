@@ -22,7 +22,7 @@ export default function UpdatesSection({
   columns = 3,
 }: UpdatesSectionProps) {
   return (
-    <section id="updates" className="py-10 md:py-20 px-6">
+    <section id="updates" className="py-10 md:py-20 px-6 relative z-10">
       <div className="container mx-auto px-0 md:px-8">
         <ScrollReveal>
           <div className="text-center mb-12">

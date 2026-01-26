@@ -8,7 +8,7 @@ interface GeneralSectionProps {
   preferences: SitePreference[];
   getPreferenceValue: (key: string) => any;
   handleValueChange: (key: string, value: any) => void;
-  updateMutation: { isPending: boolean };
+  updateMutation: { mutateAsync: (updates: { key: string; value: any }[]) => Promise<any>; isPending: boolean };
   getSectionData: () => any[];
   handleSectionOrderChange: (updatedSections: any[]) => void;
   albums?: any[];
@@ -68,6 +68,7 @@ export function GeneralSection({
                 getPreferenceValue={getPreferenceValue}
                 albums={albums}
                 albumsLoading={albumsLoading}
+                updateMutation={updateMutation}
               />
             );
           })}

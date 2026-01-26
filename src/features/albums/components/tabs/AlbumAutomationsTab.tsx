@@ -2,20 +2,18 @@
 
 import { motion } from "framer-motion";
 import { AutomationsTab } from "@/features/workflows/components/AutomationsTab";
-import type { AlbumImage, AlbumAudio } from "@/features/albums/types";
+import type { EntityWorkflowData } from "@/features/workflows/data-server";
 
 type AlbumAutomationsTabProps = {
   albumId: string;
   isNew: boolean;
-  initialImages?: AlbumImage[];
-  initialAudios?: AlbumAudio[];
+  initialWorkflowData?: EntityWorkflowData; // Pre-fetched workflow data for instant loading
 };
 
 export function AlbumAutomationsTab({
   albumId,
   isNew,
-  initialImages = [],
-  initialAudios = [],
+  initialWorkflowData,
 }: AlbumAutomationsTabProps) {
   if (isNew) {
     return (
@@ -39,8 +37,8 @@ export function AlbumAutomationsTab({
       <AutomationsTab
         entityType="albums"
         entityId={albumId}
-        images={initialImages}
-        tracks={initialAudios}
+        initialWorkflowData={initialWorkflowData}
+        // Images and tracks are fetched lazily when ConfigurationSidePanel opens
       />
     </motion.div>
   );

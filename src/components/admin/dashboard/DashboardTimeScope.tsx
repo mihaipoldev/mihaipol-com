@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type TimeScope = "7" | "30" | "90" | "365" | "all";
 
@@ -41,58 +41,104 @@ function setStoredScope(scope: TimeScope) {
 }
 
 export function DashboardTimeScope() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [currentScope, setCurrentScope] = useState<TimeScope>("30");
 
-  // Get scope from URL param, or localStorage, or default to "30"
-  const urlScope = searchParams.get("scope") as TimeScope | null;
-  const storedScope = getStoredScope();
-  const currentScope = urlScope || (mounted ? storedScope : "30");
-
-  // On mount, sync URL with localStorage if needed
+  // Get current scope from localStorage
   useEffect(() => {
     setMounted(true);
-    if (!urlScope && storedScope !== "30") {
-      // If no URL param but we have a stored scope (not default), update URL
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("scope", storedScope);
-      router.replace(`${pathname}?${params.toString()}`);
-    } else if (urlScope && urlScope !== storedScope) {
-      // If URL param differs from stored, update localStorage and cookie
-      setStoredScope(urlScope);
-    }
-  }, [pathname, router, searchParams, storedScope, urlScope]);
+    setCurrentScope(getStoredScope());
+  }, []);
+
+  // Listen for localStorage changes (from other tabs/windows)
+  useEffect(() => {
+    if (!mounted) return;
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        const newScope = e.newValue as TimeScope;
+        if (["7", "30", "90", "365", "all"].includes(newScope)) {
+          setCurrentScope(newScope);
+        }
+      }
+    };
+
+    // Poll for same-tab changes (storage event doesn't fire in same tab)
+    const interval = setInterval(() => {
+      const stored = getStoredScope();
+      if (stored !== currentScope) {
+        setCurrentScope(stored);
+      }
+    }, 100);
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [mounted, currentScope]);
+
+  // Get current scope label
+  const currentScopeLabel = timeScopeOptions.find((opt) => opt.value === currentScope)?.label || "30 days";
+
+  // Detect dark mode
+  useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains("dark"));
+    };
+    
+    checkDarkMode();
+    
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    
+    return () => observer.disconnect();
+  }, []);
 
   const handleScopeChange = (value: TimeScope) => {
     // Save to localStorage and cookie
     setStoredScope(value);
-
-    // Update URL
-    const params = new URLSearchParams(searchParams.toString());
-    if (value === "30") {
-      // Default value, remove from URL
-      params.delete("scope");
-    } else {
-      params.set("scope", value);
-    }
-    const queryString = params.toString();
-    router.push(`${pathname}${queryString ? `?${queryString}` : ""}`);
+    // Update local state immediately
+    setCurrentScope(value);
   };
 
   return (
-    <Select value={currentScope} onValueChange={handleScopeChange}>
-      <SelectTrigger className="w-[140px] h-9">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="h-auto p-0 font-semibold text-foreground hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-0 hover:bg-transparent cursor-pointer flex items-center gap-1.5 transition-colors"
+        >
+          {currentScopeLabel}
+          <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent 
+        align="end"
+        sideOffset={0}
+        className="px-0 py-2 border-0 w-32 bg-popover"
+        style={{
+          boxShadow: isDarkMode ? 'none' : 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;'
+        }}
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
         {timeScopeOptions.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
+          <DropdownMenuItem
+            key={option.value}
+            onClick={() => handleScopeChange(option.value)}
+            className={cn(
+              "cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground",
+              currentScope === option.value && "bg-accent/50"
+            )}
+          >
             {option.label}
-          </SelectItem>
+          </DropdownMenuItem>
         ))}
-      </SelectContent>
-    </Select>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

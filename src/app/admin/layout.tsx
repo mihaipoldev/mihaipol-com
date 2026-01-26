@@ -7,6 +7,7 @@ import { AdminFooter } from "@/components/admin/layout/AdminFooter";
 import { AdminBodyClass } from "@/components/admin/layout/AdminBodyClass";
 import { ColorInitializer } from "@/components/admin/initializers/ColorInitializer";
 import { AdminThemeProvider } from "@/providers/AdminThemeProvider";
+import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
 import { requireUserRedirect } from "@/lib/auth";
 import { getGradient, getSidebarGradient } from "@/lib/gradient-presets";
 import { headers } from "next/headers";
@@ -34,38 +35,40 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <AdminThemeProvider>
-      <>
-        <ColorInitializer />
-        <AdminBodyClass />
-        <div
-          className={`preset-balanced font-sans flex h-screen overflow-hidden flex-col ${getGradient()} ${getAllFontVariables()}`}
-        >
-          <div className="flex flex-1 overflow-hidden min-h-0">
-            {/* Desktop Sidebar - Full Height */}
-            <aside
-              className={`fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-sidebar-border ${getSidebarGradient()} lg:block overflow-y-auto`}
-            >
-              <AdminSidebar />
-            </aside>
-            {/* Main Content Area */}
-            <main className="flex-1 flex flex-col lg:pl-64 min-h-0">
-              <div className="flex-1 overflow-y-auto min-h-0">
-                <div className="mx-auto w-full max-w-[1400px] flex flex-col min-h-full">
-                  <AdminHeader />
-                  <AdminPageTransition>
-                    <div className="flex-1 flex flex-col pt-4 pb-0 md:pb-0 px-4 md:px-10 lg:px-12 space-y-4 md:space-y-6">
-                      {children}
-                    </div>
-                  </AdminPageTransition>
-                  <AdminFooter />
-                  {/* Mobile bottom spacer - creates scrollable space */}
-                  <div className="h-40 md:h-0 flex-shrink-0" aria-hidden="true" />
+      <AudioPlayerProvider>
+        <>
+          <ColorInitializer />
+          <AdminBodyClass />
+          <div
+            className={`preset-balanced font-sans flex h-screen overflow-hidden flex-col ${getGradient()} ${getAllFontVariables()}`}
+          >
+            <div className="flex flex-1 overflow-hidden min-h-0">
+              {/* Desktop Sidebar - Full Height */}
+              <aside
+                className={`fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-sidebar-border ${getSidebarGradient()} lg:block overflow-y-auto`}
+              >
+                <AdminSidebar />
+              </aside>
+              {/* Main Content Area */}
+              <main className="flex-1 flex flex-col lg:pl-64 min-h-0">
+                <div className="flex-1 overflow-y-auto min-h-0">
+                  <div className="mx-auto w-full max-w-[1400px] flex flex-col min-h-full">
+                    <AdminHeader />
+                    <AdminPageTransition>
+                      <div className="flex-1 flex flex-col pt-4 pb-0 md:pb-0 px-4 md:px-10 lg:px-12 space-y-4 md:space-y-6">
+                        {children}
+                      </div>
+                    </AdminPageTransition>
+                    <AdminFooter />
+                    {/* Mobile bottom spacer - creates scrollable space */}
+                    <div className="h-40 md:h-0 flex-shrink-0" aria-hidden="true" />
+                  </div>
                 </div>
-              </div>
-            </main>
+              </main>
+            </div>
           </div>
-        </div>
-      </>
+        </>
+      </AudioPlayerProvider>
     </AdminThemeProvider>
   );
 }

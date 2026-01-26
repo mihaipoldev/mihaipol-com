@@ -4,6 +4,7 @@ export type LandingPagePreset = {
   primary: string; // HSL values as "h s% l%"
   secondary: string;
   accent: string;
+  favorite?: boolean; // Optional to maintain backward compatibility
 };
 
 /**

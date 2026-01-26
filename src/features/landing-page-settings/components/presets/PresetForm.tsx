@@ -6,9 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ModalShell } from "@/components/ui/modal-shell";
 import { DialogFooter } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PresetColorPicker } from "./PresetColorPicker";
 import type { LandingPagePreset } from "@/lib/landing-page-presets";
 import { Loader2, Sparkles } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "sonner";
 
 interface PresetFormProps {
@@ -43,14 +51,15 @@ export function PresetForm({ isOpen, onClose, onSubmit, initialPreset, mode }: P
     }
   }, [isOpen, mode, initialPreset]);
 
-  const handleGeneratePreset = async () => {
+  const handleGeneratePreset = async (style: "artistic" | "vibrant") => {
     try {
       setIsGenerating(true);
 
-      // Call AI API to generate complete preset
+      // Call AI API to generate complete preset with style parameter
       const response = await fetch("/api/admin/ai/generate-preset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ style }),
       });
 
       if (!response.ok) {
@@ -117,25 +126,53 @@ export function PresetForm({ isOpen, onClose, onSubmit, initialPreset, mode }: P
           {/* Generate with AI Button - Only show in create mode */}
           {mode === "create" && (
             <div className="flex justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleGeneratePreset}
-                disabled={isGenerating}
-                className="gap-2"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4" />
-                    Generate with AI
-                  </>
-                )}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isGenerating}
+                    className="gap-2"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        Generate with AI
+                        <FontAwesomeIcon icon={faChevronDown} className="ml-1 h-3 w-3" />
+                      </>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="end" 
+                  className="px-0 py-2 border-0 w-56"
+                  style={{
+                    boxShadow: 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px'
+                  }}
+                >
+                  <DropdownMenuItem
+                    onClick={() => handleGeneratePreset("artistic")}
+                    disabled={isGenerating}
+                    className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Artistic & Mystic
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleGeneratePreset("vibrant")}
+                    disabled={isGenerating}
+                    className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Vibrant & Bold
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
 

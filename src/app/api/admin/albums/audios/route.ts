@@ -17,6 +17,7 @@ const albumAudioCreateSchema = z.object({
   file_size: z.number().int().min(0).nullable().optional(),
   highlight_start_time: z.number().nullable().optional(),
   content_group: z.string().nullable().optional(),
+  is_public: z.boolean().optional(),
   sort_order: z.number().int().min(0).optional(),
 });
 
@@ -28,6 +29,7 @@ const albumAudioUpdateSchema = z.object({
   file_size: z.number().int().min(0).nullable().optional(),
   highlight_start_time: z.number().nullable().optional(),
   content_group: z.string().nullable().optional(),
+  is_public: z.boolean().optional(),
   sort_order: z.number().int().min(0).optional(),
 });
 
@@ -42,6 +44,7 @@ const batchUpdateAudiosSchema = z.object({
       file_size: z.number().int().min(0).nullable().optional(),
       highlight_start_time: z.number().nullable().optional(),
       content_group: z.string().nullable().optional(),
+      is_public: z.boolean().optional(),
       sort_order: z.number().int().min(0),
     })
   ),

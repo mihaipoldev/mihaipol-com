@@ -455,6 +455,11 @@ export async function getAlbumBySlugAdmin(slug: string) {
 
     if (error) throw error;
 
+    // Performance monitoring
+    if (queryTime > 1000) {
+      console.warn(`⚠️ [DB] SLOW QUERY: getAlbumBySlugAdmin took ${queryTime.toFixed(0)}ms`);
+    }
+
     // Normalize labels: Supabase returns array even for one-to-one relationships
     if (data) {
       // Normalize album_images: Supabase returns array
@@ -467,6 +472,15 @@ export async function getAlbumBySlugAdmin(slug: string) {
         ? data.album_audios.sort((a: any, b: any) => a.sort_order - b.sort_order)
         : [];
 
+      // Performance warning if fetching many images/audios
+      const imageCount = normalizedImages.length;
+      const audioCount = normalizedAudios.length;
+      if (imageCount > 20 || audioCount > 20) {
+        console.warn(
+          `⚠️ [DB] Large dataset: Album has ${imageCount} images and ${audioCount} audio files. Consider pagination.`
+        );
+      }
+
       const normalizedData = {
         ...data,
         labels: Array.isArray(data.labels)
@@ -477,6 +491,13 @@ export async function getAlbumBySlugAdmin(slug: string) {
         album_images: normalizedImages,
         album_audios: normalizedAudios,
       };
+      
+      if (queryTime > 100) {
+        console.log(
+          `[DB] getAlbumBySlugAdmin: ${queryTime.toFixed(2)}ms (${imageCount} images, ${audioCount} audios)`
+        );
+      }
+      
       return normalizedData;
     }
 
@@ -502,6 +523,28 @@ export async function getAlbumImages(albumId: string) {
     return data || [];
   } catch (error) {
     console.error("Error fetching album images:", error);
+    return [];
+  }
+}
+
+/**
+ * Get all album audios for a specific album
+ */
+export async function getAlbumAudios(albumId: string) {
+  try {
+    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
+    const supabase = getServiceSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("album_audios")
+      .select("*")
+      .eq("album_id", albumId)
+      .order("sort_order", { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching album audios:", error);
     return [];
   }
 }
@@ -588,9 +631,14 @@ export async function getAlbumLinks(albumId: string) {
 
     if (error) throw error;
 
+    // Performance monitoring
+    if (queryTime > 500) {
+      console.warn(`⚠️ [DB] SLOW QUERY: getAlbumLinks took ${queryTime.toFixed(0)}ms`);
+    }
+
     // Normalize platforms: Supabase returns array even for one-to-one relationships
     if (data) {
-      return data.map((link: any) => ({
+      const normalizedData = data.map((link: any) => ({
         ...link,
         platforms: Array.isArray(link.platforms)
           ? link.platforms.length > 0
@@ -598,6 +646,12 @@ export async function getAlbumLinks(albumId: string) {
             : null
           : link.platforms || null,
       }));
+      
+      if (queryTime > 100) {
+        console.log(`[DB] getAlbumLinks: ${queryTime.toFixed(2)}ms (${normalizedData.length} links)`);
+      }
+      
+      return normalizedData;
     }
 
     return [];

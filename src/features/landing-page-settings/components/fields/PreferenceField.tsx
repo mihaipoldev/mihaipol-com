@@ -11,6 +11,7 @@ import {
   DAYS_BACK_OPTIONS,
 } from "../../utils/preference-constants";
 import { getDynamicLimitOptions } from "../../utils/preference-helpers";
+import { toast } from "sonner";
 
 interface PreferenceFieldProps {
   preference: SitePreference;
@@ -20,6 +21,7 @@ interface PreferenceFieldProps {
   getPreferenceValue: (key: string) => any;
   albums?: Album[];
   albumsLoading?: boolean;
+  updateMutation?: { mutateAsync: (updates: { key: string; value: any }[]) => Promise<any>; isPending: boolean };
 }
 
 export function PreferenceField({
@@ -30,6 +32,7 @@ export function PreferenceField({
   getPreferenceValue,
   albums,
   albumsLoading,
+  updateMutation,
 }: PreferenceFieldProps) {
   // Special handling for landing page preset selector (dev and prod)
   if (preference.key === "landing_page_preset_number" || 
@@ -37,6 +40,51 @@ export function PreferenceField({
     const label = preference.key.includes("prod") 
       ? "Production Preset" 
       : "Dev Preset";
+    
+    const isDevPreset = preference.key === "landing_page_preset_number";
+    
+    // Handle dev preset: save immediately
+    const handlePresetChange = async (newValue: any) => {
+      if (isDevPreset && updateMutation) {
+        // Save dev preset immediately
+        try {
+          // Process the preset value (same logic as in PreferencesSettings)
+          let processedValue: any = newValue;
+          if (typeof newValue === "object" && newValue !== null && "id" in newValue) {
+            const preset = newValue as any;
+            if (
+              typeof preset.id === "number" &&
+              typeof preset.name === "string" &&
+              typeof preset.primary === "string" &&
+              typeof preset.secondary === "string" &&
+              typeof preset.accent === "string"
+            ) {
+              processedValue = {
+                id: preset.id,
+                name: preset.name,
+                primary: preset.primary,
+                secondary: preset.secondary,
+                accent: preset.accent,
+                favorite: preset.favorite ?? false,
+              };
+            }
+          }
+          
+          await updateMutation.mutateAsync([{ key: preference.key, value: processedValue }]);
+          // Also update local state so UI reflects the change immediately
+          onChange(preference.key, newValue);
+          toast.success("Dev preset updated");
+        } catch (error: any) {
+          console.error("Error saving dev preset:", error);
+          toast.error(error.message || "Failed to save dev preset");
+          // Still update local state for UI feedback, but user will see error
+          onChange(preference.key, newValue);
+        }
+      } else {
+        // Production preset: use normal onChange (requires save)
+        onChange(preference.key, newValue);
+      }
+    };
     
     return (
       <PreferenceRow
@@ -46,8 +94,8 @@ export function PreferenceField({
       >
         <LandingPagePresetSelect
           value={value}
-          onChange={(newValue) => onChange(preference.key, newValue)}
-          disabled={disabled}
+          onChange={handlePresetChange}
+          disabled={disabled || (isDevPreset && updateMutation?.isPending)}
         />
       </PreferenceRow>
     );

@@ -17,8 +17,8 @@ export default function EventsSection({
   showPastStrikethrough,
 }: EventsSectionProps) {
   return (
-    <section id="events" className="py-24 pb-16 px-6 relative">
-      <div className="max-w-[1264px] mx-auto px-0 md:px-8 relative z-10">
+    <section id="events" className="py-24 pb-16 px-6 relative z-10">
+      <div className="max-w-[1264px] mx-auto px-0 md:px-8 relative">
         <ScrollReveal>
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">Upcoming Events</h2>

@@ -125,8 +125,13 @@ export function PreferencesSettings() {
 
       const originalValue = pref.value;
       
-      // Handle preset objects (compare by ID) - dev and prod presets
-      if (pref.key === "landing_page_preset_number" || pref.key === "landing_page_preset_prod") {
+      // Skip dev preset from change detection (it saves immediately)
+      if (pref.key === "landing_page_preset_number") {
+        return false;
+      }
+      
+      // Handle preset objects (compare by ID) - prod preset only
+      if (pref.key === "landing_page_preset_prod") {
         const currentId = getPresetId(currentValue);
         const originalId = getPresetId(originalValue);
         return currentId !== originalId;
@@ -164,8 +169,13 @@ export function PreferencesSettings() {
 
           let processedValue: any = currentValue;
           
-          // Handle preset objects - keep as object (both dev and prod)
-          if (pref.key === "landing_page_preset_number" || pref.key === "landing_page_preset_prod") {
+          // Skip dev preset (it saves immediately, not in batch)
+          if (pref.key === "landing_page_preset_number") {
+            return;
+          }
+          
+          // Handle preset objects - keep as object (prod preset only)
+          if (pref.key === "landing_page_preset_prod") {
             // If it's already an object, validate and use it directly
             if (typeof currentValue === "object" && currentValue !== null && "id" in currentValue) {
               // Ensure all required fields are present

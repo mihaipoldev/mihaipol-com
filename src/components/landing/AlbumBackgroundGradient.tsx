@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import { rgbToHsl, hslToRgb } from "@/lib/colorUtils";
 
 type AlbumBackgroundGradientProps = {
@@ -133,8 +134,12 @@ export default function AlbumBackgroundGradient({
   children,
   className = "",
 }: AlbumBackgroundGradientProps) {
+  const { theme, resolvedTheme } = useTheme();
   const [gradientColors, setGradientColors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Determine if we're in dark mode
+  const isDark = resolvedTheme === "dark" || theme === "dark";
 
   useEffect(() => {
     if (!coverImageUrl) {
@@ -174,18 +179,34 @@ export default function AlbumBackgroundGradient({
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      {/* Blurred album cover as background - darker blur effect */}
+      {/* Blurred album cover as background */}
       {coverImageUrl && (
         <div
           className="absolute inset-0 -z-10"
           style={{
             backgroundImage: `url(${coverImageUrl})`,
             backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundPosition: "center center",
             backgroundRepeat: "no-repeat",
-            filter: "blur(60px) brightness(1) saturate(1)",
-            transform: "scale(2)", // Scale up to avoid blur edges
-            opacity: 0.4,
+            filter: isDark 
+              ? "blur(60px) brightness(0.8) saturate(1)" 
+              : "blur(60px) brightness(1.5)",
+            transform: "scale(2)",
+            transformOrigin: "center center",
+            opacity: isDark ? 0.4 : 0.9,
+          }}
+        />
+      )}
+
+      {/* Base layer with gradient - different for light/dark */}
+      {colors.length >= 3 && (
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            background: isDark
+              ? `linear-gradient(135deg, ${rgbToRgba(colors[0], 0.4)} 0%, ${rgbToRgba(colors[1], 0.3)} 50%, ${rgbToRgba(colors[2], 0.4)} 100%)`
+              : `linear-gradient(135deg, ${rgbToRgba(colors[0], 0.3)} 0%, ${rgbToRgba(colors[1], 0.2)} 50%, ${rgbToRgba(colors[2], 0.3)} 100%), white`,
+            opacity: isDark ? 0.6 : 0.5,
           }}
         />
       )}

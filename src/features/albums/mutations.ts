@@ -119,10 +119,12 @@ export async function batchUpdateAlbumLinks(
     sort_order: number;
   }>
 ) {
+  const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+  
   try {
     const supabase = getServiceSupabaseClient();
 
-    // Get existing links for this album
+    // Get existing links for this album (optimized query)
     const { data: existingLinks, error: fetchError } = await supabase
       .from("album_links")
       .select("id")
@@ -134,11 +136,9 @@ export async function batchUpdateAlbumLinks(
     const newLinkIds = new Set(links.filter((link) => link.id).map((link) => link.id!));
 
     // Find links to delete (exist in DB but not in new list)
-    const linksToDelete = existingLinkIds
-      ? Array.from(existingLinkIds).filter((id) => !newLinkIds.has(id))
-      : [];
+    const linksToDelete = Array.from(existingLinkIds).filter((id) => !newLinkIds.has(id));
 
-    // Delete removed links
+    // Delete removed links in one operation
     if (linksToDelete.length > 0) {
       const { error: deleteError } = await supabase
         .from("album_links")
@@ -148,58 +148,55 @@ export async function batchUpdateAlbumLinks(
       if (deleteError) throw deleteError;
     }
 
-    // Process each link: update existing or create new
-    const updates: Promise<any>[] = [];
-    const creates: any[] = [];
+    // Prepare all links for upsert (handles both updates and creates in one operation)
+    // Only include id for existing links (updates), omit id for new links (creates)
+    const linksToUpsert = links.map((link) => {
+      const isUpdate = link.id && existingLinkIds.has(link.id);
+      return {
+        ...(isUpdate ? { id: link.id } : {}), // Only include id for updates
+        album_id: albumId,
+        platform_id: link.platform_id || null,
+        url: link.url,
+        cta_label: link.cta_label,
+        link_type: link.link_type || null,
+        sort_order: link.sort_order,
+      };
+    });
 
-    for (const link of links) {
-      if (link.id && existingLinkIds.has(link.id)) {
-        // Update existing link
-        updates.push(
-          Promise.resolve(
-            supabase
-              .from("album_links")
-              .update({
-                platform_id: link.platform_id || null,
-                url: link.url,
-                cta_label: link.cta_label,
-                link_type: link.link_type || null,
-                sort_order: link.sort_order,
-              })
-              .eq("id", link.id)
-          ).then(({ error }) => {
-            if (error) throw error;
-            return true;
-          })
-        );
-      } else {
-        // Create new link
-        creates.push({
-          album_id: albumId,
-          platform_id: link.platform_id || null,
-          url: link.url,
-          cta_label: link.cta_label,
-          link_type: link.link_type || null,
-          sort_order: link.sort_order,
+    // Use upsert for all links in one operation (much faster than individual updates!)
+    if (linksToUpsert.length > 0) {
+      const { error: upsertError } = await supabase
+        .from("album_links")
+        .upsert(linksToUpsert, {
+          onConflict: "id",
+          ignoreDuplicates: false,
         });
-      }
+
+      if (upsertError) throw upsertError;
     }
 
-    // Execute all updates
-    if (updates.length > 0) {
-      await Promise.all(updates);
-    }
+    const totalTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
 
-    // Create new links
-    if (creates.length > 0) {
-      const { error: createError } = await supabase.from("album_links").insert(creates);
-
-      if (createError) throw createError;
+    // Performance monitoring
+    if (totalTime > 500) {
+      console.warn(
+        `⚠️ [DB] SLOW MUTATION: batchUpdateAlbumLinks took ${totalTime.toFixed(0)}ms (${links.length} links)`
+      );
+    } else if (totalTime > 100) {
+      console.log(
+        `[DB] batchUpdateAlbumLinks: ${totalTime.toFixed(2)}ms (${links.length} links)`
+      );
     }
 
     return true;
   } catch (error) {
-    console.error("Error batch updating album links:", error);
+    const totalTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
+    console.error(
+      `Error batch updating album links (took ${totalTime.toFixed(2)}ms):`,
+      error
+    );
     throw error;
   }
 }
@@ -428,6 +425,8 @@ export async function batchUpdateAlbumImages(
     sort_order: number;
   }>
 ) {
+  const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+  
   try {
     const supabase = getServiceSupabaseClient();
 
@@ -443,34 +442,33 @@ export async function batchUpdateAlbumImages(
     const newImageIds = new Set(images.filter((img) => img.id).map((img) => img.id!));
 
     // Find images to delete (exist in DB but not in new list)
-    const imagesToDelete = existingImageIds
-      ? Array.from(existingImageIds).filter((id) => !newImageIds.has(id))
-      : [];
+    const imagesToDelete = Array.from(existingImageIds).filter((id) => !newImageIds.has(id));
 
-    // Get image URLs for images that will be deleted, then move to trash
+    // Get image URLs for images that will be deleted, then move to trash in parallel
     if (imagesToDelete.length > 0) {
       const imagesToDeleteData = existingImages?.filter((img) =>
         imagesToDelete.includes(img.id)
       );
 
-      // Move deleted images to trash before deleting from database
-      if (imagesToDeleteData) {
-        for (const imageToDelete of imagesToDeleteData) {
-          if (
-            imageToDelete.image_url &&
-            imageToDelete.image_url.includes("mihaipol-com.b-cdn.net")
-          ) {
-            try {
-              await moveToTrash(imageToDelete.image_url);
-            } catch (trashError) {
+      // Move deleted images to trash in parallel (much faster!)
+      if (imagesToDeleteData && imagesToDeleteData.length > 0) {
+        const trashPromises = imagesToDeleteData
+          .filter(
+            (img) =>
+              img.image_url && img.image_url.includes("mihaipol-com.b-cdn.net")
+          )
+          .map((img) =>
+            moveToTrash(img.image_url!).catch((trashError) => {
               // Log but don't fail - we'll still delete from DB
               console.error(
-                `Failed to move album image to trash (id: ${imageToDelete.id}):`,
+                `Failed to move album image to trash (id: ${img.id}):`,
                 trashError
               );
-            }
-          }
-        }
+            })
+          );
+
+        // Execute all trash operations in parallel
+        await Promise.all(trashPromises);
       }
 
       // Delete removed images from database
@@ -482,86 +480,91 @@ export async function batchUpdateAlbumImages(
       if (deleteError) throw deleteError;
     }
 
-    // Process each image: update existing or create new
-    const updates: Promise<any>[] = [];
-    const creates: any[] = [];
+    // Prepare all images for upsert (handles both updates and creates in one operation)
+    // Track which images had URL changes for trash cleanup
+    const imagesToUpsert = images.map((image) => {
+      const isUpdate = image.id && existingImageIds.has(image.id);
+      const existingImage = isUpdate
+        ? existingImages?.find((img) => img.id === image.id)
+        : null;
+      const oldImageUrl = existingImage?.image_url;
 
-    for (const image of images) {
-      if (image.id && existingImageIds.has(image.id)) {
-        // Update existing image - check if image_url changed
-        const existingImage = existingImages?.find((img) => img.id === image.id);
-        const oldImageUrl = existingImage?.image_url;
+      return {
+        ...(isUpdate ? { id: image.id } : {}), // Only include id for updates
+        album_id: albumId,
+        title: image.title || null,
+        image_url: image.image_url,
+        crop_shape: image.crop_shape,
+        content_type: image.content_type || null,
+        content_group: image.content_group || null,
+        sort_order: image.sort_order,
+        updated_at: isUpdate ? new Date().toISOString() : undefined,
+        // Store old URL for trash cleanup
+        _oldImageUrl: oldImageUrl,
+      };
+    });
 
-        // Update the database record
-        updates.push(
-          Promise.resolve(
-            supabase
-              .from("album_images")
-              .update({
-                title: image.title || null,
-                image_url: image.image_url,
-                crop_shape: image.crop_shape,
-                content_type: image.content_type || null,
-                content_group: image.content_group || null,
-                sort_order: image.sort_order,
-                updated_at: new Date().toISOString(),
-              })
-              .eq("id", image.id)
-          )
-            .then(({ error }) => {
-              if (error) throw error;
-              return { id: image.id, oldImageUrl, newImageUrl: image.image_url };
-            })
-        );
-      } else {
-        // Create new image
-        creates.push({
-          album_id: albumId,
-          title: image.title || null,
-          image_url: image.image_url,
-          crop_shape: image.crop_shape,
-          content_type: image.content_type || null,
-          content_group: image.content_group || null,
-          sort_order: image.sort_order,
+    // Use upsert for all images in one operation (much faster than individual updates!)
+    if (imagesToUpsert.length > 0) {
+      // Remove the _oldImageUrl field before upsert (it's just for tracking)
+      const imagesForUpsert = imagesToUpsert.map(({ _oldImageUrl, ...img }) => img);
+
+      const { error: upsertError } = await supabase
+        .from("album_images")
+        .upsert(imagesForUpsert, {
+          onConflict: "id",
+          ignoreDuplicates: false,
         });
-      }
-    }
 
-    // Execute all updates
-    if (updates.length > 0) {
-      const updateResults = await Promise.all(updates);
+      if (upsertError) throw upsertError;
 
-      // Move old images to trash for images that were replaced
-      for (const result of updateResults) {
-        if (
-          result.oldImageUrl &&
-          result.newImageUrl &&
-          result.oldImageUrl !== result.newImageUrl &&
-          result.oldImageUrl.includes("mihaipol-com.b-cdn.net")
-        ) {
-          try {
-            await moveToTrash(result.oldImageUrl);
-          } catch (trashError) {
+      // Move old images to trash for images that were replaced (in parallel)
+      const imagesToTrash = imagesToUpsert.filter(
+        (img) =>
+          img._oldImageUrl &&
+          img.image_url &&
+          img._oldImageUrl !== img.image_url &&
+          img._oldImageUrl.includes("mihaipol-com.b-cdn.net")
+      );
+
+      if (imagesToTrash.length > 0) {
+        const trashPromises = imagesToTrash.map((img) =>
+          moveToTrash(img._oldImageUrl!).catch((trashError) => {
             // Log but don't fail - database record is already updated
             console.error(
-              `Failed to move old album image to trash (id: ${result.id}):`,
+              `Failed to move old album image to trash (id: ${img.id}):`,
               trashError
             );
-          }
-        }
+          })
+        );
+
+        // Execute all trash operations in parallel
+        await Promise.all(trashPromises);
       }
     }
 
-    // Create new images
-    if (creates.length > 0) {
-      const { error: createError } = await supabase.from("album_images").insert(creates);
+    const totalTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
 
-      if (createError) throw createError;
+    // Performance monitoring
+    if (totalTime > 1000) {
+      console.warn(
+        `⚠️ [DB] SLOW MUTATION: batchUpdateAlbumImages took ${totalTime.toFixed(0)}ms (${images.length} images)`
+      );
+    } else if (totalTime > 100) {
+      console.log(
+        `[DB] batchUpdateAlbumImages: ${totalTime.toFixed(2)}ms (${images.length} images)`
+      );
     }
 
     return true;
   } catch (error) {
-    console.error("Error batch updating album images:", error);
+    const totalTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
+    console.error(
+      `Error batch updating album images (took ${totalTime.toFixed(2)}ms):`,
+      error
+    );
     throw error;
   }
 }
@@ -629,7 +632,24 @@ export async function updateAlbumAudio(id: string, updates: {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("[Mutations] Error updating album audio:", {
+        id,
+        error,
+        errorMessage: error.message,
+        errorCode: error.code,
+        updates: updates.waveform_peaks ? { ...updates, waveform_peaks: `[Array of ${updates.waveform_peaks.length} numbers]` } : updates,
+      });
+      throw error;
+    }
+
+    console.log("[Mutations] Successfully updated album audio:", {
+      id,
+      hasWaveformPeaks: !!data?.waveform_peaks,
+      waveformPeaksLength: data?.waveform_peaks?.length || 0,
+      waveformPeaksType: typeof data?.waveform_peaks,
+      waveformPeaksIsArray: Array.isArray(data?.waveform_peaks),
+    });
 
     // Move old audio to trash if audio_url changed and old audio is from our CDN
     if (
@@ -704,6 +724,8 @@ export async function batchUpdateAlbumAudios(
     sort_order: number;
   }>
 ) {
+  const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+  
   try {
     const supabase = getServiceSupabaseClient();
 
@@ -719,34 +741,33 @@ export async function batchUpdateAlbumAudios(
     const newAudioIds = new Set(audios.filter((audio) => audio.id).map((audio) => audio.id!));
 
     // Find audios to delete (exist in DB but not in new list)
-    const audiosToDelete = existingAudioIds
-      ? Array.from(existingAudioIds).filter((id) => !newAudioIds.has(id))
-      : [];
+    const audiosToDelete = Array.from(existingAudioIds).filter((id) => !newAudioIds.has(id));
 
-    // Get audio URLs for audios that will be deleted, then move to trash
+    // Get audio URLs for audios that will be deleted, then move to trash in parallel
     if (audiosToDelete.length > 0) {
       const audiosToDeleteData = existingAudios?.filter((audio) =>
         audiosToDelete.includes(audio.id)
       );
 
-      // Move deleted audios to trash before deleting from database
-      if (audiosToDeleteData) {
-        for (const audioToDelete of audiosToDeleteData) {
-          if (
-            audioToDelete.audio_url &&
-            audioToDelete.audio_url.includes("mihaipol-com.b-cdn.net")
-          ) {
-            try {
-              await moveToTrash(audioToDelete.audio_url);
-            } catch (trashError) {
+      // Move deleted audios to trash in parallel (much faster!)
+      if (audiosToDeleteData && audiosToDeleteData.length > 0) {
+        const trashPromises = audiosToDeleteData
+          .filter(
+            (audio) =>
+              audio.audio_url && audio.audio_url.includes("mihaipol-com.b-cdn.net")
+          )
+          .map((audio) =>
+            moveToTrash(audio.audio_url!).catch((trashError) => {
               // Log but don't fail - we'll still delete from DB
               console.error(
-                `Failed to move album audio to trash (id: ${audioToDelete.id}):`,
+                `Failed to move album audio to trash (id: ${audio.id}):`,
                 trashError
               );
-            }
-          }
-        }
+            })
+          );
+
+        // Execute all trash operations in parallel
+        await Promise.all(trashPromises);
       }
 
       // Delete removed audios from database
@@ -758,88 +779,92 @@ export async function batchUpdateAlbumAudios(
       if (deleteError) throw deleteError;
     }
 
-    // Process each audio: update existing or create new
-    const updates: Promise<any>[] = [];
-    const creates: any[] = [];
+    // Prepare all audios for upsert (handles both updates and creates in one operation)
+    // Track which audios had URL changes for trash cleanup
+    const audiosToUpsert = audios.map((audio) => {
+      const isUpdate = audio.id && existingAudioIds.has(audio.id);
+      const existingAudio = isUpdate
+        ? existingAudios?.find((a) => a.id === audio.id)
+        : null;
+      const oldAudioUrl = existingAudio?.audio_url;
 
-    for (const audio of audios) {
-      if (audio.id && existingAudioIds.has(audio.id)) {
-        // Update existing audio - check if audio_url changed
-        const existingAudio = existingAudios?.find((a) => a.id === audio.id);
-        const oldAudioUrl = existingAudio?.audio_url;
+      return {
+        ...(isUpdate ? { id: audio.id } : {}), // Only include id for updates
+        album_id: albumId,
+        title: audio.title || null,
+        audio_url: audio.audio_url,
+        duration: audio.duration ?? null,
+        file_size: audio.file_size ?? null,
+        highlight_start_time: audio.highlight_start_time ?? null,
+        content_group: audio.content_group || null,
+        sort_order: audio.sort_order,
+        updated_at: isUpdate ? new Date().toISOString() : undefined,
+        // Store old URL for trash cleanup
+        _oldAudioUrl: oldAudioUrl,
+      };
+    });
 
-        // Update the database record
-        updates.push(
-          Promise.resolve(
-            supabase
-              .from("album_audios")
-              .update({
-                title: audio.title || null,
-                audio_url: audio.audio_url,
-                duration: audio.duration ?? null,
-                file_size: audio.file_size ?? null,
-                highlight_start_time: audio.highlight_start_time ?? null,
-                content_group: audio.content_group || null,
-                sort_order: audio.sort_order,
-                updated_at: new Date().toISOString(),
-              })
-              .eq("id", audio.id)
-          )
-            .then(({ error }) => {
-              if (error) throw error;
-              return { id: audio.id, oldAudioUrl, newAudioUrl: audio.audio_url };
-            })
-        );
-      } else {
-        // Create new audio
-        creates.push({
-          album_id: albumId,
-          title: audio.title || null,
-          audio_url: audio.audio_url,
-          duration: audio.duration ?? null,
-          file_size: audio.file_size ?? null,
-          highlight_start_time: audio.highlight_start_time ?? null,
-          content_group: audio.content_group || null,
-          sort_order: audio.sort_order,
+    // Use upsert for all audios in one operation (much faster than individual updates!)
+    if (audiosToUpsert.length > 0) {
+      // Remove the _oldAudioUrl field before upsert (it's just for tracking)
+      const audiosForUpsert = audiosToUpsert.map(({ _oldAudioUrl, ...audio }) => audio);
+
+      const { error: upsertError } = await supabase
+        .from("album_audios")
+        .upsert(audiosForUpsert, {
+          onConflict: "id",
+          ignoreDuplicates: false,
         });
-      }
-    }
 
-    // Execute all updates
-    if (updates.length > 0) {
-      const updateResults = await Promise.all(updates);
+      if (upsertError) throw upsertError;
 
-      // Move old audios to trash for audios that were replaced
-      for (const result of updateResults) {
-        if (
-          result.oldAudioUrl &&
-          result.newAudioUrl &&
-          result.oldAudioUrl !== result.newAudioUrl &&
-          result.oldAudioUrl.includes("mihaipol-com.b-cdn.net")
-        ) {
-          try {
-            await moveToTrash(result.oldAudioUrl);
-          } catch (trashError) {
+      // Move old audios to trash for audios that were replaced (in parallel)
+      const audiosToTrash = audiosToUpsert.filter(
+        (audio) =>
+          audio._oldAudioUrl &&
+          audio.audio_url &&
+          audio._oldAudioUrl !== audio.audio_url &&
+          audio._oldAudioUrl.includes("mihaipol-com.b-cdn.net")
+      );
+
+      if (audiosToTrash.length > 0) {
+        const trashPromises = audiosToTrash.map((audio) =>
+          moveToTrash(audio._oldAudioUrl!).catch((trashError) => {
             // Log but don't fail - database record is already updated
             console.error(
-              `Failed to move old album audio to trash (id: ${result.id}):`,
+              `Failed to move old album audio to trash (id: ${audio.id}):`,
               trashError
             );
-          }
-        }
+          })
+        );
+
+        // Execute all trash operations in parallel
+        await Promise.all(trashPromises);
       }
     }
 
-    // Create new audios
-    if (creates.length > 0) {
-      const { error: createError } = await supabase.from("album_audios").insert(creates);
+    const totalTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
 
-      if (createError) throw createError;
+    // Performance monitoring
+    if (totalTime > 1000) {
+      console.warn(
+        `⚠️ [DB] SLOW MUTATION: batchUpdateAlbumAudios took ${totalTime.toFixed(0)}ms (${audios.length} audios)`
+      );
+    } else if (totalTime > 100) {
+      console.log(
+        `[DB] batchUpdateAlbumAudios: ${totalTime.toFixed(2)}ms (${audios.length} audios)`
+      );
     }
 
     return true;
   } catch (error) {
-    console.error("Error batch updating album audios:", error);
+    const totalTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
+    console.error(
+      `Error batch updating album audios (took ${totalTime.toFixed(2)}ms):`,
+      error
+    );
     throw error;
   }
 }

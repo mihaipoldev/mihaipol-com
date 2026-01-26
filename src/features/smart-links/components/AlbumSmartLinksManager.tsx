@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Plus, GripVertical } from "lucide-react";
+import { motion } from "framer-motion";
+import { X, Plus, GripVertical, Save, Loader2 } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -29,8 +30,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/admin/forms/AdminSelect";
-import { Label } from "@/components/ui/label";
 import { CreatePlatformModal } from "@/features/platforms/components/CreatePlatformModal";
+import { Separator } from "@/components/ui/separator";
 import { getCardGradient } from "@/lib/gradient-presets";
 import { cn } from "@/lib/utils";
 import type { AlbumLink, Platform } from "@/features/albums/types";
@@ -41,6 +42,8 @@ type AlbumSmartLinksManagerProps = {
   onChange: (links: AlbumLink[]) => void;
   onPlatformsChange?: (platforms: Platform[]) => void;
   validationErrors?: Record<string, { platform?: string; url?: string }>;
+  onSave?: () => void;
+  isSaving?: boolean;
 };
 
 type SortableLinkItemProps = {
@@ -96,21 +99,31 @@ function SortableLinkItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative flex gap-3 p-4 pr-10 border rounded-lg bg-muted/20 dark:bg-muted/10 backdrop-blur-sm",
-        isDragging ? "shadow-lg" : "shadow-sm"
+        "relative py-3 backdrop-blur-sm",
+
+        "group",
+        isDragging && "shadow-xl"
       )}
     >
+
       {/* Drag Handle */}
       <div
         {...filteredAttributes}
         {...listeners}
-        className="flex items-center justify-center cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute top-2 left-0 w-8 h-8 rounded-lg flex items-center justify-center cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground z-20 transition-colors duration-300"
+        style={{ cursor: 'grab' }}
+        onMouseDown={(e) => {
+          e.currentTarget.style.cursor = 'grabbing';
+        }}
+        onMouseUp={(e) => {
+          e.currentTarget.style.cursor = 'grab';
+        }}
       >
-        <GripVertical className="h-5 w-5" />
+        <GripVertical className="h-4 w-4 pointer-events-none" />
       </div>
 
       {/* Content */}
-      <div className="flex-1 space-y-3">
+      <div className="flex-1 space-y-3 pl-12 pr-10 relative z-0">
         {/* Platform Display (Read-only) */}
         <div className="space-y-1">
           {platform ? (
@@ -167,7 +180,7 @@ function SortableLinkItem({
         variant="ghost"
         size="icon"
         onClick={() => onDelete(link.id)}
-        className="absolute top-2 right-2 h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+        className="absolute top-2 right-0 h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-transparent z-10"
         title="Delete link"
       >
         <X className="h-4 w-4" />
@@ -182,6 +195,8 @@ export function AlbumSmartLinksManager({
   onChange,
   onPlatformsChange,
   validationErrors,
+  onSave,
+  isSaving = false,
 }: AlbumSmartLinksManagerProps) {
   const [localLinks, setLocalLinks] = useState<AlbumLink[]>(
     [...links].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
@@ -313,38 +328,62 @@ export function AlbumSmartLinksManager({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center">
-        <Label className="text-base font-semibold">Links</Label>
-      </div>
+      {/* Links List */}
 
       {localLinks.length === 0 ? (
         <div
           className={cn(
-            "text-sm text-muted-foreground py-8 border rounded-lg text-center bg-muted/20 dark:bg-muted/10 backdrop-blur-sm"
+            "relative p-5 rounded-xl bg-card/50 dark:bg-card/30 backdrop-blur-sm",
+            "bg-gradient-to-br from-primary/[2%] via-primary/[1%] to-transparent",
+            "shadow-lg overflow-hidden",
+            "text-sm text-muted-foreground py-8 text-center"
           )}
         >
-          No links added yet
+          {/* Decorative gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
+          <div className="relative z-10">No links added yet</div>
         </div>
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext
-            items={localLinks.map((link) => link.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-3">
-              {localLinks.map((link) => (
-                <SortableLinkItem
-                  key={link.id}
-                  link={link}
-                  platforms={platforms}
-                  onUpdate={handleUpdate}
-                  onDelete={handleDelete}
-                  validationErrors={validationErrors?.[link.id]}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+        >
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext
+              items={localLinks.map((link) => link.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-3">
+                {localLinks.map((link, index) => (
+                  <motion.div
+                    key={link.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.3,
+                      delay: 0.2 + index * 0.05,
+                      ease: [0.4, 0, 0.2, 1],
+                    }}
+                  >
+                    {index > 0 && (
+                      <div className="flex items-center justify-center my-4">
+                        <div className="w-2/3 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-40" />
+                      </div>
+                    )}
+                    <SortableLinkItem
+                      link={link}
+                      platforms={platforms}
+                      onUpdate={handleUpdate}
+                      onDelete={handleDelete}
+                      validationErrors={validationErrors?.[link.id]}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        </motion.div>
       )}
 
       <div className="pt-2 space-y-2">
@@ -414,6 +453,29 @@ export function AlbumSmartLinksManager({
             Add Link
           </ShadowButton>
         )}
+        
+        {/* Save Links Button - Right below Add Link */}
+        {onSave && (
+          <Button
+            type="button"
+            onClick={onSave}
+            disabled={isSaving}
+            className="w-full"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save Links
+              </>
+            )}
+          </Button>
+        )}
+        
         <CreatePlatformModal
           open={isCreatePlatformModalOpen}
           onOpenChange={setIsCreatePlatformModalOpen}

@@ -8,7 +8,7 @@ import { getAnalyticsScope } from "@/lib/analytics-scope";
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ scope?: string }>;
+  searchParams: Promise<Record<string, never>>;
 };
 
 async function AnalyticsContent({ scope }: { scope: string }) {
@@ -17,8 +17,8 @@ async function AnalyticsContent({ scope }: { scope: string }) {
 }
 
 export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const scope = await getAnalyticsScope(params.scope);
+  await searchParams; // Consume searchParams but don't use it
+  const scope = await getAnalyticsScope();
 
   return (
     <>

@@ -17,6 +17,7 @@ const presetSchema = z.object({
   primary: z.string().regex(/^\d+\s+\d+%\s+\d+%$/, "Invalid HSL format (expected: 'h s% l%')"),
   secondary: z.string().regex(/^\d+\s+\d+%\s+\d+%$/, "Invalid HSL format (expected: 'h s% l%')"),
   accent: z.string().regex(/^\d+\s+\d+%\s+\d+%$/, "Invalid HSL format (expected: 'h s% l%')"),
+  favorite: z.boolean().optional().default(false),
 });
 
 const updatePresetSchema = presetSchema.extend({
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
       primary: parsed.data.primary,
       secondary: parsed.data.secondary,
       accent: parsed.data.accent,
+      favorite: parsed.data.favorite ?? false,
     };
 
     presets.push(newPreset);
@@ -94,6 +96,7 @@ export async function PUT(request: NextRequest) {
       primary: parsed.data.primary,
       secondary: parsed.data.secondary,
       accent: parsed.data.accent,
+      favorite: parsed.data.favorite ?? false,
     };
 
     writeCustomPresets(presets);

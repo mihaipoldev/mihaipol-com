@@ -188,7 +188,7 @@ function MusicCollapsible({
             "[&>svg]:shrink-0",
             "[&>span:last-child]:truncate",
             isMusicActive
-              ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+              ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "px-5" : "px-4"}`
               : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
           )}
         >
@@ -223,7 +223,7 @@ function MusicCollapsible({
                   "[&>svg]:shrink-0",
                   "[&>span:last-child]:truncate",
                   isActive
-                    ? `${getSidebarAccentGradient()} relative font-semibold hover:font-semibold text-primary rounded-lg before:content-none ${isMobile ? "pl-6 pr-4" : "pl-5 pr-3"}`
+                    ? `${getSidebarAccentGradient()} relative font-semibold hover:font-semibold text-primary rounded-lg before:content-none ${isMobile ? "px-4" : "px-3"}`
                     : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-4" : "px-3"}`
                 )}
               >
@@ -354,7 +354,7 @@ function SidebarContent({
                     "[&>svg]:shrink-0",
                     "[&>span:last-child]:truncate",
                     isActive
-                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "px-5" : "px-4"}`
                       : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
                   )}
                 >
@@ -378,7 +378,7 @@ function SidebarContent({
                 "[&>svg]:shrink-0",
                 "[&>span:last-child]:truncate",
                 pathname === updatesItem.href || pathname.startsWith(updatesItem.href + "/")
-                  ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+                  ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "px-5" : "px-4"}`
                   : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
               )}
             >
@@ -416,7 +416,7 @@ function SidebarContent({
                     "[&>svg]:shrink-0",
                     "[&>span:last-child]:truncate",
                     isActive
-                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "px-5" : "px-4"}`
                       : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
                   )}
                 >
@@ -456,7 +456,7 @@ function SidebarContent({
                     "[&>svg]:shrink-0",
                     "[&>span:last-child]:truncate",
                     isActive
-                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "pl-8 pr-5" : "pl-7 pr-4"}`
+                      ? `${getSidebarAccentGradient()} relative font-bold hover:font-bold text-primary rounded-lg before:content-none ${isMobile ? "px-5" : "px-4"}`
                       : `text-sidebar-muted-foreground rounded-lg ${isMobile ? "px-5" : "px-4"}`
                   )}
                 >

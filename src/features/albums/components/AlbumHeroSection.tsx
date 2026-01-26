@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,20 @@ import { StateBadge } from "@/components/admin/StateBadge";
 import { DriveFolderBadge } from "@/features/google-drive/components/DriveFolderBadge";
 import { DriveFolderModal } from "@/features/google-drive/components/DriveFolderModal";
 import { EditAlbumDetailsModal } from "./EditAlbumDetailsModal";
-import { Edit, ExternalLink, Trash2 } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEllipsis,
+  faPencil,
+  faTrash,
+  faExternalLink,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import type { Album } from "@/features/albums/types";
 import { useRouter } from "next/navigation";
@@ -41,6 +54,24 @@ export function AlbumHeroSection({
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Detect dark mode
+  useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains("dark"));
+    };
+    
+    checkDarkMode();
+    
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    
+    return () => observer.disconnect();
+  }, []);
   
   // Drive folder state
   const [driveRefreshKey, setDriveRefreshKey] = useState(0);
@@ -148,7 +179,7 @@ export function AlbumHeroSection({
   const publicUrl = `/dev/albums/${initialAlbum.slug}`;
 
   return (
-    <AlbumBackgroundGradient coverImageUrl={initialAlbum.cover_image_url} className="-mx-16 px-16 -mt-4 py-6 mb-0 rounded-lg">
+    <AlbumBackgroundGradient coverImageUrl={initialAlbum.cover_image_url} className="-mx-16 px-16 -mt-4 py-6 -mb-12 pb-14 rounded-lg">
       <>
         <motion.div
           className="0"
@@ -194,41 +225,62 @@ export function AlbumHeroSection({
                     </p>
                   )}
                 </div>
-                {/* Action Buttons - Next to title */}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditModalOpen(true)}
-                    title="Edit Album"
-                    className="h-8 w-8 p-0 hover:bg-transparent"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    asChild
-                    title="View Live Page"
-                    className="h-8 w-8 p-0 hover:bg-transparent"
-                  >
-                    <a
-                      href={publicUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                {/* Action Menu - Three-dot button */}
+                <div className="flex items-center flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="no-shadow !shadow-[0_0_0_0_transparent] hover:!shadow-[0_0_0_0_transparent] dark:!shadow-[0_0_0_0_transparent] dark:hover:!shadow-[0_0_0_0_transparent] h-10 w-10 focus-visible:ring-0 hover:bg-transparent dark:hover:bg-transparent [&:hover_svg]:text-primary"
+                        style={{ boxShadow: "none" }}
+                      >
+                        <FontAwesomeIcon icon={faEllipsis} className="!h-5 !w-5 transition-colors duration-150" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent 
+                      align="end"
+                      sideOffset={0}
+                      className="px-0 py-2 border-0 w-48 bg-popover"
+                      style={{
+                        boxShadow: isDarkMode ? 'none' : 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px'
+                      }}
+                      onCloseAutoFocus={(e) => e.preventDefault()}
                     >
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDeleteDialogOpen(true)}
-                    title="Delete Album"
-                    className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-transparent"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditModalOpen(true);
+                        }}
+                        className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
+                      >
+                        <FontAwesomeIcon icon={faPencil} className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(publicUrl, "_blank", "noopener,noreferrer");
+                        }}
+                        className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
+                      >
+                        <FontAwesomeIcon icon={faExternalLink} className="mr-2 h-4 w-4" />
+                        Open Page
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteDialogOpen(true);
+                        }}
+                        className="text-destructive focus:text-destructive cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
+                      >
+                        <FontAwesomeIcon icon={faTrash} className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
 

@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { hslToCss, type LandingPagePreset } from "@/lib/landing-page-presets";
-import { Edit2, Trash2, Plus, ChevronDown, Check, Copy } from "lucide-react";
+import { Edit2, Trash2, Plus, ChevronDown, Check, Copy, Star } from "lucide-react";
 import { PresetForm } from "../presets/PresetForm";
 import {
   AlertDialog,
@@ -64,8 +64,12 @@ export function LandingPagePresetSelect({ value, onChange, disabled }: LandingPa
         }
         
         if (Array.isArray(presets)) {
-          // Sort presets by ID for consistent display
-          const sortedPresets = [...presets].sort((a, b) => a.id - b.id);
+          // Sort presets: favorites first, then by ID
+          const sortedPresets = [...presets].sort((a, b) => {
+            if (a.favorite && !b.favorite) return -1;
+            if (!a.favorite && b.favorite) return 1;
+            return a.id - b.id;
+          });
           setAllPresets(sortedPresets);
         } else {
           console.error("Unexpected API response format:", data);
@@ -123,7 +127,12 @@ export function LandingPagePresetSelect({ value, onChange, disabled }: LandingPa
       if (refreshResponse.ok) {
         const data = await refreshResponse.json();
         const presets = Array.isArray(data) ? data : (data?.data || []);
-        setAllPresets([...presets].sort((a, b) => a.id - b.id));
+        const sortedPresets = [...presets].sort((a, b) => {
+          if (a.favorite && !b.favorite) return -1;
+          if (!a.favorite && b.favorite) return 1;
+          return a.id - b.id;
+        });
+        setAllPresets(sortedPresets);
       }
       
       // Select the newly created preset
@@ -148,6 +157,7 @@ export function LandingPagePresetSelect({ value, onChange, disabled }: LandingPa
         body: JSON.stringify({
           id: editingPreset.id,
           ...presetData,
+          favorite: editingPreset.favorite ?? false, // Preserve favorite status
         }),
       });
 
@@ -164,7 +174,12 @@ export function LandingPagePresetSelect({ value, onChange, disabled }: LandingPa
       if (refreshResponse.ok) {
         const data = await refreshResponse.json();
         const presets = Array.isArray(data) ? data : (data?.data || []);
-        setAllPresets([...presets].sort((a, b) => a.id - b.id));
+        const sortedPresets = [...presets].sort((a, b) => {
+          if (a.favorite && !b.favorite) return -1;
+          if (!a.favorite && b.favorite) return 1;
+          return a.id - b.id;
+        });
+        setAllPresets(sortedPresets);
       }
       
       // Update selected preset if it was the one being edited
@@ -191,6 +206,7 @@ export function LandingPagePresetSelect({ value, onChange, disabled }: LandingPa
           primary: preset.primary,
           secondary: preset.secondary,
           accent: preset.accent,
+          favorite: false, // Duplicates start as not favorite
         }),
       });
 
@@ -207,10 +223,64 @@ export function LandingPagePresetSelect({ value, onChange, disabled }: LandingPa
       if (refreshResponse.ok) {
         const data = await refreshResponse.json();
         const presets = Array.isArray(data) ? data : (data?.data || []);
-        setAllPresets([...presets].sort((a, b) => a.id - b.id));
+        const sortedPresets = [...presets].sort((a, b) => {
+          if (a.favorite && !b.favorite) return -1;
+          if (!a.favorite && b.favorite) return 1;
+          return a.id - b.id;
+        });
+        setAllPresets(sortedPresets);
       }
     } catch (error: any) {
       toast.error(error.message || "Failed to duplicate preset");
+    }
+  };
+
+  const handleToggleFavorite = async (preset: LandingPagePreset, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent preset selection when clicking star
+    
+    try {
+      const response = await fetch("/api/admin/settings/presets", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: preset.id,
+          name: preset.name,
+          primary: preset.primary,
+          secondary: preset.secondary,
+          accent: preset.accent,
+          favorite: !preset.favorite,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to update favorite");
+      }
+
+      toast.success(preset.favorite ? "Removed from favorites" : "Added to favorites");
+      
+      // Refresh presets list
+      const refreshResponse = await fetch("/api/admin/settings/presets");
+      if (refreshResponse.ok) {
+        const data = await refreshResponse.json();
+        const presets = Array.isArray(data) ? data : (data?.data || []);
+        const sortedPresets = [...presets].sort((a, b) => {
+          if (a.favorite && !b.favorite) return -1;
+          if (!a.favorite && b.favorite) return 1;
+          return a.id - b.id;
+        });
+        setAllPresets(sortedPresets);
+        
+        // Update selected preset if it was the one being favorited
+        if (selectedPreset?.id === preset.id) {
+          const updatedPreset = sortedPresets.find((p) => p.id === preset.id);
+          if (updatedPreset) {
+            onChange(updatedPreset);
+          }
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update favorite");
     }
   };
 
@@ -234,7 +304,11 @@ export function LandingPagePresetSelect({ value, onChange, disabled }: LandingPa
       if (refreshResponse.ok) {
         const data = await refreshResponse.json();
         const presets = Array.isArray(data) ? data : (data?.data || []);
-        const sortedPresets = [...presets].sort((a, b) => a.id - b.id);
+        const sortedPresets = [...presets].sort((a, b) => {
+          if (a.favorite && !b.favorite) return -1;
+          if (!a.favorite && b.favorite) return 1;
+          return a.id - b.id;
+        });
         setAllPresets(sortedPresets);
         
         // If deleted preset was selected, select default (19) or first available
@@ -340,6 +414,27 @@ export function LandingPagePresetSelect({ value, onChange, disabled }: LandingPa
                           isSelected ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
                         )}
                       >
+                        {/* Star icon - always visible */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggleFavorite(preset, e)}
+                          className={cn(
+                            "flex-shrink-0 p-0.5 rounded transition-all",
+                            preset.favorite 
+                              ? "text-primary" 
+                              : "text-muted-foreground hover:text-primary"
+                          )}
+                          title={preset.favorite ? "Remove from favorites" : "Add to favorites"}
+                        >
+                          <Star 
+                            className={cn(
+                              "transition-all",
+                              preset.favorite 
+                                ? "h-4 w-4 fill-current" 
+                                : "h-3.5 w-3.5"
+                            )} 
+                          />
+                        </button>
                         <span className="text-sm font-medium whitespace-nowrap">{preset.name}</span>
                         {isSelected && <Check className="h-4 w-4 text-primary shrink-0" />}
                       </div>

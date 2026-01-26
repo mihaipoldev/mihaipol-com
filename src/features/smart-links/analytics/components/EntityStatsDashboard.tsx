@@ -2,7 +2,9 @@
 
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import { AdminMetricTab } from "@/components/admin/dashboard/AdminMetricTab";
+import { DashboardTimeScope } from "@/components/admin/dashboard/DashboardTimeScope";
 import { AnalyticsLineChart } from "./AnalyticsLineChart";
 import { getCardGradient } from "@/lib/gradient-presets";
 import { cn } from "@/lib/utils";
@@ -28,47 +30,75 @@ export function EntityStatsDashboard({ data, entityType, entityTitle }: EntitySt
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8">
-      <div
-        className={cn(
-          "rounded-xl overflow-hidden bg-card/50 text-card-foreground dark:bg-card/30 shadow-lg transition-all duration-300 hover:shadow-xl",
-          getCardGradient()
-        )}
-      >
-        <Tabs defaultValue="visits" className="w-full">
-          <TabsList className="grid grid-cols-2 w-full bg-transparent p-0 gap-0 overflow-hidden h-auto min-h-[88px] border-b border-border/30 rounded-none">
-            <AdminMetricTab
-              value="visits"
-              label="Page Visits"
-              metric={totalPageViews}
-              subtitle=""
-              className="border-r border-border/30"
-            />
-            <AdminMetricTab
-              value="clicks"
-              label="Service Clicks"
-              metric={totalServiceClicks}
-              subtitle=""
-            />
-          </TabsList>
+      {/* Overview Section */}
+      <section className="space-y-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+              <span className="w-1.5 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full"></span>
+              Overview
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2 ml-5">
+              Track page visits and service clicks over time
+            </p>
+          </div>
+          <div className="flex-shrink-0 pt-1">
+            <DashboardTimeScope />
+          </div>
+        </div>
+        <div
+          className={cn(
+            "rounded-xl overflow-hidden bg-card/50 text-card-foreground dark:bg-card/30 shadow-lg transition-all duration-300 hover:shadow-xl",
+            getCardGradient()
+          )}
+        >
+          <Tabs defaultValue="visits" className="w-full">
+            <TabsList className="grid grid-cols-2 w-full bg-transparent p-0 gap-0 overflow-hidden h-auto min-h-[88px] border-b border-border/30 rounded-none">
+              <AdminMetricTab
+                value="visits"
+                label="Page Visits"
+                metric={totalPageViews}
+                subtitle=""
+                className="border-r border-border/30"
+                disableAnimations={true}
+              />
+              <AdminMetricTab
+                value="clicks"
+                label="Service Clicks"
+                metric={totalServiceClicks}
+                subtitle=""
+                disableAnimations={true}
+              />
+            </TabsList>
 
-          <TabsContent value="visits" className="mt-0 dark:bg-transparent">
-            <div className="pr-6 pl-2 pt-10 pb-6">
-              <AnalyticsLineChart data={visitsSeries} />
-            </div>
-          </TabsContent>
+            <TabsContent value="visits" className="mt-0 dark:bg-transparent">
+              <div className="pr-6 pl-2 pt-10 pb-6">
+                <AnalyticsLineChart data={visitsSeries} />
+              </div>
+            </TabsContent>
 
-          <TabsContent value="clicks" className="mt-0 dark:bg-transparent">
-            <div className="pr-6 pl-2 pt-10 pb-6">
-              <AnalyticsLineChart data={clicksSeries} />
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
+            <TabsContent value="clicks" className="mt-0 dark:bg-transparent">
+              <div className="pr-6 pl-2 pt-10 pb-6">
+                <AnalyticsLineChart data={clicksSeries} valueLabel="clicks" />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </section>
 
-      {/* Sections outside tabs */}
+      {/* Platforms Section */}
       {showPlatforms && (
-        <section className="space-y-3">
-          <h2 className="text-xl font-semibold">Top Performing Platforms</h2>
+        <>
+          <section className="space-y-5">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+              <span className="w-1.5 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full"></span>
+              Top Performing Platforms
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2 ml-5">
+              See which streaming platforms are getting the most engagement
+            </p>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm table-fixed">
               <thead>
@@ -110,10 +140,21 @@ export function EntityStatsDashboard({ data, entityType, entityTitle }: EntitySt
             </table>
           </div>
         </section>
+        </>
       )}
 
-      <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Top Countries</h2>
+
+      {/* Geographic Section */}
+      <section className="space-y-5">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+            <span className="w-1.5 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full"></span>
+            Geographic Insights
+          </h2>
+          <p className="text-sm text-muted-foreground mt-2 ml-5">
+            Discover where your audience is located around the world
+          </p>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm table-fixed">
             <thead>

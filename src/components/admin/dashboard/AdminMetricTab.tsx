@@ -11,22 +11,17 @@ type AdminMetricTabProps = {
   metric: number | string;
   subtitle?: string;
   className?: string;
+  disableAnimations?: boolean;
 };
 
-export function AdminMetricTab({ value, label, metric, subtitle, className }: AdminMetricTabProps) {
+export function AdminMetricTab({ value, label, metric, subtitle, className, disableAnimations = false }: AdminMetricTabProps) {
   const subtleGradient = getGradient();
   const beforeGradientClasses = subtleGradient
     .split(" ")
     .map((cls) => `before:${cls}`)
     .join(" ");
 
-  return (
-    <motion.div
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      transition={{ duration: 0.15 }}
-      className="w-full"
-    >
+  const content = (
     <TabsTrigger
       value={value}
       className={cn(
@@ -45,18 +40,38 @@ export function AdminMetricTab({ value, label, metric, subtitle, className }: Ad
       <span className="relative z-10 text-xs md:text-sm text-sidebar-foreground/70 data-[state=active]:text-foreground/70 transition-colors duration-200 ease-in-out">
         {label}
       </span>
+      {disableAnimations ? (
+        <span className="relative z-10 text-2xl md:text-3xl font-semibold leading-none tabular-nums transition-colors duration-200 ease-in-out">
+          {metric}
+        </span>
+      ) : (
         <motion.span
           className="relative z-10 text-2xl md:text-3xl font-semibold leading-none tabular-nums transition-colors duration-200 ease-in-out"
           initial={{ scale: 0.95 }}
           animate={{ scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-        {metric}
+          {metric}
         </motion.span>
-        {subtitle && (
-          <span className="relative z-10 text-xs text-emerald-500">{subtitle}</span>
-        )}
+      )}
+      {subtitle && (
+        <span className="relative z-10 text-xs text-emerald-500">{subtitle}</span>
+      )}
     </TabsTrigger>
+  );
+
+  if (disableAnimations) {
+    return <div className="w-full">{content}</div>;
+  }
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ duration: 0.15 }}
+      className="w-full"
+    >
+      {content}
     </motion.div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AlbumImagesManager } from "../AlbumImagesManager";
 import { AlbumAudiosManager } from "../AlbumAudiosManager";
 import { Separator } from "@/components/ui/separator";
@@ -28,34 +27,17 @@ export function AlbumContentTab({
   onImagesChange,
   onAudiosChange,
 }: AlbumContentTabProps) {
-  const [albumImages, setAlbumImages] = useState<AlbumImage[]>(
-    initialImages || initialAlbum?.album_images || []
-  );
-  const [albumAudios, setAlbumAudios] = useState<AlbumAudio[]>(
-    initialAudios || initialAlbum?.album_audios || []
-  );
+  // No local state - parent manages everything
+  // Use props directly to avoid duplicate syncing
+  const albumImages = initialImages || initialAlbum?.album_images || [];
+  const albumAudios = initialAudios || initialAlbum?.album_audios || [];
 
-  // Sync images when initialImages or initialAlbum changes
-  useEffect(() => {
-    const images = initialImages || initialAlbum?.album_images || [];
-    setAlbumImages(images);
-  }, [initialImages, initialAlbum?.album_images]);
-
-  // Sync audios when initialAudios or initialAlbum changes
-  useEffect(() => {
-    const audios = initialAudios || initialAlbum?.album_audios || [];
-    setAlbumAudios(audios);
-  }, [initialAudios, initialAlbum?.album_audios]);
-
+  // Wrapper functions to handle optional callbacks
   const handleImagesChange = (images: AlbumImage[]) => {
-    setAlbumImages(images);
-    // Notify parent if callback provided
     onImagesChange?.(images);
   };
 
   const handleAudiosChange = (audios: AlbumAudio[]) => {
-    setAlbumAudios(audios);
-    // Notify parent if callback provided
     onAudiosChange?.(audios);
   };
 
@@ -80,8 +62,9 @@ export function AlbumContentTab({
       transition={{ duration: 0.2 }}
     >
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.3, delay: 0.05 }}
       >
         <AlbumImagesManager
@@ -91,11 +74,17 @@ export function AlbumContentTab({
           coverImageUrl={coverImageUrl || null}
         />
       </motion.div>
-      <Separator />
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
+      >
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.3, delay: 0.15 }}
       >
         <AlbumAudiosManager
           audios={albumAudios}

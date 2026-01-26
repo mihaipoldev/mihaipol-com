@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo } from "react";
+import { motion } from "framer-motion";
 import ReactFlow, {
   Background,
   Controls,
@@ -46,7 +47,15 @@ export function WorkflowCanvas({ workflows }: WorkflowCanvasProps) {
   );
 
   return (
-    <div className="w-full h-[600px] border rounded-lg">
+    <motion.div
+      className="w-full h-[600px] border rounded-lg overflow-hidden"
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{
+        duration: 0.4,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -59,6 +68,6 @@ export function WorkflowCanvas({ workflows }: WorkflowCanvasProps) {
         <Controls />
         <MiniMap />
       </ReactFlow>
-    </div>
+    </motion.div>
   );
 }

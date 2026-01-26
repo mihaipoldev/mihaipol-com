@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useInView, useReducedMotion } from "framer-motion";
-import { useRef, type ReactNode } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { type ReactNode } from "react";
 
 type ScrollRevealProps = {
   children: ReactNode;
@@ -16,8 +16,6 @@ export default function ScrollReveal({
   direction = "up",
   className,
 }: ScrollRevealProps) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.5 });
   const shouldReduceMotion = useReducedMotion();
 
   const getInitialPosition = () => {
@@ -56,15 +54,16 @@ export default function ScrollReveal({
 
   return (
     <motion.div
-      ref={ref}
       initial={getInitialPosition()}
-      animate={isInView ? getAnimatePosition() : getInitialPosition()}
+      whileInView={getAnimatePosition()}
+      viewport={{ once: false, amount: 0.2, margin: "0px 0px -100px 0px" }}
       transition={{
         duration: 0.6,
         delay,
         ease: [0.4, 0, 0.2, 1],
       }}
       className={className}
+      style={{ willChange: "opacity, transform" }}
     >
       {children}
     </motion.div>

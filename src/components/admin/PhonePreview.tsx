@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import SmartLinksPage from "@/features/smart-links/components/SmartLinksPage";
 import SmartLinksGradientBackground from "@/features/smart-links/layout/SmartLinksGradientBackground";
 import type { Album, AlbumLink } from "@/features/albums/types";
@@ -10,6 +11,9 @@ import type { SmartLink } from "@/features/smart-links/data";
 const PHONE_PREVIEW_COLORS = {
   // addressBarBg: '#5e6367',        // Address bar background - now using bg-background
 } as const;
+
+// Cache for extracted colors to avoid re-processing the same image
+const colorCache = new Map<string, string>();
 
 type PhonePreviewProps = {
   album: Album | null;
@@ -22,6 +26,13 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
   // Extract dominant color from cover image for phone frame
   useEffect(() => {
     const extractColorFromImage = async (imageUrl: string) => {
+      // Check cache first
+      const cachedColor = colorCache.get(imageUrl);
+      if (cachedColor) {
+        setPhoneColor(cachedColor);
+        return;
+      }
+
       try {
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -72,7 +83,20 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
           g = Math.floor(g * 0.3);
           b = Math.floor(b * 0.3);
 
-          setPhoneColor(`rgb(${r}, ${g}, ${b})`);
+          const extractedColor = `rgb(${r}, ${g}, ${b})`;
+          
+          // Cache the extracted color
+          colorCache.set(imageUrl, extractedColor);
+          
+          // Limit cache size to prevent memory leaks (keep last 50)
+          if (colorCache.size > 50) {
+            const firstKey = colorCache.keys().next().value;
+            if (firstKey !== undefined) {
+              colorCache.delete(firstKey);
+            }
+          }
+          
+          setPhoneColor(extractedColor);
         }
       } catch (error) {
         console.error("Error extracting color from image:", error);
@@ -91,7 +115,16 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
   }
 
   return (
-    <div className="hidden lg:block w-full">
+    <motion.div
+      className="hidden lg:block w-full"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{
+        duration: 0.4,
+        delay: 0.2,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+    >
       <div className="sticky top-6 flex justify-center items-start w-full">
         <div
           className="relative"
@@ -125,11 +158,11 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
               }}
             >
               {/* Status Bar */}
-              <div className="absolute top-[-0px] h-24 text-center align-middle left-0 right-0 h-8 bg-white/95 z-20 flex text-sm font-semibold text-foreground">
-                <span className="ml-12 text-xl text-black font-bold pt-[34px]">10:24</span>
-                <div className="flex items-center gap-1 ml-[165px] mt-[46px]">
+              <div className="absolute top-[19px] h-14 text-center align-middle left-0 right-0 bg-white/100 z-20 flex text-sm font-semibold text-foreground">
+                <span className="ml-12 text-xl text-black font-bold pt-[15px]">10:24</span>
+                <div className="flex items-center gap-1 ml-[165px] mt-[0px] !bg-white/95">
                   {/* Signal bars */}
-                  <img src="/apple-signal.png" alt="Signal" className="h-5 w-auto object-contain bg-transparent" />
+                  <img src="/apple-signal.png" alt="Signal" className="h-5 w-auto object-contain bg-transparent !bg-white/95" />
                   {/* Wi-Fi icon */}
                   <img
                     src="/apple-wifi-icon-17.jpg"
@@ -146,7 +179,7 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
               </div>
 
               {/* Safari Browser Bar */}
-              <div className="absolute top-[70px] left-0 right-0 h-12 bg-white/80 backdrop-blur-xl z-20 flex items-center justify-center px-3 border-b border-border/20">
+              <div className="absolute top-[70px] left-0 right-0 h-12 bg-white/100 backdrop-blur-xl z-20 flex items-center justify-center px-3 border-b border-border/20">
                 <div className="flex items-center justify-center gap-2 px-6">
                   {/* Address Bar */}
                   <div className="rounded-full px-4 py-1.5 flex items-center justify-center gap-2 bg-gray-200">
@@ -211,6 +244,6 @@ export function PhonePreview({ album, links }: PhonePreviewProps) {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

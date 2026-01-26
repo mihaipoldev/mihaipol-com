@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense, useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,18 @@ import { cn } from "@/lib/utils";
 import type { Album, AlbumLink, AlbumImage, AlbumAudio } from "@/features/albums/types";
 import { useAlbumTabs } from "../../hooks/useAlbumTabs";
 import { useAlbumAnalytics } from "../../hooks/useAlbumAnalytics";
+import { DashboardTimeScope } from "@/components/admin/dashboard/DashboardTimeScope";
+
+const STORAGE_KEY = "admin-analytics-scope";
+
+function getStoredScope(): string {
+  if (typeof window === "undefined") return "30";
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored && ["7", "30", "90", "365", "all"].includes(stored)) {
+    return stored;
+  }
+  return "30";
+}
 
 type AlbumOverviewTabProps = {
   albumId: string;
@@ -21,21 +34,60 @@ type AlbumOverviewTabProps = {
   initialAudios?: AlbumAudio[];
 };
 
-export function AlbumOverviewTab({
+function OverviewContent({
   albumId,
-  isNew,
   initialAlbum,
   initialLinks,
   initialImages = [],
   initialAudios = [],
-}: AlbumOverviewTabProps) {
+}: {
+  albumId: string;
+  initialAlbum: Album | null;
+  initialLinks: AlbumLink[];
+  initialImages: AlbumImage[];
+  initialAudios: AlbumAudio[];
+}) {
   const { setActiveTab } = useAlbumTabs();
+  
+  // Get initial scope from localStorage, or default to "30"
+  const getInitialScope = (): string => {
+    return getStoredScope();
+  };
+  
+  const [scope, setScope] = useState<string>(getInitialScope);
+
+  // Listen for localStorage changes
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        const newScope = e.newValue;
+        if (["7", "30", "90", "365", "all"].includes(newScope)) {
+          setScope(newScope);
+        }
+      }
+    };
+
+    // Poll for same-tab changes (storage event doesn't fire in same tab)
+    const interval = setInterval(() => {
+      const current = getStoredScope();
+      if (current !== scope) {
+        setScope(current);
+      }
+    }, 100);
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [scope]);
   
   // Fetch analytics data using shared hook (prevents duplicate requests)
   const { data: analyticsData, loading: isLoadingAnalytics } = useAlbumAnalytics(
     albumId,
-    "30",
-    !isNew && !!initialAlbum
+    scope,
+    !!initialAlbum
   );
 
   const formatNumber = (num: number) => {
@@ -52,19 +104,6 @@ export function AlbumOverviewTab({
     setActiveTab(tab);
   };
 
-  if (isNew) {
-    return (
-      <motion.p
-        className="text-sm text-muted-foreground"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.2 }}
-      >
-        Save the album first to view overview.
-      </motion.p>
-    );
-  }
-
   const topPlatforms = analyticsData?.perPlatformRows.slice(0, 4) || [];
   const displayImages = (initialImages || initialAlbum?.album_images || []).slice(0, 4);
   const imageCount = initialImages?.length || initialAlbum?.album_images?.length || 0;
@@ -77,6 +116,24 @@ export function AlbumOverviewTab({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
     >
+      {/* Overview Section Header */}
+      <section className="space-y-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+              <span className="w-1.5 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full"></span>
+              Overview
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2 ml-5">
+              Track page visits and service clicks over time
+            </p>
+          </div>
+          <div className="flex-shrink-0 pt-1">
+            <DashboardTimeScope />
+          </div>
+        </div>
+      </section>
+
       <motion.div
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
         initial={{ opacity: 0 }}
@@ -87,25 +144,43 @@ export function AlbumOverviewTab({
         <motion.div
           onClick={() => handleCardClick("analytics")}
           className={cn(
-            "p-6 rounded-lg border border-border bg-card/50",
-            "hover:bg-card hover:shadow-md transition-all duration-200 cursor-pointer",
-            "group"
+            "relative p-5 rounded-xl bg-sidebar backdrop-blur-sm",
+            "bg-gradient-to-br from-primary/[2%] via-primary/[1%] to-transparent",
+            "shadow-lg overflow-hidden",
+            "hover:shadow-xl transition-all duration-300",
+            "group cursor-pointer"
           )}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1, duration: 0.2 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.2,
+            delay: 0.05,
+            ease: [0.4, 0, 0.2, 1],
+          }}
         >
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-primary/10">
-                <BarChart3 className="h-5 w-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold">Analytics</h3>
-            </div>
-          </div>
+          {/* Decorative gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
 
-          {isLoadingAnalytics ? (
-            <div className="h-[220px] flex items-center justify-center">
+          {/* Sparkle decorations */}
+          <div className="absolute top-3 right-3 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm animate-pulse" />
+          <div
+            className="absolute top-6 right-8 w-1 h-1 bg-primary/20 rounded-full blur-sm animate-pulse"
+            style={{ animationDelay: "300ms" }}
+          />
+
+          {/* Content */}
+          <div className="space-y-4 relative z-10">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold text-foreground">Total Visits</h3>
+              {analyticsData && !isLoadingAnalytics && (
+                <div className="text-2xl font-bold text-foreground">
+                  {formatNumber(analyticsData.totalPageViews)}
+                </div>
+              )}
+            </div>
+
+            {isLoadingAnalytics ? (
+            <div className="h-[180px] flex items-center justify-center">
               <div className="flex flex-col items-center gap-4">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 <p className="text-sm text-muted-foreground">Loading analytics...</p>
@@ -113,62 +188,61 @@ export function AlbumOverviewTab({
             </div>
           ) : analyticsData ? (
             <>
-              <div className="mb-4 -mx-2">
-                <AnalyticsLineChart
-                  data={analyticsData.visitsSeries}
-                />
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <div className="space-y-1">
-                  <div className="text-muted-foreground">Total Visits</div>
-                  <div className="text-lg font-semibold">
-                    {formatNumber(analyticsData.totalPageViews)}
-                  </div>
+              {analyticsData.visitsSeries && analyticsData.visitsSeries.length > 0 ? (
+                <div className="-mx-[28px] -mb-4">
+                  <AnalyticsLineChart
+                    data={analyticsData.visitsSeries}
+                    hideAxes={true}
+                    hideYAxis={true}
+                    height={160}
+                    hideGrid={true}
+                  />
                 </div>
-                <div className="space-y-1">
-                  <div className="text-muted-foreground">Total Clicks</div>
-                  <div className="text-lg font-semibold">
-                    {formatNumber(analyticsData.totalServiceClicks)}
-                  </div>
+              ) : (
+                <div className="h-[120px] flex items-center justify-center text-muted-foreground">
+                  No chart data available
                 </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-4 w-full group-hover:bg-accent"
-                onClick={(e) => handleButtonClick(e, "analytics")}
-              >
-                View Full Analytics
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+              )}
             </>
           ) : (
             <div className="h-[120px] flex items-center justify-center text-muted-foreground">
               No analytics data available
             </div>
           )}
+          </div>
         </motion.div>
 
         {/* Links Card */}
         <motion.div
           onClick={() => handleCardClick("links")}
           className={cn(
-            "p-6 rounded-lg border border-border bg-card/50",
-            "hover:bg-card hover:shadow-md transition-all duration-200 cursor-pointer",
-            "group"
+            "relative p-5 rounded-xl bg-sidebar backdrop-blur-sm",
+            "bg-gradient-to-br from-primary/[2%] via-primary/[1%] to-transparent",
+            "shadow-lg overflow-hidden",
+            "hover:shadow-xl transition-all duration-300",
+            "group cursor-pointer"
           )}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.15, duration: 0.2 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.2,
+            delay: 0.1,
+            ease: [0.4, 0, 0.2, 1],
+          }}
         >
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-primary/10">
-                <Link2 className="h-5 w-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold">Distribution Links</h3>
-            </div>
-          </div>
+          {/* Decorative gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
+
+          {/* Sparkle decorations */}
+          <div className="absolute top-3 right-3 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm animate-pulse" />
+          <div
+            className="absolute top-6 right-8 w-1 h-1 bg-primary/20 rounded-full blur-sm animate-pulse"
+            style={{ animationDelay: "300ms" }}
+          />
+
+          {/* Content */}
+          <div className="space-y-4 relative z-10">
+            <h3 className="text-xl font-bold text-foreground">Distribution Links</h3>
 
           {topPlatforms.length > 0 ? (
             <>
@@ -203,52 +277,46 @@ export function AlbumOverviewTab({
                   </div>
                 )}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full group-hover:bg-accent"
-                onClick={(e) => handleButtonClick(e, "links")}
-              >
-                Manage Links
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
             </>
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">No links added yet</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full group-hover:bg-accent"
-                onClick={(e) => handleButtonClick(e, "links")}
-              >
-                Add Links
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
             </div>
           )}
+          </div>
         </motion.div>
 
         {/* Content Card */}
         <motion.div
           onClick={() => handleCardClick("content")}
           className={cn(
-            "p-6 rounded-lg border border-border bg-card/50",
-            "hover:bg-card hover:shadow-md transition-all duration-200 cursor-pointer",
-            "group"
+            "relative p-5 rounded-xl bg-sidebar backdrop-blur-sm",
+            "bg-gradient-to-br from-primary/[2%] via-primary/[1%] to-transparent",
+            "shadow-lg overflow-hidden",
+            "hover:shadow-xl transition-all duration-300",
+            "group cursor-pointer"
           )}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.2 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.2,
+            delay: 0.15,
+            ease: [0.4, 0, 0.2, 1],
+          }}
         >
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-primary/10">
-                <ImageIcon className="h-5 w-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold">Media Assets</h3>
-            </div>
-          </div>
+          {/* Decorative gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
+
+          {/* Sparkle decorations */}
+          <div className="absolute top-3 right-3 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm animate-pulse" />
+          <div
+            className="absolute top-6 right-8 w-1 h-1 bg-primary/20 rounded-full blur-sm animate-pulse"
+            style={{ animationDelay: "300ms" }}
+          />
+
+          {/* Content */}
+          <div className="space-y-4 relative z-10">
+            <h3 className="text-xl font-bold text-foreground">Media Assets</h3>
 
           {displayImages.length > 0 || audioCount > 0 ? (
             <>
@@ -276,52 +344,46 @@ export function AlbumOverviewTab({
                   {audioCount > 0 && `, ${audioCount} ${audioCount === 1 ? "audio file" : "audio files"}`}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full group-hover:bg-accent"
-                onClick={(e) => handleButtonClick(e, "content")}
-              >
-                Manage Assets
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
             </>
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">No content uploaded yet</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full group-hover:bg-accent"
-                onClick={(e) => handleButtonClick(e, "content")}
-              >
-                Add Content
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
             </div>
           )}
+          </div>
         </motion.div>
 
         {/* Automations Card */}
         <motion.div
           onClick={() => handleCardClick("automations")}
           className={cn(
-            "p-6 rounded-lg border border-border bg-card/50",
-            "hover:bg-card hover:shadow-md transition-all duration-200 cursor-pointer",
-            "group"
+            "relative p-5 rounded-xl bg-sidebar backdrop-blur-sm",
+            "bg-gradient-to-br from-primary/[2%] via-primary/[1%] to-transparent",
+            "shadow-lg overflow-hidden",
+            "hover:shadow-xl transition-all duration-300",
+            "group cursor-pointer"
           )}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.25, duration: 0.2 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.2,
+            delay: 0.2,
+            ease: [0.4, 0, 0.2, 1],
+          }}
         >
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-primary/10">
-                <Zap className="h-5 w-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold">Automations</h3>
-            </div>
-          </div>
+          {/* Decorative gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent pointer-events-none" />
+
+          {/* Sparkle decorations */}
+          <div className="absolute top-3 right-3 w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm animate-pulse" />
+          <div
+            className="absolute top-6 right-8 w-1 h-1 bg-primary/20 rounded-full blur-sm animate-pulse"
+            style={{ animationDelay: "300ms" }}
+          />
+
+          {/* Content */}
+          <div className="space-y-4 relative z-10">
+            <h3 className="text-xl font-bold text-foreground">Automations</h3>
 
           <div className="space-y-4">
             <div>
@@ -329,18 +391,58 @@ export function AlbumOverviewTab({
                 No active automations
               </p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full group-hover:bg-accent"
-              onClick={(e) => handleButtonClick(e, "automations")}
-            >
-              Set Up
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
+          </div>
           </div>
         </motion.div>
       </motion.div>
     </motion.div>
+  );
+}
+
+export function AlbumOverviewTab({
+  albumId,
+  isNew,
+  initialAlbum,
+  initialLinks,
+  initialImages = [],
+  initialAudios = [],
+}: AlbumOverviewTabProps) {
+  if (isNew) {
+    return (
+      <motion.p
+        className="text-sm text-muted-foreground"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        Save the album first to view overview.
+      </motion.p>
+    );
+  }
+
+  return (
+    <Suspense
+      fallback={
+        <motion.div
+          className="w-full flex items-center justify-center min-h-[400px]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Loading overview...</p>
+          </div>
+        </motion.div>
+      }
+    >
+      <OverviewContent
+        albumId={albumId}
+        initialAlbum={initialAlbum}
+        initialLinks={initialLinks}
+        initialImages={initialImages}
+        initialAudios={initialAudios}
+      />
+    </Suspense>
   );
 }

@@ -44,12 +44,12 @@ function DashboardLoadingScreen() {
 }
 
 type PageProps = {
-  searchParams: Promise<{ scope?: string }>;
+  searchParams: Promise<Record<string, never>>;
 };
 
 export default async function AdminDashboardPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const scope = await getAnalyticsScope(params.scope);
+  await searchParams; // Consume searchParams but don't use it
+  const scope = await getAnalyticsScope();
 
   return (
     <div className="w-full">

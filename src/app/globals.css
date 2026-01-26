@@ -701,6 +701,68 @@ body.preset-balanced div[role="menu"] {
    See src/lib/landing-page-presets-server.ts for CSS generation logic. */
 
 /* REMOVED: Hardcoded preset CSS for presets 1-22 - now generated dynamically */
+/* Floating orbs and glow effects */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-10px);
+  }
+  75% {
+    transform: translateY(-15px) translateX(5px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.orb-glow {
+  filter: blur(40px);
+  opacity: 0.6;
+  animation: pulse-glow 6s ease-in-out infinite;
+}
+
+.floating-element {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 15s ease infinite;
+}
+
 @keyframes glitch-horizontal {
   0%, 90%, 100% {
     transform: translateX(0);
@@ -739,6 +801,17 @@ body.preset-balanced div[role="menu"] {
   99% {
     transform: translateX(2px);
     opacity: 0.9;
+  }
+}
+
+@keyframes waveform-skeleton-pulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scaleY(0.75);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scaleY(1);
   }
 }
 

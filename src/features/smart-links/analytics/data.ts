@@ -359,6 +359,8 @@ export async function getEntityAnalyticsData(
 
   console.log(`[EntityAnalytics] Starting data fetch for ${entityType}:${entityId}`);
   console.log(`[EntityAnalytics] Date range: ${lookbackISO} to ${now.toISOString()}`);
+  console.log(`[EntityAnalytics] Series date range: ${thirtyDaysAgoISO} to ${now.toISOString()}`);
+  console.log(`[EntityAnalytics] Scope: ${scope}, lookbackDays: ${lookbackDays}, seriesDays: ${seriesDays}`);
 
   // For albums, we need to fetch album_links and platforms to track platform clicks
   let albumLinks: any[] = [];
@@ -368,12 +370,28 @@ export async function getEntityAnalyticsData(
 
   if (entityType === "album") {
     const refDataStart = performance.now();
-    const [{ data: platformsData = [] }, { data: albumLinksData = [] }] = await Promise.all([
-      supabase.from("platforms").select("id, name, icon_url"),
-      supabase.from("album_links").select("id, album_id, platform_id").eq("album_id", entityId),
-    ]);
-    platforms = platformsData ?? [];
+    
+    // First fetch album_links to determine which platforms we need
+    const { data: albumLinksData = [] } = await supabase
+      .from("album_links")
+      .select("id, album_id, platform_id")
+      .eq("album_id", entityId);
+    
     albumLinks = albumLinksData ?? [];
+
+    // Extract unique platform IDs from album links
+    const platformIds = [...new Set(albumLinks.map((l) => l.platform_id).filter(Boolean))] as string[];
+
+    // Fetch only platforms that are actually linked to this album
+    // This avoids fetching all platforms when we only need a few
+    const { data: platformsData = [] } = platformIds.length > 0
+      ? await supabase
+          .from("platforms")
+          .select("id, name, icon_url")
+          .in("id", platformIds)
+      : { data: [] };
+    
+    platforms = platformsData ?? [];
 
     // Build lookup maps
     for (const l of albumLinks) {
@@ -382,7 +400,7 @@ export async function getEntityAnalyticsData(
     }
     const refDataTime = performance.now() - refDataStart;
     console.log(
-      `[EntityAnalytics] Reference data fetch: ${refDataTime.toFixed(2)}ms (platforms: ${platforms.length}, links: ${albumLinks.length})`
+      `[EntityAnalytics] Reference data fetch: ${refDataTime.toFixed(2)}ms (platforms: ${platforms.length}/${platformIds.length} requested, links: ${albumLinks.length})`
     );
   }
 
@@ -399,7 +417,7 @@ export async function getEntityAnalyticsData(
     linkIds.push(entityId);
   }
 
-  // Totals filtered by entity
+  // Totals filtered by entity AND date range (to match the scope)
   const totalsStart = performance.now();
   const [pageViewsHead, linkClicksHead] = await Promise.all([
     supabase
@@ -407,7 +425,8 @@ export async function getEntityAnalyticsData(
       .select("*", { count: "exact", head: true })
       .eq("event_type", "page_view")
       .eq("entity_type", entityType)
-      .eq("entity_id", entityId),
+      .eq("entity_id", entityId)
+      .gte("created_at", lookbackISO), // Add date filter to match series queries
     linkIds.length > 0
       ? supabase
           .from("analytics_events")
@@ -415,6 +434,7 @@ export async function getEntityAnalyticsData(
           .eq("event_type", "link_click")
           .eq("entity_type", linkEntityType)
           .in("entity_id", linkIds)
+          .gte("created_at", lookbackISO) // Add date filter to match series queries
       : { count: 0 },
   ]);
   const totalsTime = performance.now() - totalsStart;
@@ -423,6 +443,7 @@ export async function getEntityAnalyticsData(
   console.log(
     `[EntityAnalytics] Totals fetch: ${totalsTime.toFixed(2)}ms (page views: ${totalPageViews}, clicks: ${totalServiceClicks})`
   );
+  console.log(`[EntityAnalytics] Totals are filtered by date range (>= ${lookbackISO}) to match scope`);
 
   // Fetch analytics events filtered by entity
   const analyticsQueriesStart = performance.now();
@@ -504,10 +525,31 @@ export async function getEntityAnalyticsData(
   ]);
   const analyticsQueriesTime = performance.now() - analyticsQueriesStart;
   console.log(`[EntityAnalytics] Analytics queries: ${analyticsQueriesTime.toFixed(2)}ms`);
-  console.log(`[EntityAnalytics]   - Page views: ${pageViews?.length || 0} rows`);
+  console.log(`[EntityAnalytics]   - Page views: ${pageViews?.length || 0} rows (filtered by date >= ${lookbackISO})`);
   console.log(`[EntityAnalytics]   - Link clicks: ${linkClicks?.length || 0} rows`);
   console.log(`[EntityAnalytics]   - Geo events: ${eventsForGeo?.length || 0} rows`);
-  console.log(`[EntityAnalytics]   - Recent events (${scope}): ${recentEvents?.length || 0} rows`);
+  console.log(`[EntityAnalytics]   - Recent events (${scope}): ${recentEvents?.length || 0} rows (filtered by date >= ${thirtyDaysAgoISO})`);
+  
+  // Debug: Show sample dates from page views if any exist
+  if (pageViews && pageViews.length > 0) {
+    const sampleDates = pageViews.slice(0, 3).map((pv: any) => pv.created_at);
+    console.log(`[EntityAnalytics]   - Sample page view dates:`, sampleDates);
+  } else {
+    console.log(`[EntityAnalytics]   - ⚠️ No page views found in date range! Check if events are older than ${lookbackISO}`);
+  }
+  
+  // Debug: Show sample dates from recent events if any exist
+  if (recentEvents && recentEvents.length > 0) {
+    const sampleDates = recentEvents.slice(0, 3).map((ev: any) => ev.created_at);
+    console.log(`[EntityAnalytics]   - Sample recent event dates:`, sampleDates);
+  } else {
+    console.log(`[EntityAnalytics]   - ⚠️ No recent events found in date range! Check if events are older than ${thirtyDaysAgoISO}`);
+  }
+  
+  // Performance warning for slow queries
+  if (analyticsQueriesTime > 1000) {
+    console.warn(`⚠️ [EntityAnalytics] SLOW QUERIES: Analytics queries took ${analyticsQueriesTime.toFixed(0)}ms`);
+  }
 
   // Process data
   const processingStart = performance.now();
@@ -552,9 +594,16 @@ export async function getEntityAnalyticsData(
 
   // For recent events, we need to check if they match our entity
   // Since we already filtered by entity_id, all events should match
+  let processedEvents = 0;
+  let skippedEvents = 0;
   for (const ev of (recentEvents ?? []) as any[]) {
     const key = toDayKey(ev.created_at);
-    if (!(key in visitsByDay)) continue;
+    if (!(key in visitsByDay)) {
+      skippedEvents++;
+      console.log(`[EntityAnalytics]   - Skipped event date ${ev.created_at} (key: ${key}) - not in dayKeys range`);
+      continue;
+    }
+    processedEvents++;
     if (ev.event_type === "page_view") {
       visitsByDay[key] += 1;
     } else if (ev.event_type === "link_click") {
@@ -565,6 +614,10 @@ export async function getEntityAnalyticsData(
   const clicksSeries = dayKeys.map((k) => ({ date: k, count: clicksByDay[k] || 0 }));
   const seriesTime = performance.now() - seriesStart;
   console.log(`[EntityAnalytics] Daily series building: ${seriesTime.toFixed(2)}ms`);
+  console.log(`[EntityAnalytics]   - Processed ${processedEvents} events, skipped ${skippedEvents} events`);
+  console.log(`[EntityAnalytics]   - DayKeys range: ${dayKeys[0]} to ${dayKeys[dayKeys.length - 1]}`);
+  console.log(`[EntityAnalytics]   - VisitsSeries total: ${visitsSeries.reduce((sum, d) => sum + d.count, 0)} visits`);
+  console.log(`[EntityAnalytics]   - ClicksSeries total: ${clicksSeries.reduce((sum, d) => sum + d.count, 0)} clicks`);
 
   // Build per-platform rows (only for albums)
   const perPlatformRows: PlatformRow[] = [];
@@ -590,6 +643,12 @@ export async function getEntityAnalyticsData(
   console.log(
     `[EntityAnalytics] TOTAL TIME: ${totalTime.toFixed(2)}ms (${(totalTime / 1000).toFixed(2)}s)`
   );
+  
+  // Performance warning for slow total time
+  if (totalTime > 2000) {
+    console.warn(`⚠️ [EntityAnalytics] SLOW TOTAL TIME: ${totalTime.toFixed(0)}ms (${(totalTime / 1000).toFixed(2)}s)`);
+  }
+  
   console.log(`[EntityAnalytics] ========================================`);
 
   return {

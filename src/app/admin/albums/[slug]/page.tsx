@@ -3,6 +3,8 @@ import { getAlbumBySlugAdmin, getAlbumLinks, getAlbumArtists } from "@/features/
 import { getAllLabels } from "@/features/labels/data";
 import { getAllPlatforms } from "@/features/smart-links/platforms/data";
 import { getAllArtists } from "@/features/artists/data";
+import { getEntityWorkflowDataServer } from "@/features/workflows/data-server";
+import { getEntityAnalyticsData } from "@/features/smart-links/analytics/data";
 import { AlbumPage } from "@/features/albums/components/AlbumPage";
 
 export const dynamic = "force-dynamic";
@@ -18,13 +20,24 @@ export default async function EditAlbumPage({ params }: PageProps) {
   // Fetch album first, then fetch related data
   const album = isNew ? null : await getAlbumBySlugAdmin(slug);
 
-  // Fetch all other data in parallel
-  const [links, albumArtists, labels, platforms, artists] = await Promise.all([
+  // Fetch all other data in parallel (including workflow and analytics data for instant tab loading)
+  const [links, albumArtists, labels, platforms, artists, workflowData, defaultAnalytics] = await Promise.all([
     isNew || !album ? Promise.resolve([]) : getAlbumLinks(album.id),
     isNew || !album ? Promise.resolve([]) : getAlbumArtists(album.id),
     getAllLabels(),
     getAllPlatforms(),
     getAllArtists(),
+    // Pre-fetch workflow data server-side for instant automations tab loading
+    isNew || !album
+      ? Promise.resolve({ workflows: [], presets: [], runs: [] })
+      : getEntityWorkflowDataServer("albums", album.id, 10),
+    // Pre-fetch analytics data for default scope (30 days) for instant analytics tab loading
+    isNew || !album
+      ? Promise.resolve(null)
+      : getEntityAnalyticsData("album", album.id, "30").catch((error) => {
+          console.error("Error pre-fetching analytics:", error);
+          return null; // Don't fail page load if analytics fails
+        }),
   ]);
 
   // If editing and album not found, redirect
@@ -42,6 +55,8 @@ export default async function EditAlbumPage({ params }: PageProps) {
       labels={labels}
       platforms={platforms}
       artists={artists}
+      initialWorkflowData={workflowData}
+      initialAnalytics={defaultAnalytics || undefined}
     />
   );
 }

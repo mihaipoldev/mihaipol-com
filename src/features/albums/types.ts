@@ -31,6 +31,7 @@ export type AlbumImage = {
   content_type?: string | null;
   content_group?: string | null;
   sort_order: number;
+  is_public?: boolean;
   created_at?: string;
   updated_at?: string;
 };
@@ -46,6 +47,7 @@ export type AlbumAudio = {
   waveform_peaks?: number[] | null; // Pre-computed waveform peaks for fast visualization
   content_group?: string | null;
   sort_order: number;
+  is_public?: boolean;
   created_at?: string;
   updated_at?: string;
 };

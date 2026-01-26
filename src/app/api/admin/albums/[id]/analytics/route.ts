@@ -16,9 +16,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     if ("status" in guard) return guard;
 
     const { id } = await params;
-    const { searchParams } = new URL(request.url);
-    const scopeParam = searchParams.get("scope");
-    const scope = await getAnalyticsScope(scopeParam);
+    const scope = await getAnalyticsScope();
 
     const data = await getEntityAnalyticsData("album", id, scope);
 

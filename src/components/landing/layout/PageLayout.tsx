@@ -8,6 +8,8 @@ import PageTransition from "./PageTransition";
 import Footer from "./Footer";
 import Header from "./Header";
 import { PresetCSSInjector } from "@/components/landing/PresetCSSInjector";
+import BackgroundOrbs from "@/components/landing/BackgroundOrbs";
+import FloatingParticles from "@/components/landing/FloatingParticles";
 
 type PageLayoutProps = {
   children: ReactNode;
@@ -138,7 +140,13 @@ export function PageLayout({ children, landingPagePreset = 19 }: PageLayoutProps
           transition: presetReady ? "opacity 0.2s ease-in" : "none",
         }}
       >
-      {/* Animated Background */}
+      {/* Background Orbs - Animated glowing orbs */}
+      <BackgroundOrbs />
+      
+      {/* Floating Particles - Small animated particles */}
+      <FloatingParticles />
+      
+      {/* Animated Background Gradient */}
       <div
         ref={gradientBgRef}
         className="fixed inset-0 bg-gradient-sunset opacity-10 animate-gradient-shift"

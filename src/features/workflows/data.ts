@@ -132,6 +132,8 @@ export async function getWorkflowRunsByEntity(
   entityId: string,
   limit: number = 10
 ): Promise<WorkflowRun[]> {
+  const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+  
   try {
     const supabase = getServiceSupabaseClient();
     const { data, error } = await supabase
@@ -154,7 +156,7 @@ export async function getWorkflowRunsByEntity(
     if (error) throw error;
 
     // Normalize workflows: Supabase returns array even for one-to-one relationships
-    return (data || []).map((run: any) => ({
+    const runs = (data || []).map((run: any) => ({
       ...run,
       workflow: Array.isArray(run.workflows)
         ? run.workflows.length > 0
@@ -162,8 +164,29 @@ export async function getWorkflowRunsByEntity(
           : null
         : run.workflows || null,
     })) as WorkflowRun[];
+
+    const totalTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
+
+    // Performance monitoring
+    if (totalTime > 500) {
+      console.warn(
+        `⚠️ [DB] SLOW QUERY: getWorkflowRunsByEntity took ${totalTime.toFixed(0)}ms (${runs.length} runs)`
+      );
+    } else if (totalTime > 100) {
+      console.log(
+        `[DB] getWorkflowRunsByEntity: ${totalTime.toFixed(2)}ms (${runs.length} runs)`
+      );
+    }
+
+    return runs;
   } catch (error) {
-    console.error("Error fetching workflow runs:", error);
+    const totalTime =
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
+    console.error(
+      `Error fetching workflow runs (took ${totalTime.toFixed(2)}ms):`,
+      error
+    );
     return [];
   }
 }

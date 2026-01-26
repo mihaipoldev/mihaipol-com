@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import AnimatedBackground from "../AnimatedBackground";
 import type { LandingAlbum, LandingEvent } from "../types";
 
 type HeroSectionProps = {
@@ -147,9 +148,12 @@ export default function HeroSection({
 
   return (
     <section ref={sectionRef} className="relative min-h-screen w-full overflow-hidden">
+      {/* Animated background with orbs and particles */}
+      <AnimatedBackground />
+      
       {/* Full width image - glued to top with fade at bottom */}
       <div className="absolute inset-0 w-full h-full">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.div
             key={currentImageIndex}
             initial={{ opacity: 0 }}

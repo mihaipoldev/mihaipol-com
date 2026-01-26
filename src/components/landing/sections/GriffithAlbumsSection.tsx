@@ -21,7 +21,7 @@ export default function GriffithAlbumsSection({
   griffithLabelSlug,
 }: GriffithAlbumsSectionProps) {
   return (
-    <section id="griffith-albums" className="pt-0 md:pt-16 px-6">
+    <section id="griffith-albums" className="pt-0 md:pt-16 px-6 relative z-10">
       <div className="container mx-auto px-0 md:px-8 pb-10 md:pb-20">
         <ScrollReveal>
           <div className="text-center mb-12">

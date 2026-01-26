@@ -24,7 +24,7 @@ export default function FeatureSection({
   const featured = featuredAlbum ?? null;
 
   return (
-    <section id="feature" className="py-8 md:py-16 px-6 relative overflow-hidden">
+    <section id="feature" className="py-8 md:py-16 px-6 relative overflow-hidden z-10">
       <div className="container mx-auto px-0 md:px-8 relative">
         <ScrollReveal>
           <div className="max-w-[1200px] mx-auto">

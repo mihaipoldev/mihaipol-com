@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AlbumSmartLinksManager } from "@/features/smart-links/components/AlbumSmartLinksManager";
 import { PhonePreview } from "@/components/admin/PhonePreview";
 import { Button } from "@/components/ui/button";
@@ -146,59 +146,56 @@ export function AlbumLinksTab({
 
   return (
     <motion.div
-      className="space-y-6"
+      className="space-y-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
     >
-      <motion.div
-        className="flex items-center justify-between"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.05 }}
-      >
-        <h2 className="text-lg font-semibold">Smart Links</h2>
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4 mr-2" />
-              Save Links
-            </>
-          )}
-        </Button>
-      </motion.div>
+      {/* Main Content Grid */}
       <motion.div
         className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
       >
-        {/* Left column: Links Manager */}
+        {/* Left column: Header + Links Manager */}
         <motion.div
-          className="lg:col-span-3"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          className="lg:col-span-3 space-y-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.15 }}
         >
+          {/* Header Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.05 }}
+          >
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+              <span className="w-1.5 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full"></span>
+              Smart Links
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2 ml-5">
+              Order and configure the services shown on your smart link page
+            </p>
+          </motion.div>
+
           <AlbumSmartLinksManager
             links={links}
             platforms={platforms}
             onChange={handleLinksChange}
             onPlatformsChange={handlePlatformsChange}
             validationErrors={linkValidationErrors}
+            onSave={handleSave}
+            isSaving={isSaving}
           />
         </motion.div>
 
         {/* Right column: Mobile Preview */}
         <motion.div
           className="lg:col-span-2 flex justify-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
         >
           <PhonePreview album={initialAlbum} links={links} />

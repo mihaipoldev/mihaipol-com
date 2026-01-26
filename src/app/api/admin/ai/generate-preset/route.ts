@@ -15,8 +15,140 @@ export async function POST(request: NextRequest) {
       return serverError("OpenRouter API key not configured", undefined);
     }
 
-    // Build comprehensive system prompt for color generation
-    const systemPrompt = `You are a world-class Art Director and Color Theorist specializing in high-end contemporary visual systems and gallery-grade palettes.
+    // Parse request body to get style parameter
+    let style: "artistic" | "vibrant" = "artistic";
+    try {
+      const body = await request.json();
+      style = body.style === "vibrant" ? "vibrant" : "artistic";
+    } catch {
+      // Default to artistic if no body or invalid JSON
+      style = "artistic";
+    }
+
+    // Build system prompt based on style
+    let systemPrompt: string;
+    
+    if (style === "vibrant") {
+      systemPrompt = `You are a world-class Art Director and Color Theorist specializing in vibrant, high-contrast, and energetic color palettes for modern digital products.
+
+Your task is to generate a 3-color palette that feels vibrant, energetic, and visually striking, with higher saturation and contrast than typical artistic palettes.
+
+The result must feel:
+- Vibrant and energetic
+- High contrast and bold
+- Modern and dynamic
+- Visually striking without being overwhelming
+
+---
+
+STEP 1 — COLOR THEORY STRATEGY
+
+**IMPORTANT: Randomly and EQUALLY select a base hue from the FULL color spectrum:**
+- Warm hues: Red, Orange, Yellow, Warm Pink, Coral
+- Cool hues: Blue, Cyan, Teal, Purple, Violet
+- Earth tones: Brown, Olive, Sage, Terracotta, Rust
+- Neutral tones: Slate, Steel, Taupe, Beige
+
+Then randomly choose ONE strategy:
+
+1. Monochromatic (with contrast)  
+   One hue family with clear separation in lightness and saturation.
+
+2. Analogous  
+   Three neighboring hues with distinct roles.
+
+3. Split-Complementary  
+   One dominant hue with two complementary counterpoints.
+
+4. Triadic (Artsy)  
+   Three equidistant hues with distinct roles.
+
+**CRITICAL: Truly randomize hue selection. Equal probability for warm, cool, earth, and neutral tones. Do not favor any color family.**
+
+---
+
+STEP 2 — COLOR RULES (VIBRANT STYLE)
+
+Generate three colors in HEX format with strict roles:
+
+PRIMARY COLOR  
+- Emotional anchor of the palette  
+- Must clearly read as a color, not a neutral  
+- HIGH saturation (65-90%) with medium to high lightness (45-70%)  
+- Can be ANY hue: warm (red, orange, yellow) OR cool (blue, cyan, purple, teal) OR earth (brown, olive, sage)  
+- Feels vibrant and energetic - explore all color families with higher saturation
+
+SECONDARY COLOR  
+- Used for backgrounds or large surfaces  
+- Medium-dark or dark, but with MORE saturation than typical muted palettes (30-60% saturation)  
+- Must clearly contrast with the primary  
+- Think vibrant charcoal, saturated slate, rich earth tones (not super dark or desaturated)  
+- Should feel more colorful than muted backgrounds
+
+ACCENT COLOR  
+- Used sparingly for emphasis  
+- Lighter or contrasting with HIGH saturation (70-95%)  
+- Must stand apart from primary or be analogous to primary  
+- High saturation - think vibrant pastels, bold highlights, energetic tones  
+- Should pop and create visual interest
+
+---
+
+HARD CONSTRAINTS (VIBRANT STYLE)
+
+- No pure greys as primary  
+- No three colors in the same luminance range  
+- Primary and secondary must be clearly distinguishable  
+- Avoid default web colors  
+- Primary color: saturation range 65–90%, lightness 45-70%  
+- Secondary color: saturation range 30–60% (more saturated than muted palettes), medium-dark lightness  
+- Accent color: saturation range 70–95%, can be lighter or contrasting  
+- Higher overall saturation than typical artistic palettes  
+- More contrast between colors  
+- **Vary hue selection across the full color spectrum - do not repeatedly use the same color families**  
+- Palette must feel vibrant and energetic, not muted or subtle
+
+---
+
+STEP 3 — NAME
+
+Create a 2–3 word energetic name inspired by:
+- Energy and vibrancy
+- Modern materials
+- Dynamic processes
+- Bold aesthetics
+
+Examples:
+Vibrant Coral  
+Electric Blue  
+Bold Sunset  
+Energetic Teal  
+Dynamic Indigo  
+Vivid Sage  
+Bold Terracotta  
+Electric Purple  
+Vibrant Mint  
+Energetic Gold
+
+---
+
+OUTPUT FORMAT (STRICT)
+
+Return ONLY this JSON:
+
+{
+  "primary_color": "#RRGGBB",
+  "secondary_color": "#RRGGBB",
+  "accent_color": "#RRGGBB",
+  "name": "Preset Name"
+}
+
+No markdown.  
+No explanation.  
+No extra text.`;
+    } else {
+      // Artistic style (original)
+      systemPrompt = `You are a world-class Art Director and Color Theorist specializing in high-end contemporary visual systems and gallery-grade palettes.
 
 Your task is to generate a 3-color palette that feels curated, intentional, and visually structured, suitable for a premium digital product or art-forward brand.
 
@@ -112,7 +244,7 @@ Worn Mineral (earth)
 Sage Rust (earth)  
 Deep Indigo (cool blue)  
 Violet Mist (cool purple)  
-Teal Depths (cool cyan)  
+Teal Depths (cool cyan)
 
 ---
 
@@ -129,8 +261,8 @@ Return ONLY this JSON:
 
 No markdown.  
 No explanation.  
-No extra text.
-`;
+No extra text.`;
+    }
 
     // Prepare request body
     const requestBody = {
@@ -142,7 +274,9 @@ No extra text.
         },
         {
           role: "user",
-          content: "Generate a complete preset configuration. Randomly select from the full color spectrum with equal probability for warm, cool, earth, and neutral tones. Return only the JSON object.",
+          content: style === "vibrant" 
+            ? "Generate a vibrant, high-contrast preset configuration with higher saturation and more energetic colors. Randomly select from the full color spectrum with equal probability for warm, cool, earth, and neutral tones. Return only the JSON object."
+            : "Generate a complete preset configuration. Randomly select from the full color spectrum with equal probability for warm, cool, earth, and neutral tones. Return only the JSON object.",
         },
       ],
       temperature: 1.3,

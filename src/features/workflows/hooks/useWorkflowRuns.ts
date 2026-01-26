@@ -16,10 +16,13 @@ export function useWorkflowRuns(
   entityType: string,
   entityId: string,
   limit: number = 10,
-  pollInterval?: number
+  pollInterval?: number,
+  skipInitialFetch?: boolean, // New parameter to skip initial fetch if data already exists
+  initialRuns?: WorkflowRun[] // Initial runs to use when skipping fetch
 ): UseWorkflowRunsResult {
-  const [runs, setRuns] = useState<WorkflowRun[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Initialize with initialRuns if provided and skipping fetch
+  const [runs, setRuns] = useState<WorkflowRun[]>(skipInitialFetch && initialRuns ? initialRuns : []);
+  const [isLoading, setIsLoading] = useState(!skipInitialFetch); // Don't show loading if skipping initial fetch
   const [error, setError] = useState<string | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -48,10 +51,20 @@ export function useWorkflowRuns(
     }
   }, [entityType, entityId, limit]);
 
-  // Initial fetch
+  // Initial fetch - skip if skipInitialFetch is true
   useEffect(() => {
-    fetchRuns();
-  }, [fetchRuns]);
+    if (!skipInitialFetch) {
+      fetchRuns();
+    }
+  }, [fetchRuns, skipInitialFetch]);
+
+  // Sync initialRuns when they change (if we're skipping initial fetch and don't have realtime data yet)
+  useEffect(() => {
+    if (skipInitialFetch && initialRuns && initialRuns.length > 0 && runs.length === 0) {
+      // Only set initial runs if we don't have any runs yet (before realtime subscription populates)
+      setRuns(initialRuns);
+    }
+  }, [skipInitialFetch, initialRuns, runs.length]);
 
   // Set up realtime subscription
   useEffect(() => {

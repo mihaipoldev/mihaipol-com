@@ -11,13 +11,13 @@ export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ scope?: string }>;
+  searchParams: Promise<Record<string, never>>;
 };
 
 export default async function UpdateStatsPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
-  const params2 = await searchParams;
-  const scope = await getAnalyticsScope(params2.scope);
+  await searchParams; // Consume searchParams but don't use it
+  const scope = await getAnalyticsScope();
 
   const update = await getUpdateBySlugAdmin(slug);
 

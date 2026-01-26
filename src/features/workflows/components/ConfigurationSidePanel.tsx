@@ -19,8 +19,8 @@ type ConfigurationSidePanelProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRunWorkflow: (inputData: Record<string, any>) => Promise<void>;
-  images: AlbumImage[];
-  tracks: AlbumAudio[];
+  images?: AlbumImage[]; // Made optional - will be fetched if not provided
+  tracks?: AlbumAudio[]; // Made optional - will be fetched if not provided
   entityType: string;
   entityId: string;
   defaultValues?: Record<string, any>;
@@ -31,8 +31,8 @@ export function ConfigurationSidePanel({
   open,
   onOpenChange,
   onRunWorkflow,
-  images,
-  tracks,
+  images: initialImages = [],
+  tracks: initialTracks = [],
   entityType,
   entityId,
   defaultValues,
@@ -40,6 +40,45 @@ export function ConfigurationSidePanel({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formKey, setFormKey] = useState(0);
   const formRef = useRef<DynamicFormRendererRef>(null);
+  const [images, setImages] = useState<AlbumImage[]>(initialImages);
+  const [tracks, setTracks] = useState<AlbumAudio[]>(initialTracks);
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
+
+  // Sync state when props change (if images/tracks are provided)
+  useEffect(() => {
+    if (initialImages.length > 0) {
+      setImages(initialImages);
+    }
+    if (initialTracks.length > 0) {
+      setTracks(initialTracks);
+    }
+  }, [initialImages, initialTracks]);
+
+  // Lazy load images/tracks when panel opens if not provided
+  useEffect(() => {
+    if (open && entityType === "albums" && (initialImages.length === 0 || initialTracks.length === 0)) {
+      setIsLoadingContent(true);
+      fetch(`/api/admin/albums/content?album_id=${entityId}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch album content");
+          return res.json();
+        })
+        .then((data) => {
+          if (initialImages.length === 0 && data.images) {
+            setImages(data.images);
+          }
+          if (initialTracks.length === 0 && data.audios) {
+            setTracks(data.audios);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching album content:", error);
+        })
+        .finally(() => {
+          setIsLoadingContent(false);
+        });
+    }
+  }, [open, entityType, entityId, initialImages.length, initialTracks.length]);
 
   // Reset form when modal opens/closes or workflow changes
   useEffect(() => {
@@ -125,7 +164,14 @@ export function ConfigurationSidePanel({
         </DialogFooter>
       }
     >
-      {!Array.isArray(inputSchema) || inputSchema.length === 0 ? (
+      {isLoadingContent ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Loading content...</p>
+          </div>
+        </div>
+      ) : !Array.isArray(inputSchema) || inputSchema.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <p>This workflow has no configuration options.</p>
           <p className="text-sm mt-2">

@@ -6,7 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PresetForm } from "./PresetForm";
 import type { LandingPagePreset } from "@/lib/landing-page-presets";
 import { hslToCss } from "@/lib/landing-page-presets";
-import { Edit2, Trash2, Plus, Sparkles, Loader2, Copy } from "lucide-react";
+import { Edit2, Trash2, Plus, Sparkles, Loader2, Copy, Heart } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +19,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { hslToHex } from "@/lib/colorUtils";
 
@@ -72,6 +80,7 @@ export function PresetList({ presets, onRefresh }: PresetListProps) {
         body: JSON.stringify({
           id: editingPreset.id,
           ...presetData,
+          favorite: editingPreset.favorite ?? false, // Preserve favorite status
         }),
       });
 
@@ -89,6 +98,33 @@ export function PresetList({ presets, onRefresh }: PresetListProps) {
     }
   };
 
+  const handleToggleFavorite = async (preset: LandingPagePreset) => {
+    try {
+      const response = await fetch("/api/admin/settings/presets", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: preset.id,
+          name: preset.name,
+          primary: preset.primary,
+          secondary: preset.secondary,
+          accent: preset.accent,
+          favorite: !preset.favorite,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to update favorite");
+      }
+
+      toast.success(preset.favorite ? "Removed from favorites" : "Added to favorites");
+      onRefresh();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update favorite");
+    }
+  };
+
   const handleDuplicate = async (preset: LandingPagePreset) => {
     try {
       const duplicateName = `Copy of ${preset.name}`;
@@ -101,6 +137,7 @@ export function PresetList({ presets, onRefresh }: PresetListProps) {
           primary: preset.primary,
           secondary: preset.secondary,
           accent: preset.accent,
+          favorite: false, // Duplicates start as not favorite
         }),
       });
 
@@ -179,6 +216,7 @@ export function PresetList({ presets, onRefresh }: PresetListProps) {
           primary: preset.primary,
           secondary: preset.secondary,
           accent: preset.accent,
+          favorite: preset.favorite ?? false,
         }),
       });
 
@@ -197,14 +235,15 @@ export function PresetList({ presets, onRefresh }: PresetListProps) {
     }
   };
 
-  const handleGeneratePreset = async () => {
+  const handleGeneratePreset = async (style: "artistic" | "vibrant") => {
     try {
       setIsGeneratingPreset(true);
 
-      // Call AI API to generate complete preset
+      // Call AI API to generate complete preset with style parameter
       const response = await fetch("/api/admin/ai/generate-preset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ style }),
       });
 
       if (!response.ok) {
@@ -245,23 +284,51 @@ export function PresetList({ presets, onRefresh }: PresetListProps) {
             <Plus className="h-4 w-4 mr-2" />
             Create Your First Preset
           </Button>
-          <Button
-            onClick={handleGeneratePreset}
-            disabled={isGeneratingPreset}
-            variant="outline"
-          >
-            {isGeneratingPreset ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                disabled={isGeneratingPreset}
+                variant="outline"
+              >
+                {isGeneratingPreset ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate with AI
+                    <FontAwesomeIcon icon={faChevronDown} className="ml-1 h-3 w-3" />
+                  </>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end"
+              className="px-0 py-2 border-0 w-56"
+              style={{
+                boxShadow: 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px'
+              }}
+            >
+              <DropdownMenuItem
+                onClick={() => handleGeneratePreset("artistic")}
+                disabled={isGeneratingPreset}
+                className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
+              >
                 <Sparkles className="h-4 w-4 mr-2" />
-                Generate with AI
-              </>
-            )}
-          </Button>
+                Artistic & Mystic
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleGeneratePreset("vibrant")}
+                disabled={isGeneratingPreset}
+                className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Vibrant & Bold
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <PresetForm
@@ -280,24 +347,52 @@ export function PresetList({ presets, onRefresh }: PresetListProps) {
         <div className="flex justify-between items-center">
           <h4 className="text-sm font-medium">Presets ({presets.length})</h4>
           <div className="flex gap-2">
-            <Button
-              onClick={handleGeneratePreset}
-              disabled={isGeneratingPreset}
-              size="sm"
-              variant="outline"
-            >
-              {isGeneratingPreset ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  disabled={isGeneratingPreset}
+                  size="sm"
+                  variant="outline"
+                >
+                  {isGeneratingPreset ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generate with AI
+                      <FontAwesomeIcon icon={faChevronDown} className="ml-1 h-3 w-3" />
+                    </>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                align="end"
+                className="px-0 py-2 border-0 w-56"
+                style={{
+                  boxShadow: 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px'
+                }}
+              >
+                <DropdownMenuItem
+                  onClick={() => handleGeneratePreset("artistic")}
+                  disabled={isGeneratingPreset}
+                  className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
+                >
                   <Sparkles className="h-4 w-4 mr-2" />
-                  Generate with AI
-                </>
-              )}
-            </Button>
+                  Artistic & Mystic
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleGeneratePreset("vibrant")}
+                  disabled={isGeneratingPreset}
+                  className="cursor-pointer !rounded-none px-4 py-2 focus:!bg-accent focus:!text-accent-foreground data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Vibrant & Bold
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button onClick={() => setIsCreateOpen(true)} size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Add Preset
@@ -306,7 +401,12 @@ export function PresetList({ presets, onRefresh }: PresetListProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {presets.map((preset) => (
+          {[...presets].sort((a, b) => {
+            // Sort favorites first, then by name
+            if (a.favorite && !b.favorite) return -1;
+            if (!a.favorite && b.favorite) return 1;
+            return a.name.localeCompare(b.name);
+          }).map((preset) => (
             <Card key={preset.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -323,6 +423,17 @@ export function PresetList({ presets, onRefresh }: PresetListProps) {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleToggleFavorite(preset)}
+                      title={preset.favorite ? "Remove from favorites" : "Add to favorites"}
+                      className={preset.favorite ? "text-red-500 hover:text-red-600" : ""}
+                    >
+                      <Heart 
+                        className={`h-4 w-4 ${preset.favorite ? "fill-current" : ""}`} 
+                      />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"

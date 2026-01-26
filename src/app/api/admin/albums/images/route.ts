@@ -16,6 +16,7 @@ const albumImageCreateSchema = z.object({
   crop_shape: z.enum(["circle", "square"]),
   content_type: z.string().nullable().optional(),
   content_group: z.string().nullable().optional(),
+  is_public: z.boolean().optional(),
   sort_order: z.number().int().min(0).optional(),
 });
 
@@ -26,6 +27,7 @@ const albumImageUpdateSchema = z.object({
   crop_shape: z.enum(["circle", "square"]).optional(),
   content_type: z.string().nullable().optional(),
   content_group: z.string().nullable().optional(),
+  is_public: z.boolean().optional(),
   sort_order: z.number().int().min(0).optional(),
 });
 
@@ -39,6 +41,7 @@ const batchUpdateImagesSchema = z.object({
       crop_shape: z.enum(["circle", "square"]),
       content_type: z.string().nullable().optional(),
       content_group: z.string().nullable().optional(),
+      is_public: z.boolean().optional(),
       sort_order: z.number().int().min(0),
     })
   ),
