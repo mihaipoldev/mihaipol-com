@@ -310,8 +310,7 @@ export async function getAlbumLinks(albumId: string) {
 
 export async function getAlbumArtists(albumId: string) {
   try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
+    const supabase = await getSupabaseServer();
 
     // Query optimized for: idx_album_artists_album_id_sort_order
     const { data, error } = await supabase
