@@ -18,7 +18,7 @@ async function fetchUpdates(options: FetchUpdatesOptions = {}) {
     // Select only needed columns
     let query = supabase
       .from("updates")
-      .select("id, title, slug, date, publish_status, image_url, description");
+      .select("id, title, slug, date, publish_status, image_url, description, tags, is_featured, show_cover_image, embeds, external_links");
 
     // Filter by publish status (matches index column order)
     // Uses: idx_updates_publish_status_date (DESC) for order="desc"
@@ -70,7 +70,7 @@ export async function getUpdateBySlug(slug: string) {
     // Query optimized for: idx_updates_slug_publish_status (partial index on published)
     const { data, error } = await supabase
       .from("updates")
-      .select("id, title, slug, date, publish_status, image_url, description, read_more_url")
+      .select("id, title, slug, date, publish_status, image_url, description, read_more_url, tags, is_featured, show_cover_image, embeds, external_links")
       .eq("slug", slug)
       .eq("publish_status", "published")
       .single();
@@ -94,7 +94,7 @@ export async function getAllUpdatesUnfiltered() {
 
     const { data, error } = await supabase
       .from("updates")
-      .select("id, title, slug, subtitle, date, publish_status, image_url, description, read_more_url")
+      .select("id, title, slug, subtitle, date, publish_status, image_url, description, read_more_url, tags, is_featured, show_cover_image, embeds, external_links, og_image_url, meta_description")
       .order("date", { ascending: false, nullsFirst: false });
 
     const queryTime =
@@ -143,7 +143,7 @@ export async function getUpdateBySlugAdmin(slug: string) {
     const { data, error } = await supabase
       .from("updates")
       .select(
-        "id, title, slug, subtitle, date, publish_status, image_url, description, read_more_url"
+        "id, title, slug, subtitle, date, publish_status, image_url, description, read_more_url, tags, is_featured, show_cover_image, embeds, external_links, og_image_url, meta_description"
       )
       .eq("slug", slug)
       .single();

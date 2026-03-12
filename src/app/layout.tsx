@@ -56,6 +56,18 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning className={`dark ${roboto.variable} ${activeFontPairing.heading.variable} ${activeFontPairing.body.variable} ${geistMono.variable}`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Disable browser scroll restoration - we handle it manually
+              if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+              }
+            `,
+          }}
+        />
+      </head>
       <body className="antialiased" suppressHydrationWarning>
         <ViewportFix />
         {/* AdminColorStyle applies server-side color IMMEDIATELY from database (runs first) */}

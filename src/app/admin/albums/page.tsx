@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getAllAlbumsWithLabels } from "@/features/albums/data";
+import { getAllAlbumsWithLabels } from "@/features/albums/data-admin-server";
 import { AlbumsList } from "@/features/albums/components/AlbumsList";
 import { AdminPageLoading } from "@/components/admin/ui/AdminPageLoading";
 

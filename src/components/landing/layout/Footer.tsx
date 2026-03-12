@@ -14,6 +14,13 @@ const socialLinks = [
   { name: "LinkMe", url: "https://link.me/mihaipol" },
 ];
 
+const sitemapLinks = [
+  { name: "Home", href: "/dev" },
+  { name: "Albums", href: "/dev/albums" },
+  { name: "Events", href: "/dev/events" },
+  { name: "Updates", href: "/dev/updates" },
+];
+
 export default function Footer() {
   return (
     <footer id="contact" className="relative py-12 px-6 overflow-hidden">
@@ -42,36 +49,64 @@ export default function Footer() {
       {/* Subtle top border */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/20 to-transparent" />
       <div className="container mx-auto relative">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col items-center text-center space-y-5 mb-10">
-            {/* Centered dot */}
-            <div className="w-12 h-12 rounded-full bg-gradient-accent shadow-card mb-4" />
+        <div className="max-w-5xl mx-auto">
+          {/* Centered circle */}
+          <div className="flex justify-center mb-6">
+            <div className="relative w-12 h-12">
+              {/* Base circle - full primary color */}
+              <div className="absolute inset-0 w-12 h-12 rounded-full bg-primary shadow-md" />
+              {/* Gradient overlay - secondary at 50% opacity */}
+              <div 
+                className="absolute inset-0 w-12 h-12 rounded-full shadow-md"
+                style={{
+                  background: `linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary) / 0.8) 50%, hsl(var(--accent)) 100%)`
+                }}
+              />
+            </div>
+          </div>
 
-            {/* Name */}
-            <h3 className="font-bold text-lg">Mihai Pol</h3>
+          <h3 className="font-bold text-lg text-center mb-8">Mihai Pol</h3>
 
-            {/* Contact section */}
-            <div className="grid grid-cols-3 items-center gap-8 text-sm text-muted-foreground max-w-xs mx-auto pt-">
+          {/* Sitemap - Horizontal */}
+          <div className="flex justify-center mb-8">
+            <nav className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+              {sitemapLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="text-foreground/80 hover:text-foreground transition-colors duration-200 text-sm relative group"
+                >
+                  <span className="relative z-10">{link.name}</span>
+                  <span className="absolute bottom-0 left-0 h-px bg-foreground/50 transition-all duration-300 ease-out w-0 group-hover:w-full" />
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* Bookings/Demos - Centered with divider */}
+          <div className="flex justify-center mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_1px_1fr] gap-5 md:gap-8 text-sm">
               <div className="flex flex-col items-center">
                 <p className="font-semibold text-xs uppercase tracking-wide text-muted-foreground mb-1">
                   Bookings
                 </p>
-                <Link href="mailto:ioana@griffith.ro" className="text-foreground no-underline">
+                <Link href="mailto:ioana@griffith.ro" className="text-foreground no-underline hover:text-foreground/80 transition-colors">
                   ioana@griffith.ro
                 </Link>
               </div>
-              <div className="h-8 w-px bg-border/30 mx-auto" />
+              <div className="hidden md:block w-px bg-border/30" />
               <div className="flex flex-col items-center">
                 <p className="font-semibold text-xs uppercase tracking-wide text-muted-foreground mb-1">
                   Demos
                 </p>
-                <Link href="mailto:mihaipol@griffith.ro" className="text-foreground no-underline">
+                <Link href="mailto:mihaipol@griffith.ro" className="text-foreground no-underline hover:text-foreground/80 transition-colors">
                   mihaipol@griffith.ro
                 </Link>
               </div>
             </div>
           </div>
 
+          {/* Bottom: Social links */}
           <div className="grid grid-cols-3 md:flex md:flex-wrap gap-4 md:gap-8 justify-items-center md:justify-center mb-8">
             {socialLinks.map((social, index) => {
               const isLastItem = index === socialLinks.length - 1;
@@ -100,6 +135,8 @@ export default function Footer() {
               );
             })}
           </div>
+
+          {/* Copyright */}
           <div className="text-center text-sm text-muted-foreground border-t border-border/50 pt-6">
             © {new Date().getFullYear()} Mihai Pol · Griffith Records
           </div>

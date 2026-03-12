@@ -23,7 +23,17 @@ export default function EventsSection({
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">Upcoming Events</h2>
             <p className="text-muted-foreground">Catch Mihai on tour.</p>
-            <div className="w-24 h-1 bg-gradient-accent mx-auto mt-6 rounded-full" />
+            <div className="relative w-24 h-1 mx-auto mt-6">
+              {/* Base - full primary color */}
+              <div className="absolute inset-0 w-24 h-1 rounded-full bg-primary" />
+              {/* Gradient overlay - secondary at 0.8 opacity */}
+              <div 
+                className="absolute inset-0 w-24 h-1 rounded-full"
+                style={{
+                  background: `linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary) / 0.8) 50%, hsl(var(--accent)) 100%)`
+                }}
+              />
+            </div>
           </div>
         </ScrollReveal>
         <EventsList events={events} showPastStrikethrough={showPastStrikethrough} />

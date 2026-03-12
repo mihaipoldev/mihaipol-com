@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import WaveSurfer from "wavesurfer.js";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -49,11 +49,20 @@ export function AudioTrackItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // Handle waveform ready callback
-  const handleWaveformReady = (wavesurfer: WaveSurfer) => {
-    wavesurferRef.current = wavesurfer;
-    setIsWaveformReady(true);
-  };
+  // Handle waveform ready callback - memoized to prevent infinite loops
+  const handleWaveformReady = useCallback((wavesurfer: WaveSurfer) => {
+    // Only update if not already ready to prevent unnecessary re-renders
+    if (wavesurferRef.current !== wavesurfer) {
+      wavesurferRef.current = wavesurfer;
+    }
+    setIsWaveformReady((prev) => {
+      // Only update if not already true
+      if (!prev) {
+        return true;
+      }
+      return prev;
+    });
+  }, []);
 
   // Handle context menu for setting highlight
   const handleWaveformContextMenu = (e: React.MouseEvent & { calculatedTime?: number }) => {

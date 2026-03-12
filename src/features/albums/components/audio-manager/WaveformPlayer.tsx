@@ -32,6 +32,7 @@ export function WaveformPlayer({
   const { theme, resolvedTheme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const lastContextMenuEventRef = useRef<React.MouseEvent<HTMLDivElement> | null>(null);
+  const onReadyCalledRef = useRef(false);
 
   const { wavesurfer, isReady, isPlaying } = useWaveform({
     audioUrl,
@@ -43,21 +44,32 @@ export function WaveformPlayer({
     resolvedTheme,
   });
 
-  // Notify parent when waveform is ready
+  // Notify parent when waveform is ready (only once)
   useEffect(() => {
-    if (wavesurfer && isReady && onReady) {
+    if (wavesurfer && isReady && onReady && !onReadyCalledRef.current) {
+      onReadyCalledRef.current = true;
       onReady(wavesurfer);
+    }
+    // Reset when waveform changes (new audio loaded)
+    if (!wavesurfer || !isReady) {
+      onReadyCalledRef.current = false;
     }
   }, [wavesurfer, isReady, onReady]);
 
-  // Notify parent of play/pause events
+  // Notify parent of play/pause events - use refs to avoid including callbacks in deps,
+  // which would cause infinite loop when parent re-renders (e.g. on highlight update)
+  const onPlayRef = useRef(onPlay);
+  const onPauseRef = useRef(onPause);
+  onPlayRef.current = onPlay;
+  onPauseRef.current = onPause;
+
   useEffect(() => {
-    if (isPlaying && onPlay) {
-      onPlay();
-    } else if (!isPlaying && onPause) {
-      onPause();
+    if (isPlaying && onPlayRef.current) {
+      onPlayRef.current();
+    } else if (!isPlaying && onPauseRef.current) {
+      onPauseRef.current();
     }
-  }, [isPlaying, onPlay, onPause]);
+  }, [isPlaying]);
 
   const handleContextMenuOpenChange = (open: boolean) => {
     // When menu closes without selection, clear the stored event
@@ -104,28 +116,71 @@ export function WaveformPlayer({
     lastContextMenuEventRef.current = null;
   };
 
+  const mouseDownRef = useRef<{ x: number; y: number; time: number } | null>(null);
+
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     // Only handle seeking when playing
     // When stopped, the overlay will handle play
     if (isPlaying && isReady && wavesurfer && e.button === 0) {
-      const waveform = e.currentTarget;
-      const rect = waveform.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const normalizedX = Math.max(0, Math.min(1, clickX / rect.width));
+      // Store initial mouse position to detect if it's a drag (scroll) vs click (seek)
+      mouseDownRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+        time: Date.now(),
+      };
+    }
+  };
 
-      console.log("[Waveform Debug] Seeking on mouseDown:", {
-        audioId,
-        clickX,
-        width: rect.width,
-        normalizedX,
-        seekToTime: `${Math.floor(normalizedX * wavesurfer.getDuration())}s`,
-      });
-
-      wavesurfer.seekTo(normalizedX);
-      if (onSeek) {
-        onSeek(normalizedX);
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    // If mouse moves significantly, it's likely a scroll/drag, not a seek
+    if (mouseDownRef.current) {
+      const deltaX = Math.abs(e.clientX - mouseDownRef.current.x);
+      const deltaY = Math.abs(e.clientY - mouseDownRef.current.y);
+      
+      // If vertical movement is greater than horizontal, it's a scroll - clear the ref
+      if (deltaY > deltaX && deltaY > 5) {
+        mouseDownRef.current = null;
       }
     }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only seek if it was a click (not a drag/scroll) and we're playing
+    if (
+      mouseDownRef.current &&
+      isPlaying &&
+      isReady &&
+      wavesurfer &&
+      e.button === 0
+    ) {
+      const deltaX = Math.abs(e.clientX - mouseDownRef.current.x);
+      const deltaY = Math.abs(e.clientY - mouseDownRef.current.y);
+      const deltaTime = Date.now() - mouseDownRef.current.time;
+      
+      // Only seek if it was a click (small movement, short duration)
+      if (deltaX < 5 && deltaY < 5 && deltaTime < 300) {
+        const waveform = e.currentTarget;
+        const rect = waveform.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const normalizedX = Math.max(0, Math.min(1, clickX / rect.width));
+
+        console.log("[Waveform Debug] Seeking on mouseUp:", {
+          audioId,
+          clickX,
+          width: rect.width,
+          normalizedX,
+          seekToTime: `${Math.floor(normalizedX * wavesurfer.getDuration())}s`,
+        });
+
+        wavesurfer.seekTo(normalizedX);
+        if (onSeek) {
+          onSeek(normalizedX);
+        }
+      }
+    }
+    
+    // Clear the ref
+    mouseDownRef.current = null;
   };
 
   const handlePlayOverlayClick = (e: React.MouseEvent) => {
@@ -161,6 +216,8 @@ export function WaveformPlayer({
               style={{ minHeight: `${WAVEFORM_CONFIG.height}px` }}
               onContextMenu={handleContextMenuTrigger}
               onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
             />
           </ContextMenuTrigger>
           <ContextMenuContent

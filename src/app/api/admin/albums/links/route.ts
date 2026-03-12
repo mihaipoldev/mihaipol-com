@@ -32,6 +32,11 @@ export async function POST(request: NextRequest) {
     return ok({ success: true });
   } catch (error: any) {
     console.error("Error batch updating album links:", error);
-    return serverError("Failed to update album links", error?.message);
+    const errorMessage = error?.message || "Unknown error";
+    const errorDetails = error?.details || error?.hint || "";
+    return serverError(
+      "Failed to update album links",
+      errorDetails ? `${errorMessage}: ${errorDetails}` : errorMessage
+    );
   }
 }

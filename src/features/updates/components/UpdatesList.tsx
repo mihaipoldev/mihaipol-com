@@ -35,6 +35,20 @@ type Update = {
   publish_status: "draft" | "scheduled" | "published" | "archived";
   image_url: string | null;
   read_more_url: string | null;
+  embeds?: Array<{
+    type: "youtube" | "spotify" | "bandcamp" | "soundcloud" | "instagram";
+    url?: string;
+    embed_code?: string;
+  }> | null;
+  tags?: string[] | null;
+  is_featured?: boolean | null;
+  show_cover_image?: boolean | null;
+  og_image_url?: string | null;
+  meta_description?: string | null;
+  external_links?: Array<{
+    label: string;
+    url: string;
+  }> | null;
 };
 
 type UpdatesListProps = {
@@ -49,9 +63,16 @@ function generateSlug(name: string): string {
 }
 
 export function UpdatesList({ initialUpdates }: UpdatesListProps) {
-  const [updates, setUpdates] = useState<Update[]>(
-    Array.isArray(initialUpdates) ? initialUpdates : []
-  );
+  // Ensure new fields have proper default values
+  const normalizedUpdates = (Array.isArray(initialUpdates) ? initialUpdates : []).map(update => ({
+    ...update,
+    embeds: Array.isArray(update.embeds) ? update.embeds : [],
+    tags: Array.isArray(update.tags) ? update.tags : [],
+    external_links: Array.isArray(update.external_links) ? update.external_links : [],
+    is_featured: Boolean(update.is_featured),
+  }));
+  
+  const [updates, setUpdates] = useState<Update[]>(normalizedUpdates);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingUpdate, setEditingUpdate] = useState<Update | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -66,8 +87,39 @@ export function UpdatesList({ initialUpdates }: UpdatesListProps) {
     setIsEditModalOpen(true);
   };
 
-  const handleEditSuccess = () => {
-    window.location.reload();
+  const handleEditSuccess = async () => {
+    try {
+      // Fetch updated data directly from Supabase
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+
+      const response = await fetch("/api/admin/updates", {
+        method: "GET",
+        headers: {
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+      });
+
+      if (response.ok) {
+        const updatedUpdates = await response.json();
+        // Normalize the new fields
+        const normalized = (Array.isArray(updatedUpdates) ? updatedUpdates : []).map(update => ({
+          ...update,
+          embeds: Array.isArray(update.embeds) ? update.embeds : [],
+          tags: Array.isArray(update.tags) ? update.tags : [],
+          external_links: Array.isArray(update.external_links) ? update.external_links : [],
+          is_featured: Boolean(update.is_featured),
+        }));
+        setUpdates(normalized);
+      } else {
+        // Fallback to reload if fetch fails
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error refreshing updates:", error);
+      // Fallback to reload if fetch fails
+      window.location.reload();
+    }
   };
 
   const handleDelete = async (id: string) => {

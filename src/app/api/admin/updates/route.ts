@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { createUpdate, updateUpdate, deleteUpdate } from "@/features/updates/mutations";
+import { getAllUpdatesUnfiltered } from "@/features/updates/data";
 import { updateCreateSchema, updateUpdateSchema } from "@/features/updates/schemas";
 import { ok, created, badRequest, serverError } from "@/lib/api";
 import { requireAdmin } from "@/lib/auth";
@@ -13,6 +14,18 @@ function handleSupabaseError(error: any) {
     });
   }
   return null;
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const guard = await requireAdmin(request);
+    if ("status" in (guard as any)) return guard as any;
+    const updates = await getAllUpdatesUnfiltered();
+    return ok(updates);
+  } catch (error: any) {
+    console.error("Error fetching updates:", error);
+    return serverError("Failed to fetch updates", error?.message);
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -49,7 +62,10 @@ export async function PUT(request: NextRequest) {
     if ("status" in (guard as any)) return guard as any;
     const json = await request.json();
     const parsed = updateUpdateSchema.safeParse(json);
-    if (!parsed.success) return badRequest("Invalid payload", parsed.error.flatten());
+    if (!parsed.success) {
+      console.error("Validation error for update:", JSON.stringify(parsed.error.flatten(), null, 2));
+      return badRequest("Invalid payload", parsed.error.flatten());
+    }
     const { id, ...updates } = parsed.data;
     const data = await updateUpdate(id, updates);
     return ok(data);

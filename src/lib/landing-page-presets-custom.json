@@ -8,14 +8,6 @@
     "favorite": false
   },
   {
-    "id": 4,
-    "name": "Soft Tech (Mint + Teal)",
-    "primary": "165 65% 40%",
-    "secondary": "150 25% 35%",
-    "accent": "200 40% 45%",
-    "favorite": false
-  },
-  {
     "id": 10,
     "name": "Deep Navy & Gold",
     "primary": "45 85% 56%",
@@ -176,22 +168,6 @@
     "favorite": false
   },
   {
-    "id": 45,
-    "name": "Dynamic Ember",
-    "primary": "11 100% 60%",
-    "secondary": "197 100% 25%",
-    "accent": "52 100% 60%",
-    "favorite": false
-  },
-  {
-    "id": 46,
-    "name": "regtre",
-    "primary": "0 36% 56%",
-    "secondary": "223 53% 40%",
-    "accent": "113 48% 40%",
-    "favorite": false
-  },
-  {
     "id": 47,
     "name": "Earthen Sheen",
     "primary": "11 28% 53%",
@@ -205,6 +181,14 @@
     "primary": "217 91% 60%",
     "secondary": "12 36% 30%",
     "accent": "337 92% 54%",
+    "favorite": false
+  },
+  {
+    "id": 49,
+    "name": "Sunset Alloy",
+    "primary": "39 100% 45%",
+    "secondary": "320 3% 23%",
+    "accent": "38 100% 75%",
     "favorite": false
   }
 ]

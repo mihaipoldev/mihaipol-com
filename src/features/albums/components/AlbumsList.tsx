@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import React from "react";
+import dynamic from "next/dynamic";
 import { format } from "date-fns";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -25,8 +26,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { EditAlbumDetailsModal } from "./EditAlbumDetailsModal";
 import type { Album } from "@/features/albums/types";
+
+// Lazy-load the modal to avoid pulling in its heavy deps (react-hook-form, zod, CreateLabelModal, etc.)
+// during initial page compile - fixes Turbopack hanging on /admin/albums
+const EditAlbumDetailsModal = dynamic(
+  () => import("./EditAlbumDetailsModal").then((m) => ({ default: m.EditAlbumDetailsModal })),
+  { ssr: false }
+);
 
 type AlbumsListProps = {
   initialAlbums: Album[];

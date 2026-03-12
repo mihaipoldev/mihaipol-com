@@ -10,6 +10,7 @@ import { FormField } from "@/components/admin/forms/FormField";
 import { ImageUploadField } from "@/components/admin/forms/ImageUploadField";
 import { ShadowInput } from "@/components/admin/forms/ShadowInput";
 import { ShadowButton } from "@/components/admin/forms/ShadowButton";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -18,11 +19,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/admin/forms/AdminSelect";
-import { Loader2 } from "lucide-react";
+import { Loader2, X, Plus } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faNewspaper } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+const embedSchema = z.object({
+  type: z.enum(["youtube", "spotify", "bandcamp", "soundcloud", "instagram"]),
+  url: z.string().url().optional(),
+  embed_code: z.string().optional(),
+});
+
+const externalLinkSchema = z.object({
+  label: z.string().min(1),
+  url: z.string().url(),
+});
 
 const updateSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -33,6 +53,13 @@ const updateSchema = z.object({
   date: z.string().optional(),
   publish_status: z.enum(["draft", "scheduled", "published", "archived"]),
   read_more_url: z.string().url().optional().or(z.literal("")),
+  embeds: z.array(embedSchema).optional(),
+  tags: z.array(z.string()).optional(),
+  is_featured: z.boolean().optional(),
+  show_cover_image: z.boolean().optional(),
+  og_image_url: z.string().url().optional().or(z.literal("")),
+  meta_description: z.string().optional(),
+  external_links: z.array(externalLinkSchema).optional(),
 });
 
 type UpdateFormData = z.infer<typeof updateSchema>;
@@ -47,6 +74,20 @@ type Update = {
   date: string | null;
   publish_status: "draft" | "scheduled" | "published" | "archived";
   read_more_url: string | null;
+  embeds?: Array<{
+    type: "youtube" | "spotify" | "bandcamp" | "soundcloud" | "instagram";
+    url?: string;
+    embed_code?: string;
+  }> | null;
+  tags?: string[] | null;
+  is_featured?: boolean | null;
+  show_cover_image?: boolean | null;
+  og_image_url?: string | null;
+  meta_description?: string | null;
+  external_links?: Array<{
+    label: string;
+    url: string;
+  }> | null;
 };
 
 type EditUpdateModalProps = {
@@ -85,6 +126,13 @@ export function EditUpdateModal({
       date: "",
       publish_status: "draft",
       read_more_url: "",
+      embeds: [],
+      tags: [],
+      is_featured: false,
+      show_cover_image: true,
+      og_image_url: "",
+      meta_description: "",
+      external_links: [],
     },
   });
 
@@ -104,6 +152,13 @@ export function EditUpdateModal({
           image_url: initialUpdate.image_url || "",
           read_more_url: initialUpdate.read_more_url || "",
           publish_status: normalizeStatus(initialUpdate.publish_status),
+          embeds: Array.isArray(initialUpdate.embeds) ? initialUpdate.embeds : [],
+          tags: Array.isArray(initialUpdate.tags) ? initialUpdate.tags : [],
+          is_featured: Boolean(initialUpdate.is_featured),
+          show_cover_image: initialUpdate.show_cover_image !== false, // Default to true if null/undefined
+          og_image_url: initialUpdate.og_image_url || "",
+          meta_description: initialUpdate.meta_description || "",
+          external_links: Array.isArray(initialUpdate.external_links) ? initialUpdate.external_links : [],
         };
 
         if (initialUpdate.date) {
@@ -129,6 +184,13 @@ export function EditUpdateModal({
           date: "",
           publish_status: "draft",
           read_more_url: "",
+          embeds: [],
+          tags: [],
+          is_featured: false,
+          show_cover_image: true,
+          og_image_url: "",
+          meta_description: "",
+          external_links: [],
         });
       }
     }
@@ -180,6 +242,10 @@ export function EditUpdateModal({
   };
 
   const onSubmit = async (data: UpdateFormData) => {
+    console.log("[UPDATE IMAGE DEBUG] onSubmit called", {
+      selectedFile: selectedFile?.name || "null",
+      image_url: data.image_url,
+    });
     try {
       const newImageUrl = data.image_url?.trim() || null;
       const oldImageUrl = initialUpdate?.image_url || null;
@@ -188,10 +254,35 @@ export function EditUpdateModal({
       const normalizedOldUrl = oldImageUrl || null;
       const imageUrlChanged = normalizedNewUrl !== normalizedOldUrl;
 
-      let finalImageUrl = normalizedNewUrl;
+      console.log("[UPDATE IMAGE DEBUG]", {
+        newImageUrl,
+        oldImageUrl,
+        normalizedNewUrl,
+        normalizedOldUrl,
+        imageUrlChanged,
+        hasSelectedFile: !!selectedFile,
+        selectedFileName: selectedFile?.name,
+      });
 
-      if (imageUrlChanged) {
+      // Default to existing image URL (will be updated if changed)
+      let finalImageUrl = normalizedOldUrl;
+
+      // Check if we need to upload: file selected OR URL changed
+      // IMPORTANT: Check selectedFile first, because when a file is selected,
+      // the URL gets cleared (becomes null), so imageUrlChanged might be false
+      // even though we need to upload
+      const needsUpload = selectedFile || (imageUrlChanged && normalizedNewUrl);
+      
+      console.log("[UPDATE IMAGE DEBUG] needsUpload:", needsUpload, {
+        hasSelectedFile: !!selectedFile,
+        imageUrlChanged,
+        hasNormalizedNewUrl: !!normalizedNewUrl,
+      });
+
+      if (needsUpload) {
+        console.log("[UPDATE IMAGE DEBUG] Entering upload flow");
         if (selectedFile) {
+          console.log("[UPDATE IMAGE DEBUG] Uploading file:", selectedFile.name);
           try {
             const formData = new FormData();
             formData.append("file", selectedFile);
@@ -205,15 +296,19 @@ export function EditUpdateModal({
               throw new Error(error.error || "Failed to upload image");
             }
             const uploadData = await uploadResponse.json();
+            console.log("[UPDATE IMAGE DEBUG] File upload success:", uploadData);
             finalImageUrl = uploadData.url;
           } catch (uploadError: any) {
-            console.error("Error uploading image:", uploadError);
+            console.error("[UPDATE IMAGE DEBUG] Error uploading image:", uploadError);
             toast.error(uploadError.message || "Failed to upload image");
             return;
           }
         } else if (normalizedNewUrl && !normalizedNewUrl.includes("mihaipol-com.b-cdn.net")) {
+          console.log("[UPDATE IMAGE DEBUG] Uploading from external URL:", normalizedNewUrl);
           const validation = await validateImageUrl(normalizedNewUrl);
+          console.log("[UPDATE IMAGE DEBUG] URL validation result:", validation);
           if (!validation.valid) {
+            console.log("[UPDATE IMAGE DEBUG] URL validation failed");
             toast.error(
               validation.error ||
                 "Image not supported or not accessible. Please check the URL or upload a file."
@@ -224,30 +319,43 @@ export function EditUpdateModal({
             const formData = new FormData();
             formData.append("imageUrl", normalizedNewUrl);
             formData.append("folderPath", isNew ? "updates/temp" : `updates/${initialUpdate.id}`);
+            console.log("[UPDATE IMAGE DEBUG] Sending upload request for URL:", {
+              imageUrl: normalizedNewUrl,
+              folderPath: isNew ? "updates/temp" : `updates/${initialUpdate.id}`,
+            });
             const uploadResponse = await fetch("/api/admin/upload", {
               method: "POST",
               body: formData,
             });
+            console.log("[UPDATE IMAGE DEBUG] Upload response status:", uploadResponse.status);
             if (!uploadResponse.ok) {
               const error = await uploadResponse.json();
+              console.error("[UPDATE IMAGE DEBUG] Upload failed:", error);
               throw new Error(error.error || "Failed to upload image from URL");
             }
             const uploadData = await uploadResponse.json();
+            console.log("[UPDATE IMAGE DEBUG] URL upload success:", uploadData);
             finalImageUrl = uploadData.url;
           } catch (uploadError: any) {
-            console.error("Error uploading image from URL:", uploadError);
+            console.error("[UPDATE IMAGE DEBUG] Error uploading image from URL:", uploadError);
             toast.error(uploadError.message || "Failed to upload image from URL");
             return;
           }
         } else if (normalizedNewUrl && normalizedNewUrl.includes("mihaipol-com.b-cdn.net")) {
+          console.log("[UPDATE IMAGE DEBUG] URL already on CDN, validating:", normalizedNewUrl);
           const validation = await validateImageUrl(normalizedNewUrl);
+          console.log("[UPDATE IMAGE DEBUG] CDN URL validation result:", validation);
           if (!validation.valid) {
+            console.log("[UPDATE IMAGE DEBUG] CDN URL validation failed");
             toast.error(
               validation.error ||
                 "Image not supported or not accessible. Please check the URL or upload a file."
             );
             return;
           }
+          // URL is already on CDN and valid, use it directly
+          console.log("[UPDATE IMAGE DEBUG] Using existing CDN URL");
+          finalImageUrl = normalizedNewUrl;
         }
 
         if (!isNew && normalizedOldUrl && normalizedOldUrl.includes("mihaipol-com.b-cdn.net")) {
@@ -261,7 +369,37 @@ export function EditUpdateModal({
             console.error("Failed to move old image to trash:", trashError);
           }
         }
+      } else if (imageUrlChanged && !normalizedNewUrl) {
+        // User explicitly cleared the image field
+        console.log("[UPDATE IMAGE DEBUG] Image field cleared by user");
+        finalImageUrl = null;
+      } else {
+        console.log("[UPDATE IMAGE DEBUG] Image URL unchanged, keeping existing:", normalizedOldUrl);
       }
+      
+      console.log("[UPDATE IMAGE DEBUG] Final image URL:", finalImageUrl);
+
+      // Filter out invalid embeds (must have url or embed_code, and not empty strings)
+      const validEmbeds = (data.embeds || [])
+        .filter((embed) => {
+          if (embed.type === "spotify") {
+            return (embed.embed_code && embed.embed_code.trim()) || (embed.url && embed.url.trim());
+          }
+          return embed.url && embed.url.trim();
+        })
+        .map((embed) => ({
+          type: embed.type,
+          ...(embed.url && embed.url.trim() ? { url: embed.url.trim() } : {}),
+          ...(embed.embed_code && embed.embed_code.trim() ? { embed_code: embed.embed_code.trim() } : {}),
+        }));
+
+      // Filter out invalid external links (must have both label and url, and not empty strings)
+      const validExternalLinks = (data.external_links || []).filter(
+        (link) => link.label && link.label.trim() && link.url && link.url.trim()
+      ).map((link) => ({
+        label: link.label.trim(),
+        url: link.url.trim(),
+      }));
 
       const submitData = {
         ...data,
@@ -270,6 +408,13 @@ export function EditUpdateModal({
         read_more_url: data.read_more_url || null,
         subtitle: data.subtitle || null,
         description: data.description || null,
+        embeds: validEmbeds.length > 0 ? validEmbeds : undefined,
+        tags: (data.tags || []).length > 0 ? data.tags : undefined,
+        is_featured: data.is_featured || false,
+        show_cover_image: data.show_cover_image !== false, // Default to true if undefined
+        og_image_url: data.og_image_url || null,
+        meta_description: data.meta_description || null,
+        external_links: validExternalLinks.length > 0 ? validExternalLinks : undefined,
       };
 
       const { data: sessionData } = await supabase.auth.getSession();
@@ -427,6 +572,46 @@ export function EditUpdateModal({
           <ShadowInput {...register("subtitle")} placeholder="Update subtitle" />
         </FormField>
 
+        {/* Tags Section */}
+        <FormField label="Tags" error={errors.tags?.message}>
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {(watch("tags") || []).map((tag, index) => (
+                <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const currentTags = watch("tags") || [];
+                      setValue("tags", currentTags.filter((_, i) => i !== index));
+                    }}
+                    className="ml-1 hover:text-destructive"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            <ShadowInput
+              placeholder="Type a tag and press Enter"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const input = e.currentTarget;
+                  const value = input.value.trim();
+                  if (value) {
+                    const currentTags = watch("tags") || [];
+                    if (!currentTags.includes(value)) {
+                      setValue("tags", [...currentTags, value]);
+                    }
+                    input.value = "";
+                  }
+                }
+              }}
+            />
+          </div>
+        </FormField>
+
         <FormField label="Description" error={errors.description?.message}>
           <Textarea {...register("description")} placeholder="Update description" rows={6} />
         </FormField>
@@ -474,6 +659,196 @@ export function EditUpdateModal({
             </SelectContent>
           </Select>
         </FormField>
+
+        {/* Is Featured Toggle */}
+        <FormField label="Featured Update" error={errors.is_featured?.message}>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={watch("is_featured") || false}
+              onCheckedChange={(checked) => setValue("is_featured", checked)}
+            />
+            <span className="text-sm text-muted-foreground">
+              Highlight this update as featured
+            </span>
+          </div>
+        </FormField>
+
+        {/* Show Cover Image Toggle */}
+        <FormField label="Show Cover Image" error={errors.show_cover_image?.message}>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={watch("show_cover_image") !== false}
+              onCheckedChange={(checked) => setValue("show_cover_image", checked)}
+            />
+            <span className="text-sm text-muted-foreground">
+              Display the cover image on the detail page. Turn off when an embed (like YouTube) serves the same visual purpose.
+            </span>
+          </div>
+        </FormField>
+
+        {/* Embeds Section */}
+        <FormField label="Embeds" error={errors.embeds?.message}>
+          <div className="space-y-3">
+            {(watch("embeds") || []).map((embed, index) => (
+              <div key={index} className="p-4 border border-border rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Embed {index + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const currentEmbeds = watch("embeds") || [];
+                      setValue("embeds", currentEmbeds.filter((_, i) => i !== index));
+                    }}
+                    className="text-destructive hover:text-destructive/80"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <Select
+                  value={embed.type}
+                  onValueChange={(value) => {
+                    const currentEmbeds = watch("embeds") || [];
+                    const updated = [...currentEmbeds];
+                    updated[index] = { ...updated[index], type: value as any };
+                    setValue("embeds", updated);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="youtube">YouTube</SelectItem>
+                    <SelectItem value="spotify">Spotify</SelectItem>
+                    <SelectItem value="bandcamp">Bandcamp</SelectItem>
+                    <SelectItem value="soundcloud">SoundCloud</SelectItem>
+                    <SelectItem value="instagram">Instagram</SelectItem>
+                  </SelectContent>
+                </Select>
+                {embed.type === "spotify" ? (
+                  <Textarea
+                    placeholder="Paste Spotify embed code here"
+                    value={embed.embed_code || ""}
+                    onChange={(e) => {
+                      const currentEmbeds = watch("embeds") || [];
+                      const updated = [...currentEmbeds];
+                      updated[index] = { ...updated[index], embed_code: e.target.value };
+                      setValue("embeds", updated);
+                    }}
+                    rows={4}
+                  />
+                ) : (
+                  <ShadowInput
+                    type="url"
+                    placeholder={`Enter ${embed.type} URL`}
+                    value={embed.url || ""}
+                    onChange={(e) => {
+                      const currentEmbeds = watch("embeds") || [];
+                      const updated = [...currentEmbeds];
+                      updated[index] = { ...updated[index], url: e.target.value };
+                      setValue("embeds", updated);
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const currentEmbeds = watch("embeds") || [];
+                setValue("embeds", [
+                  ...currentEmbeds,
+                  { type: "youtube", url: "" },
+                ]);
+              }}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Embed
+            </Button>
+          </div>
+        </FormField>
+
+        {/* External Links Section */}
+        <FormField label="External Links" error={errors.external_links?.message}>
+          <div className="space-y-3">
+            {(watch("external_links") || []).map((link, index) => (
+              <div key={index} className="p-4 border border-border rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Link {index + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const currentLinks = watch("external_links") || [];
+                      setValue("external_links", currentLinks.filter((_, i) => i !== index));
+                    }}
+                    className="text-destructive hover:text-destructive/80"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <ShadowInput
+                  placeholder="Link label (e.g., Listen on Spotify)"
+                  value={link.label}
+                  onChange={(e) => {
+                    const currentLinks = watch("external_links") || [];
+                    const updated = [...currentLinks];
+                    updated[index] = { ...updated[index], label: e.target.value };
+                    setValue("external_links", updated);
+                  }}
+                />
+                <ShadowInput
+                  type="url"
+                  placeholder="https://example.com"
+                  value={link.url}
+                  onChange={(e) => {
+                    const currentLinks = watch("external_links") || [];
+                    const updated = [...currentLinks];
+                    updated[index] = { ...updated[index], url: e.target.value };
+                    setValue("external_links", updated);
+                  }}
+                />
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const currentLinks = watch("external_links") || [];
+                setValue("external_links", [
+                  ...currentLinks,
+                  { label: "", url: "" },
+                ]);
+              }}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add External Link
+            </Button>
+          </div>
+        </FormField>
+
+        {/* SEO Section */}
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="seo">
+            <AccordionTrigger>SEO Settings</AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-4">
+              <FormField label="OG Image URL" error={errors.og_image_url?.message}>
+                <ShadowInput
+                  {...register("og_image_url")}
+                  placeholder="https://example.com/og-image.jpg"
+                />
+              </FormField>
+              <FormField label="Meta Description" error={errors.meta_description?.message}>
+                <Textarea
+                  {...register("meta_description")}
+                  placeholder="SEO meta description for search engines and social previews"
+                  rows={3}
+                />
+              </FormField>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
       </form>
     </ModalShell>

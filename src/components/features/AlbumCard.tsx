@@ -21,7 +21,7 @@ export default function AlbumCard({
   className,
 }: AlbumCardProps) {
   return (
-    <Link href={`/dev/albums/${slug}`} className={cn("group", className)}>
+    <Link href={`/dev/albums/${slug}`} className={cn("group", className)} target="_blank" rel="noopener noreferrer">
       <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
         <div className="aspect-square bg-muted overflow-hidden rounded-lg">
           {cover_image_url ? (

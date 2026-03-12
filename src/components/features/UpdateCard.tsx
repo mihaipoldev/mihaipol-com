@@ -2,6 +2,15 @@ import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
+// Helper function to save scroll position before navigation
+const saveScrollPosition = () => {
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem("updatesPageScrollPosition", window.scrollY.toString());
+    // Set a flag to indicate this is a navigation (not a refresh)
+    sessionStorage.setItem("_isNavigation", "true");
+  }
+};
+
 export type UpdateCardVariant =
   | "default" // Vertical stack: image on top, content below
   | "horizontal" // Image on left, content on right
@@ -35,7 +44,7 @@ export default function UpdateCard({
   // Default variant - Vertical stack
   if (variant === "default") {
     return (
-      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)}>
+      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
           {image_url && (
             <div className="aspect-video bg-muted overflow-hidden rounded-lg">
@@ -64,7 +73,7 @@ export default function UpdateCard({
   // Horizontal variant - Image on left, content on right
   if (variant === "horizontal") {
     return (
-      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)}>
+      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex gap-4">
           {image_url && (
             <div className="w-32 h-32 flex-shrink-0 bg-muted overflow-hidden rounded-lg">
@@ -93,7 +102,7 @@ export default function UpdateCard({
   // Overlay variant - Text overlaid on image
   if (variant === "overlay") {
     return (
-      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)}>
+      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full relative">
           {image_url ? (
             <div className="aspect-video bg-muted overflow-hidden rounded-lg relative">
@@ -223,7 +232,7 @@ export default function UpdateCard({
   // Minimal variant - Very clean, minimal design
   if (variant === "minimal") {
     return (
-      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)}>
+      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col border border-border">
           {image_url && (
             <div className="aspect-video bg-muted overflow-hidden">

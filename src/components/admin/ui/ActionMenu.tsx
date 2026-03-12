@@ -133,7 +133,7 @@ export function ActionMenu({
             sideOffset={0}
             className="px-0 py-2 border-0 w-48 bg-popover"
             style={{
-              boxShadow: isDarkMode ? 'none' : 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;'
+              boxShadow: isDarkMode ? 'none' : 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px'
             }}
             onCloseAutoFocus={(e) => e.preventDefault()}
           >

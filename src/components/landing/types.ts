@@ -31,4 +31,16 @@ export type LandingUpdate = {
   date?: string | null;
   description?: string | null;
   image_url?: string | null;
+  tags?: string[] | null;
+  is_featured?: boolean | null;
+  show_cover_image?: boolean | null;
+  embeds?: Array<{
+    type: "youtube" | "spotify" | "bandcamp" | "soundcloud" | "instagram";
+    url?: string;
+    embed_code?: string;
+  }> | null;
+  external_links?: Array<{
+    label: string;
+    url: string;
+  }> | null;
 };

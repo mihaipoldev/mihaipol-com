@@ -9,6 +9,20 @@ export async function createUpdate(updateData: {
   date?: string | null;
   publish_status: "draft" | "scheduled" | "published" | "archived";
   read_more_url?: string | null;
+  embeds?: Array<{
+    type: "youtube" | "spotify" | "bandcamp" | "soundcloud" | "instagram";
+    url?: string;
+    embed_code?: string;
+  }> | null;
+  tags?: string[] | null;
+  is_featured?: boolean | null;
+  show_cover_image?: boolean | null;
+  og_image_url?: string | null;
+  meta_description?: string | null;
+  external_links?: Array<{
+    label: string;
+    url: string;
+  }> | null;
 }) {
   try {
     const supabase = getServiceSupabaseClient();

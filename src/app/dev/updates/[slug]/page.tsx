@@ -1,17 +1,15 @@
 import { notFound } from "next/navigation";
-import { Calendar, ExternalLink } from "lucide-react";
+import { Calendar, ExternalLink, Star } from "lucide-react";
 import { getUpdateBySlug } from "@/features/updates/data";
 import { formatUpdateDate } from "@/components/landing/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Markdown } from "@/components/ui/markdown";
 import TrackView from "@/features/smart-links/analytics/components/TrackView";
 import TrackedExternalLink from "@/components/features/TrackedExternalLink";
+import { EmbedRenderer } from "@/components/features/EmbedRenderer";
 
 export const dynamic = "force-dynamic";
-
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1000&q=80";
 
 interface UpdateDetailPageProps {
   params: Promise<{
@@ -27,7 +25,8 @@ export default async function UpdateDetailPage({ params }: UpdateDetailPageProps
     notFound();
   }
 
-  const imageUrl = update.image_url ?? FALLBACK_IMAGE;
+  const hasImage = !!update.image_url;
+  const showImage = hasImage && update.show_cover_image !== false;
   const updateDate = update.date ? new Date(update.date) : null;
   const formattedDate = updateDate
     ? updateDate.toLocaleDateString("en-US", {
@@ -47,79 +46,114 @@ export default async function UpdateDetailPage({ params }: UpdateDetailPageProps
         metadata={{ update_slug: update.slug, path: `/dev/updates/${update.slug}` }}
       />
       <div className="py-24 px-6">
-        <div className="container mx-auto px-0 md:px-8 max-w-4xl">
+        <div className="container mx-auto max-w-6xl">
           <div className="space-y-8">
-            {/* Hero Image */}
-            <div className="relative rounded-3xl overflow-hidden shadow-card-hover">
-              <img
-                src={imageUrl}
-                alt={update.title}
-                className="w-full h-auto object-cover aspect-video"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
-            </div>
+            {/* Hero Section - Image on left, content on right */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-12 items-start ">
+              {/* Image - Left side, square (1/3 width) */}
+              {showImage && (
+                <div className="relative rounded-3xl overflow-hidden shadow-card-hover aspect-square lg:col-span-1">
+                  <img
+                    src={update.image_url!}
+                    alt={update.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+                </div>
+              )}
 
-            {/* Meta and Title Section */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 flex-wrap">
-                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
-                  Update
-                </Badge>
-                {updateDate && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    <time>{formatUpdateDate(update.date)}</time>
+              {/* Content - Right side (2/3 width) */}
+              <div className="space-y-6 lg:col-span-3">
+                {/* Title - Always first */}
+                <h1 className="text-4xl lg:text-5xl font-bold text-gradient-sunset leading-tight">
+                  {update.title}
+                </h1>
+
+                {/* Badges and Date - After title */}
+                <div className="flex items-center gap-4 flex-wrap">
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                    Update
+                  </Badge>
+                  {update.is_featured && (
+                    <Badge variant="default" className="bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30">
+                      <Star className="w-3 h-3 mr-1" />
+                      Featured
+                    </Badge>
+                  )}
+                  {formattedDate && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4" />
+                      <time>{formattedDate}</time>
+                    </div>
+                  )}
+                </div>
+
+                {/* Description/Body */}
+                {update.description && (
+                  <Markdown className="text-foreground leading-relaxed">
+                    {update.description}
+                  </Markdown>
+                )}
+
+                {/* Embeds Section */}
+                {update.embeds && update.embeds.length > 0 && (
+                  <div>
+                    <EmbedRenderer embeds={update.embeds} />
+                  </div>
+                )}
+
+                {/* External Links Section */}
+                {update.external_links && update.external_links.length > 0 && (
+                  <div className="space-y-3">
+                    {update.external_links.map((link: { label: string; url: string }, index: number) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        size="lg"
+                        className="group w-full sm:w-auto"
+                        style={{ borderRadius: "1rem" }}
+                        asChild
+                      >
+                        <TrackedExternalLink
+                          href={link.url}
+                          eventType="link_click"
+                          entityType="update_link"
+                          entityId={update.id}
+                          metadata={{ url: link.url, label: link.label, update_slug: update.slug }}
+                        >
+                          {link.label}
+                          <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                        </TrackedExternalLink>
+                      </Button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Optional External Link (legacy read_more_url) */}
+                {update.read_more_url && (
+                  <div>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="group"
+                      style={{ borderRadius: "1rem" }}
+                      asChild
+                    >
+                      <TrackedExternalLink
+                        href={update.read_more_url}
+                        eventType="link_click"
+                        entityType="update_link"
+                        entityId={update.id}
+                        metadata={{ url: update.read_more_url, update_slug: update.slug }}
+                      >
+                        Read more
+                        <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </TrackedExternalLink>
+                    </Button>
                   </div>
                 )}
               </div>
-
-              {/* Title */}
-              <h1 className="text-5xl lg:text-6xl font-bold text-gradient-sunset leading-tight">
-                {update.title}
-              </h1>
-
-              {/* Full Date */}
-              {formattedDate && <p className="text-muted-foreground">{formattedDate}</p>}
             </div>
-
-            {/* Description/Body */}
-            {update.description && (
-              <Card className="p-8 lg:p-12 bg-card/80 backdrop-blur border-border/50">
-                <div className="prose prose-lg dark:prose-invert max-w-none">
-                  <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-                    {update.description.split("\n\n").map((paragraph: string, index: number) => (
-                      <p key={index} className="mb-6 last:mb-0 text-muted-foreground text-lg">
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              </Card>
-            )}
-
-            {/* Optional External Link */}
-            {update.read_more_url && (
-              <div>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="group"
-                  style={{ borderRadius: "1rem" }}
-                  asChild
-                >
-                  <TrackedExternalLink
-                    href={update.read_more_url}
-                    eventType="link_click"
-                    entityType="update_link"
-                    entityId={update.id}
-                    metadata={{ url: update.read_more_url, update_slug: update.slug }}
-                  >
-                    Read more
-                    <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </TrackedExternalLink>
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       </div>

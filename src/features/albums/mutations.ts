@@ -148,12 +148,13 @@ export async function batchUpdateAlbumLinks(
       if (deleteError) throw deleteError;
     }
 
-    // Prepare all links for upsert (handles both updates and creates in one operation)
-    // Only include id for existing links (updates), omit id for new links (creates)
-    const linksToUpsert = links.map((link) => {
+    // Separate links into updates and inserts
+    const linksToUpdate: Array<{ id: string; data: any }> = [];
+    const linksToInsert: any[] = [];
+
+    links.forEach((link) => {
       const isUpdate = link.id && existingLinkIds.has(link.id);
-      return {
-        ...(isUpdate ? { id: link.id } : {}), // Only include id for updates
+      const linkData = {
         album_id: albumId,
         platform_id: link.platform_id || null,
         url: link.url,
@@ -161,18 +162,36 @@ export async function batchUpdateAlbumLinks(
         link_type: link.link_type || null,
         sort_order: link.sort_order,
       };
+
+      if (isUpdate) {
+        linksToUpdate.push({ id: link.id!, data: linkData });
+      } else {
+        linksToInsert.push(linkData);
+      }
     });
 
-    // Use upsert for all links in one operation (much faster than individual updates!)
-    if (linksToUpsert.length > 0) {
-      const { error: upsertError } = await supabase
-        .from("album_links")
-        .upsert(linksToUpsert, {
-          onConflict: "id",
-          ignoreDuplicates: false,
-        });
+    // Update existing links in parallel
+    if (linksToUpdate.length > 0) {
+      const updatePromises = linksToUpdate.map(({ id, data }) =>
+        supabase.from("album_links").update(data).eq("id", id)
+      );
+      const updateResults = await Promise.all(updatePromises);
+      const updateErrors = updateResults
+        .map((result, index) => ({ result, index }))
+        .filter(({ result }) => result.error);
+      
+      if (updateErrors.length > 0) {
+        throw updateErrors[0].result.error;
+      }
+    }
 
-      if (upsertError) throw upsertError;
+    // Insert new links in one operation
+    if (linksToInsert.length > 0) {
+      const { error: insertError } = await supabase
+        .from("album_links")
+        .insert(linksToInsert);
+
+      if (insertError) throw insertError;
     }
 
     const totalTime =
