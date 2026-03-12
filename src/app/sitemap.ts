@@ -7,29 +7,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: "daily",
       priority: 1,
     },
     {
-      url: `${baseUrl}/dev`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/dev/albums`,
+      url: `${baseUrl}/albums`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/dev/events`,
+      url: `${baseUrl}/events`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/dev/updates`,
+      url: `${baseUrl}/updates`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,

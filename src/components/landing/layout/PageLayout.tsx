@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import PageTransition from "./PageTransition";
 import Footer from "./Footer";
 import Header from "./Header";
-import { PresetCSSInjector } from "@/components/landing/PresetCSSInjector";
+
 import BackgroundOrbs from "@/components/landing/BackgroundOrbs";
 import FloatingParticles from "@/components/landing/FloatingParticles";
 
@@ -127,7 +127,6 @@ export function PageLayout({ children, landingPagePreset = 19 }: PageLayoutProps
 
   return (
     <>
-      <PresetCSSInjector />
       <div
         className={cn(
           "flex min-h-dvh flex-col bg-background relative",

@@ -36,7 +36,7 @@ export default function AlbumsSection({
             asChild
           >
             <Link
-              href="/dev/albums"
+              href="/albums"
               className="relative"
               onClick={() => {
                 // Store the current section before navigating

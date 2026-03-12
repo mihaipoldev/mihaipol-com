@@ -24,7 +24,7 @@ export default function EventCard({
   const location = city && venue ? `${city} – ${venue}` : city || venue || "Location TBA";
 
   return (
-    <Link href={`/dev/events/${slug}`} className={cn("block group", className)}>
+    <Link href={`/events/${slug}`} className={cn("block group", className)}>
       <div className="flex items-center gap-6 md:gap-8 py-4 border-l-2 border-border pl-6 hover:border-foreground transition-colors">
         <div className="flex-1 min-w-0">
           <div className="text-sm text-muted-foreground mb-1.5">{location}</div>

@@ -34,7 +34,7 @@ export default function SmartLinksHeader() {
     >
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <Link
-          href="/dev"
+          href="/"
           className="text-2xl font-bold hover:opacity-80 transition-opacity relative z-10"
           style={{ color: textColor }}
         >

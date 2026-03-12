@@ -1,4 +1,3 @@
-import { supabase } from "@/lib/supabase";
 import { getSupabaseServer } from "@/lib/supabase-ssr";
 import { getLabelBySlug } from "@/features/labels/data";
 import { getSitePreferenceNumber } from "@/features/settings/data";
@@ -22,7 +21,7 @@ type AlbumWithLabel = {
   label_id: string | null;
   labelName: string | null;
   labels: { id: string; name: string } | null;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithLabel[]> {
@@ -50,9 +49,6 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
         return [];
       }
     }
-
-    // 🐛 DEBUG: Start timing
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
     // Select only needed columns and use join if labels are needed
     const baseColumns = `id, title, slug, cover_image_url, release_date, publish_status, label_id, catalog_number, album_type, format_type, cover_shape`;
@@ -82,35 +78,19 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
 
     const { data: albums, error } = await query;
 
-    // 🐛 DEBUG: Log query time
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    const dataCount = albums?.length || 0;
-
-    if (queryTime > 1000) {
-      console.warn(`⚠️ [DB] SLOW QUERY: albums fetch took ${queryTime.toFixed(0)}ms`);
-    }
-
     if (error) {
       console.error("Error in albums query:", error);
-      console.error("Query details:", {
-        limit,
-        order,
-        includeUnpublished,
-        includeLabels,
-        labelId: actualLabelId,
-      });
       throw error;
     }
 
     // If labels are requested and we used a join, map the label name
     if (includeLabels && albums && albums.length > 0) {
       // Filter out any error objects and ensure we only have valid album objects
-      const validAlbums = (albums as any[]).filter(
-        (album: any) => album && typeof album === "object" && "id" in album && !("error" in album)
+      const validAlbums = (albums as unknown as AlbumWithLabel[]).filter(
+        (album) => album && typeof album === "object" && "id" in album && !("error" in album)
       );
 
-      const albumsWithLabels: AlbumWithLabel[] = validAlbums.map((album: any) => {
+      const albumsWithLabels: AlbumWithLabel[] = validAlbums.map((album) => {
         // Normalize labels: Supabase returns array even for one-to-one relationships
         const normalizedLabel = Array.isArray(album.labels)
           ? album.labels.length > 0
@@ -130,12 +110,12 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
 
     // Filter out any error objects for non-label queries too
     if (albums && albums.length > 0) {
-      const validAlbums = (albums as any[]).filter(
-        (album: any) => album && typeof album === "object" && "id" in album && !("error" in album)
+      const validAlbums = (albums as unknown as AlbumWithLabel[]).filter(
+        (album) => album && typeof album === "object" && "id" in album && !("error" in album)
       );
 
       return validAlbums.map(
-        (album: any): AlbumWithLabel => ({
+        (album): AlbumWithLabel => ({
           ...album,
           labelName: null,
           labels: null,
@@ -144,14 +124,8 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
     }
 
     return [];
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching albums:", error);
-    console.error("Error details:", {
-      message: error?.message,
-      code: error?.code,
-      details: error?.details,
-      hint: error?.hint,
-    });
     return [];
   }
 }
@@ -237,8 +211,6 @@ export async function getAlbumBySlug(slug: string) {
     // Use server client for proper RLS handling in server components
     const supabaseClient = await getSupabaseServer();
 
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
-
     // Query optimized for: idx_albums_slug_publish_status (partial index on published)
     const { data, error } = await supabaseClient
       .from("albums")
@@ -248,13 +220,6 @@ export async function getAlbumBySlug(slug: string) {
       .eq("slug", slug)
       .eq("publish_status", "published")
       .single();
-
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-
-    if (queryTime > 1000) {
-      console.warn(`⚠️ [DB] SLOW QUERY: album by slug took ${queryTime.toFixed(0)}ms`);
-    }
 
     if (error) {
       console.error("Error fetching album by slug:", error);
@@ -267,348 +232,44 @@ export async function getAlbumBySlug(slug: string) {
   }
 }
 
-// Admin data fetching functions (returns all albums including unpublished)
-export async function getAllAlbumsWithLabels() {
+export async function getPublishedAlbumById(id: string) {
   try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
+    const supabaseClient = await getSupabaseServer();
 
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
-
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("albums")
       .select(
-        `
-        id, title, slug, catalog_number, album_type, format_type, description, cover_image_url, release_date, label_id, publish_status, cover_shape,
-        labels (
-          id,
-          name
-        )
-      `
-      )
-      .order("release_date", { ascending: false, nullsFirst: false });
-
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    const dataCount = data?.length || 0;
-
-    if (queryTime > 1000) {
-      console.warn(`⚠️ [DB] SLOW QUERY: all albums with labels took ${queryTime.toFixed(0)}ms`);
-    }
-
-    if (error) throw error;
-
-    // Normalize labels: Supabase returns array even for one-to-one relationships
-    if (data) {
-      return data.map((album: any) => ({
-        ...album,
-        labels: Array.isArray(album.labels)
-          ? album.labels.length > 0
-            ? album.labels[0]
-            : null
-          : album.labels || null,
-      }));
-    }
-
-    return [];
-  } catch (error) {
-    console.error("Error fetching all albums:", error);
-    return [];
-  }
-}
-
-export async function getAlbumById(id: string) {
-  try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
-
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
-
-    const { data, error } = await supabase
-      .from("albums")
-      .select(
-        `
-        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description, drive_folder_id, drive_folder_url, audio_files, cover_shape,
-        labels (
-          id,
-          name
-        ),
-        album_images (
-          id,
-          album_id,
-          title,
-          image_url,
-          crop_shape,
-          content_type,
-          content_group,
-          sort_order,
-          created_at,
-          updated_at
-        ),
-        album_audios (
-          id,
-          album_id,
-          title,
-          audio_url,
-          duration,
-          file_size,
-          highlight_start_time,
-          waveform_peaks,
-          content_group,
-          sort_order,
-          created_at,
-          updated_at
-        )
-      `
+        "id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description, cover_shape, labels(id, name)"
       )
       .eq("id", id)
-      .single();
-
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-
-    if (error) throw error;
-
-    // Normalize labels: Supabase returns array even for one-to-one relationships
-    if (data) {
-      const normalizedLabel = Array.isArray(data.labels)
-        ? data.labels.length > 0
-          ? data.labels[0]
-          : null
-        : data.labels || null;
-
-      // Normalize album_images: Supabase returns array
-      const normalizedImages = Array.isArray(data.album_images)
-        ? data.album_images.sort((a: any, b: any) => a.sort_order - b.sort_order)
-        : [];
-
-      // Normalize album_audios: Supabase returns array
-      const normalizedAudios = Array.isArray(data.album_audios)
-        ? data.album_audios.sort((a: any, b: any) => a.sort_order - b.sort_order)
-        : [];
-
-      return {
-        ...data,
-        labelName: normalizedLabel?.name || null,
-        labels: normalizedLabel,
-        album_images: normalizedImages,
-        album_audios: normalizedAudios,
-      } as AlbumWithLabel;
-    }
-
-    return null;
-  } catch (error) {
-    console.error("Error fetching album by id:", error);
-    return null;
-  }
-}
-
-export async function getAlbumBySlugAdmin(slug: string) {
-  try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
-
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
-
-    const { data, error } = await supabase
-      .from("albums")
-      .select(
-        `
-        id, title, slug, catalog_number, cover_image_url, release_date, label_id, publish_status, album_type, format_type, description, cover_shape, drive_folder_id, drive_folder_url,
-        labels (
-          id,
-          name
-        ),
-        album_images (
-          id,
-          album_id,
-          title,
-          image_url,
-          crop_shape,
-          content_type,
-          content_group,
-          sort_order,
-          created_at,
-          updated_at
-        ),
-        album_audios (
-          id,
-          album_id,
-          title,
-          audio_url,
-          duration,
-          file_size,
-          highlight_start_time,
-          waveform_peaks,
-          content_group,
-          sort_order,
-          created_at,
-          updated_at
-        )
-      `
-      )
-      .eq("slug", slug)
-      .single();
-
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-
-    if (error) throw error;
-
-    // Performance monitoring
-    if (queryTime > 1000) {
-      console.warn(`⚠️ [DB] SLOW QUERY: getAlbumBySlugAdmin took ${queryTime.toFixed(0)}ms`);
-    }
-
-    // Normalize labels: Supabase returns array even for one-to-one relationships
-    if (data) {
-      // Normalize album_images: Supabase returns array
-      const normalizedImages = Array.isArray(data.album_images)
-        ? data.album_images.sort((a: any, b: any) => a.sort_order - b.sort_order)
-        : [];
-
-      // Normalize album_audios: Supabase returns array
-      const normalizedAudios = Array.isArray(data.album_audios)
-        ? data.album_audios.sort((a: any, b: any) => a.sort_order - b.sort_order)
-        : [];
-
-      // Performance warning if fetching many images/audios
-      const imageCount = normalizedImages.length;
-      const audioCount = normalizedAudios.length;
-      if (imageCount > 20 || audioCount > 20) {
-        console.warn(
-          `⚠️ [DB] Large dataset: Album has ${imageCount} images and ${audioCount} audio files. Consider pagination.`
-        );
-      }
-
-      const normalizedData = {
-        ...data,
-        labels: Array.isArray(data.labels)
-          ? data.labels.length > 0
-            ? data.labels[0]
-            : null
-          : data.labels || null,
-        album_images: normalizedImages,
-        album_audios: normalizedAudios,
-      };
-      
-      if (queryTime > 100) {
-        console.log(
-          `[DB] getAlbumBySlugAdmin: ${queryTime.toFixed(2)}ms (${imageCount} images, ${audioCount} audios)`
-        );
-      }
-      
-      return normalizedData;
-    }
-
-    return null;
-  } catch (error) {
-    console.error("Error fetching album by slug (admin):", error);
-    return null;
-  }
-}
-
-export async function getAlbumImages(albumId: string) {
-  try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
-
-    const { data, error } = await supabase
-      .from("album_images")
-      .select("*")
-      .eq("album_id", albumId)
-      .order("sort_order", { ascending: true });
-
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error("Error fetching album images:", error);
-    return [];
-  }
-}
-
-/**
- * Get all album audios for a specific album
- */
-export async function getAlbumAudios(albumId: string) {
-  try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
-
-    const { data, error } = await supabase
-      .from("album_audios")
-      .select("*")
-      .eq("album_id", albumId)
-      .order("sort_order", { ascending: true });
-
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error("Error fetching album audios:", error);
-    return [];
-  }
-}
-
-/**
- * Get a single album image by ID
- */
-export async function getAlbumImageById(imageId: string) {
-  try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
-
-    const { data, error } = await supabase
-      .from("album_images")
-      .select("*")
-      .eq("id", imageId)
+      .eq("publish_status", "published")
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") {
-        return null;
-      }
+      if (error.code === "PGRST116") return null;
       throw error;
     }
-    return data;
+
+    if (!data) return null;
+
+    const normalizedLabel = Array.isArray(data.labels)
+      ? data.labels.length > 0 ? data.labels[0] : null
+      : data.labels || null;
+
+    return {
+      ...data,
+      labelName: normalizedLabel?.name || null,
+      labels: normalizedLabel,
+    } as AlbumWithLabel;
   } catch (error) {
-    console.error("Error fetching album image by id:", error);
+    console.error("Error fetching published album by id:", error);
     return null;
-  }
-}
-
-/**
- * Get multiple album audios by IDs
- */
-export async function getAlbumAudiosByIds(audioIds: string[]) {
-  try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
-
-    if (audioIds.length === 0) {
-      return [];
-    }
-
-    const { data, error } = await supabase
-      .from("album_audios")
-      .select("*")
-      .in("id", audioIds)
-      .order("sort_order", { ascending: true });
-
-    if (error) {
-      throw error;
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error("Error fetching album audios by ids:", error);
-    return [];
   }
 }
 
 export async function getAlbumLinks(albumId: string) {
   try {
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
-
+    const supabase = await getSupabaseServer();
     // Query optimized for: idx_album_links_album_id_sort_order
     const { data, error } = await supabase
       .from("album_links")
@@ -626,19 +287,11 @@ export async function getAlbumLinks(albumId: string) {
       .eq("album_id", albumId)
       .order("sort_order", { ascending: true });
 
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-
     if (error) throw error;
-
-    // Performance monitoring
-    if (queryTime > 500) {
-      console.warn(`⚠️ [DB] SLOW QUERY: getAlbumLinks took ${queryTime.toFixed(0)}ms`);
-    }
 
     // Normalize platforms: Supabase returns array even for one-to-one relationships
     if (data) {
-      const normalizedData = data.map((link: any) => ({
+      return data.map((link) => ({
         ...link,
         platforms: Array.isArray(link.platforms)
           ? link.platforms.length > 0
@@ -646,12 +299,6 @@ export async function getAlbumLinks(albumId: string) {
             : null
           : link.platforms || null,
       }));
-      
-      if (queryTime > 100) {
-        console.log(`[DB] getAlbumLinks: ${queryTime.toFixed(2)}ms (${normalizedData.length} links)`);
-      }
-      
-      return normalizedData;
     }
 
     return [];
@@ -665,8 +312,6 @@ export async function getAlbumArtists(albumId: string) {
   try {
     const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
     const supabase = getServiceSupabaseClient();
-
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
     // Query optimized for: idx_album_artists_album_id_sort_order
     const { data, error } = await supabase
@@ -684,14 +329,11 @@ export async function getAlbumArtists(albumId: string) {
       .eq("album_id", albumId)
       .order("sort_order", { ascending: true });
 
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-
     if (error) throw error;
 
     // Normalize artists: Supabase returns array even for one-to-one relationships
     if (data) {
-      return data.map((aa: any) => ({
+      return data.map((aa) => ({
         ...aa,
         artist: Array.isArray(aa.artists)
           ? aa.artists.length > 0
@@ -738,20 +380,28 @@ export async function getAlbumWithLinksBySlug(slug: string) {
       if (!albumArtistsError && albumArtistsData && albumArtistsData.length > 0) {
         // Extract artist names and combine them
         const artistNames = albumArtistsData
-          .map((aa: any) => aa.artists?.name)
-          .filter((name: string | null) => name !== null && name !== undefined);
+          .map((aa) => (aa.artists as { name?: string } | null)?.name)
+          .filter((name): name is string => name !== null && name !== undefined);
 
         if (artistNames.length > 0) {
           artistName = artistNames.join(", ");
         }
       }
     } catch (e) {
-      console.log("Error fetching album artists:", e);
+      // ignore — album still renders without artist name
     }
 
     // Fetch album_links with platform information
     // Query optimized for: idx_album_links_album_id_sort_order
-    let links: any[] = [];
+    type NormalizedLink = {
+      id: string;
+      platformName: string;
+      platformIconUrl: string | null;
+      platformIconHorizontalUrl: string | null;
+      ctaLabel: string;
+      url: string;
+    };
+    let links: NormalizedLink[] = [];
     try {
       const { data: linksData, error: linksError } = await supabaseClient
         .from("album_links")
@@ -772,17 +422,22 @@ export async function getAlbumWithLinksBySlug(slug: string) {
         .order("sort_order", { ascending: true });
 
       if (!linksError && linksData) {
-        links = linksData.map((link: any) => ({
-          id: link.id,
-          platformName: link.platforms?.name || "",
-          platformIconUrl: link.platforms?.icon_url || null,
-          platformIconHorizontalUrl: link.platforms?.icon_horizontal_url || null,
-          ctaLabel: link.cta_label || "Play",
-          url: link.url || "",
-        }));
+        links = linksData.map((link) => {
+          const platform = Array.isArray(link.platforms)
+            ? link.platforms[0] ?? null
+            : link.platforms ?? null;
+          return {
+            id: link.id,
+            platformName: (platform as { name?: string } | null)?.name || "",
+            platformIconUrl: (platform as { icon_url?: string | null } | null)?.icon_url ?? null,
+            platformIconHorizontalUrl: (platform as { icon_horizontal_url?: string | null } | null)?.icon_horizontal_url ?? null,
+            ctaLabel: link.cta_label || "Play",
+            url: link.url || "",
+          };
+        });
       }
     } catch (e) {
-      console.log("Error fetching album links:", e);
+      // ignore — album still renders without links
     }
 
     return {
@@ -803,50 +458,3 @@ export async function getAlbumWithLinksBySlug(slug: string) {
   }
 }
 
-/**
- * Get unique content groups from both album_images and album_audios for a given album
- * Used for autocomplete suggestions in forms
- */
-export async function getAlbumContentGroups(albumId: string): Promise<string[]> {
-  try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
-
-    // Get unique content_group values from images
-    const { data: images, error: imagesError } = await supabase
-      .from("album_images")
-      .select("content_group")
-      .eq("album_id", albumId)
-      .not("content_group", "is", null);
-
-    if (imagesError) {
-      console.error("Error fetching image content groups:", imagesError);
-    }
-
-    // Get unique content_group values from audios
-    const { data: audios, error: audiosError } = await supabase
-      .from("album_audios")
-      .select("content_group")
-      .eq("album_id", albumId)
-      .not("content_group", "is", null);
-
-    if (audiosError) {
-      console.error("Error fetching audio content groups:", audiosError);
-    }
-
-    // Combine and deduplicate
-    const imageGroups = (images || [])
-      .map((img) => img.content_group)
-      .filter((group): group is string => group !== null && group !== undefined);
-    
-    const audioGroups = (audios || [])
-      .map((audio) => audio.content_group)
-      .filter((group): group is string => group !== null && group !== undefined);
-
-    const allGroups = [...imageGroups, ...audioGroups];
-    return [...new Set(allGroups)]; // Remove duplicates
-  } catch (error) {
-    console.error("Error fetching album content groups:", error);
-    return [];
-  }
-}

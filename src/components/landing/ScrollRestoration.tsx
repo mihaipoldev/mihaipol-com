@@ -14,7 +14,7 @@ export default function ScrollRestoration() {
   // Use useLayoutEffect to restore scroll BEFORE paint to prevent Next.js from scrolling to top
   useLayoutEffect(() => {
     // Only restore scroll on the updates page
-    const isUpdatesPage = pathname === "/dev/updates";
+    const isUpdatesPage = pathname === "/updates";
 
     if (!isUpdatesPage) return;
 
@@ -53,7 +53,7 @@ export default function ScrollRestoration() {
 
   // Also handle in useEffect as fallback for cases where useLayoutEffect didn't catch it
   useEffect(() => {
-    const isUpdatesPage = pathname === "/dev/updates";
+    const isUpdatesPage = pathname === "/updates";
 
     if (!isUpdatesPage) return;
 

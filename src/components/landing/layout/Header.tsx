@@ -29,21 +29,21 @@ export default function Header() {
     if (!pathname) return;
 
     // Check if we're on a slug page or list page and set active section accordingly
-    if (pathname.startsWith("/dev/events")) {
+    if (pathname.startsWith("/events")) {
       setActiveSection("events");
       return;
     }
-    if (pathname.startsWith("/dev/updates")) {
+    if (pathname.startsWith("/updates")) {
       setActiveSection("updates");
       return;
     }
-    if (pathname.startsWith("/dev/albums")) {
+    if (pathname.startsWith("/albums")) {
       setActiveSection("albums");
       return;
     }
 
     // For homepage, reset to null to allow scroll-based detection
-    if (pathname === "/dev") {
+    if (pathname === "/") {
       setActiveSection(null);
     }
   }, [pathname]);
@@ -90,10 +90,10 @@ export default function Header() {
     // Skip scroll-based detection if we're on a list page or slug page
     if (
       pathname &&
-      pathname !== "/dev" &&
-      (pathname.startsWith("/dev/events") ||
-        pathname.startsWith("/dev/updates") ||
-        pathname.startsWith("/dev/albums"))
+      pathname !== "/" &&
+      (pathname.startsWith("/events") ||
+        pathname.startsWith("/updates") ||
+        pathname.startsWith("/albums"))
     ) {
       // Clean up if we had listeners attached
       if (scrollListenersAttached.current) {
@@ -231,12 +231,12 @@ export default function Header() {
     // If we're on a list page or slug page, navigate to homepage with hash
     if (
       pathname &&
-      pathname !== "/dev" &&
-      (pathname.startsWith("/dev/events") ||
-        pathname.startsWith("/dev/updates") ||
-        pathname.startsWith("/dev/albums"))
+      pathname !== "/" &&
+      (pathname.startsWith("/events") ||
+        pathname.startsWith("/updates") ||
+        pathname.startsWith("/albums"))
     ) {
-      window.location.href = `/dev#${target}`;
+      window.location.href = `/#${target}`;
       return;
     }
 
@@ -248,7 +248,7 @@ export default function Header() {
   };
 
   // Calculate if we're on hero section for white text
-  const isLandingPage = pathname === "/dev";
+  const isLandingPage = pathname === "/";
   
   // Use state value (which is updated by scroll listener)
   // Fallback to window.scrollY if state hasn't updated yet
@@ -282,22 +282,6 @@ export default function Header() {
   // Start at 0 blur at top, reach 20px at bottom of hero
   const blurAmount = heroScrollProgress * 20;
 
-  // Debug: Log values to console
-  useEffect(() => {
-    if (isLandingPage) {
-      console.log('Header values:', {
-        scrollY,
-        currentScrollY,
-        viewportHeight,
-        heroHeight,
-        heroScrollProgress: heroScrollProgress.toFixed(3),
-        bgOpacity: bgOpacity.toFixed(3),
-        blurAmount: blurAmount.toFixed(2),
-        pathname
-      });
-    }
-  }, [scrollY, currentScrollY, viewportHeight, isLandingPage, pathname]);
-
   return (
     <>
       <motion.header
@@ -317,7 +301,7 @@ export default function Header() {
       >
         <div className="max-w-[1200px] mx-auto px-6 md:px-8 py-4 flex items-center justify-between pointer-events-auto">
           <Link
-            href="/dev"
+            href="/"
             className="text-2xl md:text-3xl font-bold uppercase tracking-wider transition-all duration-500 relative group flex items-center gap-3 cursor-pointer"
             style={{
               fontFamily: "var(--font-roboto, var(--font-family-heading, var(--font-geist-sans)))",

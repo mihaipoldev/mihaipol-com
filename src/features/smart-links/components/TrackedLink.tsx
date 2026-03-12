@@ -44,8 +44,6 @@ export default function TrackedLink({
     }
     lastClickAtRef.current = now;
 
-    console.log("TrackedLink click:", { href, externalUrl, ...debug });
-
     // Track the click (unless tracking is disabled)
     if (!disableTracking && entityId) {
       trackView("link_click", "album_link", entityId, {

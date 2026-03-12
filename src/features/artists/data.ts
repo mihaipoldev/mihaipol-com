@@ -1,7 +1,8 @@
-import { supabase } from "@/lib/supabase";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
 export async function getAllArtists() {
   try {
+    const supabase = getSupabaseBrowser();
     const { data, error } = await supabase
       .from("artists")
       .select("*")
@@ -17,6 +18,7 @@ export async function getAllArtists() {
 
 export async function getArtistById(id: string) {
   try {
+    const supabase = getSupabaseBrowser();
     const { data, error } = await supabase.from("artists").select("*").eq("id", id).single();
 
     if (error) throw error;
@@ -29,6 +31,7 @@ export async function getArtistById(id: string) {
 
 export async function getArtistBySlug(slug: string) {
   try {
+    const supabase = getSupabaseBrowser();
     const { data, error } = await supabase.from("artists").select("*").eq("slug", slug).single();
 
     if (error) throw error;

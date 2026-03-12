@@ -13,14 +13,9 @@ import { Star } from "lucide-react";
 const saveScrollPosition = () => {
   if (typeof window !== "undefined") {
     const scrollY = window.scrollY;
-    console.log("[ScrollRestore] Saving scroll position:", scrollY);
     sessionStorage.setItem("updatesPageScrollPosition", scrollY.toString());
     // Set a flag to indicate this is a navigation (not a refresh)
     sessionStorage.setItem("_isNavigation", "true");
-    console.log("[ScrollRestore] Navigation flag set, sessionStorage:", {
-      updatesPageScrollPosition: sessionStorage.getItem("updatesPageScrollPosition"),
-      _isNavigation: sessionStorage.getItem("_isNavigation"),
-    });
   }
 };
 
@@ -59,7 +54,7 @@ export default function UpdateItem({
         <Card className={cn(
           "overflow-hidden group bg-card/80 backdrop-blur"
         )}>
-        <Link href={`/dev/updates/${update.slug}`} onClick={saveScrollPosition}>
+        <Link href={`/updates/${update.slug}`} onClick={saveScrollPosition}>
           <div className="aspect-video overflow-hidden relative">
             <img
               src={imageUrl}
@@ -117,7 +112,7 @@ export default function UpdateItem({
         whileHover={{ y: -8, scale: 1.02 }}
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       >
-        <Link href={`/dev/updates/${update.slug}`} className="group h-full block" onClick={saveScrollPosition}>
+        <Link href={`/updates/${update.slug}`} className="group h-full block" onClick={saveScrollPosition}>
           <div className={cn(
             "rounded-lg transition-all duration-200 h-full flex flex-col"
           )}>
@@ -172,7 +167,7 @@ export default function UpdateItem({
   // Horizontal variant - Image on left, content on right
   if (variant === "horizontal") {
     return (
-      <Link href={`/dev/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
+      <Link href={`/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
         <Card className={cn(
           "overflow-hidden group transition-all duration-300 h-full flex gap-4 p-4"
         )}>
@@ -214,7 +209,7 @@ export default function UpdateItem({
   // Overlay variant - Text overlaid on image
   if (variant === "overlay") {
     return (
-      <Link href={`/dev/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
+      <Link href={`/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
         <div className={cn(
           "rounded-lg overflow-hidden transition-all duration-200 h-full relative"
         )}>
@@ -282,7 +277,7 @@ export default function UpdateItem({
         whileHover={{ y: -8, scale: 1.02 }}
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       >
-        <Link href={`/dev/updates/${update.slug}`} className="h-full block">
+        <Link href={`/updates/${update.slug}`} className="h-full block">
           <div className={cn(
             "rounded-lg transition-all duration-200 h-full flex flex-col"
           )}>
@@ -334,7 +329,7 @@ export default function UpdateItem({
         whileHover={{ y: -8, scale: 1.02 }}
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       >
-        <Link href={`/dev/updates/${update.slug}`} className="h-full block">
+        <Link href={`/updates/${update.slug}`} className="h-full block">
           <div className={cn(
             "rounded-lg transition-all duration-200 h-full flex flex-col"
           )}>
@@ -379,7 +374,7 @@ export default function UpdateItem({
   // Featured variant - Larger image with prominent text
   if (variant === "featured") {
     return (
-      <Link href={`/dev/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
+      <Link href={`/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
         <div className={cn(
           "rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col",
           update.is_featured && "border-2 border-primary/50 shadow-lg"
@@ -427,7 +422,7 @@ export default function UpdateItem({
   // Minimal variant - Very clean, minimal design
   if (variant === "minimal") {
     return (
-      <Link href={`/dev/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
+      <Link href={`/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
         <div className={cn(
           "rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col border border-border"
         )}>

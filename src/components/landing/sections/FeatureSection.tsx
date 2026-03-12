@@ -75,7 +75,7 @@ export default function FeatureSection({
                 <div className="flex flex-wrap gap-4">
                   <Button variant="hero" size="lg" style={{ borderRadius: "0.75rem" }} asChild>
                     <Link 
-                      href={featured ? `/dev/albums/${featured.slug}` : "/dev/albums"}
+                      href={featured ? `/albums/${featured.slug}` : "/albums"}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -91,7 +91,7 @@ export default function FeatureSection({
                       style={{ borderRadius: "0.75rem" }}
                       asChild
                     >
-                      <Link href={`/dev/albums?label=${griffithLabelSlug}`}>
+                      <Link href={`/albums?label=${griffithLabelSlug}`}>
                         More from Griffith
                         <ExternalLink className="w-4 h-4 ml-2" />
                       </Link>

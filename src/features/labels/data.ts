@@ -1,7 +1,8 @@
-import { supabase } from "@/lib/supabase";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
 export async function getAllLabels() {
   try {
+    const supabase = getSupabaseBrowser();
     const { data, error } = await supabase
       .from("labels")
       .select("*")
@@ -17,6 +18,7 @@ export async function getAllLabels() {
 
 export async function getLabelById(id: string) {
   try {
+    const supabase = getSupabaseBrowser();
     const { data, error } = await supabase.from("labels").select("*").eq("id", id).single();
 
     if (error) throw error;
@@ -29,6 +31,7 @@ export async function getLabelById(id: string) {
 
 export async function getLabelBySlug(slug: string) {
   try {
+    const supabase = getSupabaseBrowser();
     const { data, error } = await supabase.from("labels").select("*").eq("slug", slug).single();
 
     if (error) throw error;

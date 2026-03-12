@@ -107,7 +107,7 @@ export default function EventItem({ event, showPastStrikethrough }: EventItemPro
               {formatEventDate(event.date)}
             </div>
             <Link
-              href={`/dev/events/${event.slug}`}
+              href={`/events/${event.slug}`}
               className={cn(
                 "block text-sm font-medium mb-1.5 transition-colors duration-200 group-hover:text-primary",
                 isPastYesterday && "line-through"
@@ -160,7 +160,7 @@ export default function EventItem({ event, showPastStrikethrough }: EventItemPro
         </div>
         <div className={cn("col-span-4 text-sm font-medium", isPastYesterday && "line-through")}>
           <Link
-            href={`/dev/events/${event.slug}`}
+            href={`/events/${event.slug}`}
             className="transition-colors duration-200 group-hover:text-primary"
           >
             {name}

@@ -44,7 +44,7 @@ export default function UpdateCard({
   // Default variant - Vertical stack
   if (variant === "default") {
     return (
-      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
+      <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
           {image_url && (
             <div className="aspect-video bg-muted overflow-hidden rounded-lg">
@@ -73,7 +73,7 @@ export default function UpdateCard({
   // Horizontal variant - Image on left, content on right
   if (variant === "horizontal") {
     return (
-      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
+      <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex gap-4">
           {image_url && (
             <div className="w-32 h-32 flex-shrink-0 bg-muted overflow-hidden rounded-lg">
@@ -102,7 +102,7 @@ export default function UpdateCard({
   // Overlay variant - Text overlaid on image
   if (variant === "overlay") {
     return (
-      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
+      <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full relative">
           {image_url ? (
             <div className="aspect-video bg-muted overflow-hidden rounded-lg relative">
@@ -141,7 +141,7 @@ export default function UpdateCard({
   // Compact variant - Smaller, more condensed (horizontal/rectangular)
   if (variant === "compact") {
     return (
-      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-64 group", className)}>
+      <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-64 group", className)}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
           {image_url && (
             <div className="aspect-video bg-muted overflow-hidden rounded-lg">
@@ -170,7 +170,7 @@ export default function UpdateCard({
   // Compact-square variant - Smaller, more condensed (square image)
   if (variant === "compact-square") {
     return (
-      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-64 group", className)}>
+      <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-64 group", className)}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
           {image_url && (
             <div className="aspect-square bg-muted overflow-hidden rounded-lg">
@@ -199,7 +199,7 @@ export default function UpdateCard({
   // Featured variant - Larger image with prominent text
   if (variant === "featured") {
     return (
-      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-96 group", className)}>
+      <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-96 group", className)}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
           {image_url && (
             <div className="aspect-[4/3] bg-muted overflow-hidden rounded-lg">
@@ -232,7 +232,7 @@ export default function UpdateCard({
   // Minimal variant - Very clean, minimal design
   if (variant === "minimal") {
     return (
-      <Link href={`/dev/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
+      <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col border border-border">
           {image_url && (
             <div className="aspect-video bg-muted overflow-hidden">

@@ -161,7 +161,7 @@ export default function AlbumItem({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/dev/albums/${album.slug}`} target="_blank" rel="noopener noreferrer">
+      <Link href={`/albums/${album.slug}`} target="_blank" rel="noopener noreferrer">
         <div
           className={cn(
             "aspect-square overflow-hidden relative mb-4",

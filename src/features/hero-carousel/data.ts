@@ -36,29 +36,4 @@ export async function getHeroCarouselImages(): Promise<HeroCarouselImage[]> {
   }
 }
 
-/**
- * Get all hero carousel images (including inactive) - admin only
- */
-export async function getAllHeroCarouselImages(): Promise<HeroCarouselImage[]> {
-  try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
-
-    const { data, error } = await supabase
-      .from("hero_carousel_images")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      console.error("Error fetching all hero carousel images:", error);
-      return [];
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error("Error fetching all hero carousel images:", error);
-    return [];
-  }
-}
 

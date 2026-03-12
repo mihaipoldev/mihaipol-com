@@ -22,35 +22,15 @@ const TrackedExternalLink = React.forwardRef<HTMLAnchorElement, TrackedExternalL
       // Deduplicate rapid double-fires
       const now = Date.now();
       if (now - lastClickAtRef.current < 800) {
-        if (process.env.NODE_ENV === "development") {
-          console.log("TrackedExternalLink: Skipping duplicate click", {
-            eventType,
-            entityType,
-            entityId,
-          });
-        }
         return;
       }
       lastClickAtRef.current = now;
 
       // Track the click (non-blocking)
-      if (process.env.NODE_ENV === "development") {
-        console.log("TrackedExternalLink: Tracking click", {
-          eventType,
-          entityType,
-          entityId,
-          href,
-        });
-      }
-
       trackView(eventType, entityType, entityId, {
         url: href,
         ...metadata,
-      }).catch((error) => {
-        if (process.env.NODE_ENV === "development") {
-          console.error("TrackedExternalLink: Tracking error", error);
-        }
-      });
+      }).catch(() => void 0);
 
       // Let the default link behavior proceed
     };

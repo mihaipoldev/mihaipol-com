@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { getSupabaseServer } from "@/lib/supabase-ssr";
 import { getSitePreferenceNumber } from "@/features/settings/data";
 
 type FetchEventsOptions = {
@@ -13,9 +13,7 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
   const { status = "all", limit, order = "asc", includeUnpublished = false, startDate } = options;
 
   try {
-    // 🐛 DEBUG: Start timing
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
-
+    const supabase = await getSupabaseServer();
     // Select only needed columns
     let query = supabase
       .from("events")
@@ -55,15 +53,6 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
 
     const { data, error } = await query;
 
-    // 🐛 DEBUG: Log query time
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    const dataCount = data?.length || 0;
-
-    if (queryTime > 1000) {
-      console.warn(`⚠️ [DB] SLOW QUERY: events fetch took ${queryTime.toFixed(0)}ms`);
-    }
-
     if (error) throw error;
     return data || [];
   } catch (error) {
@@ -87,11 +76,6 @@ export async function getHomepageEvents(limit?: number) {
   startDate.setHours(0, 0, 0, 0); // Ensure it's at start of day
   const startDateISO = startDate.toISOString().split("T")[0];
 
-  // Debug logging
-  console.log(
-    `📅 [Events] Filtering events from ${startDateISO} onwards (${daysBack} days ago from today)`
-  );
-
   // Fetch events from specified days back onwards, ordered by date ascending
   const events = await fetchEvents({
     status: "all",
@@ -107,12 +91,6 @@ export async function getHomepageEvents(limit?: number) {
     return eventDate >= startDate;
   });
 
-  if (filteredEvents.length !== events.length) {
-    console.warn(
-      `⚠️ [Events] Filtered out ${events.length - filteredEvents.length} events that were outside the ${daysBack}-day window`
-    );
-  }
-
   return filteredEvents;
 }
 
@@ -122,8 +100,7 @@ export async function getAllEvents() {
 
 export async function getEventBySlug(slug: string) {
   try {
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
-
+    const supabase = await getSupabaseServer();
     // Query optimized for: idx_events_slug_publish_status (partial index on published)
     const { data, error } = await supabase
       .from("events")
@@ -134,9 +111,6 @@ export async function getEventBySlug(slug: string) {
       .eq("publish_status", "published")
       .single();
 
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-
     if (error) throw error;
     return data || null;
   } catch (error) {
@@ -145,85 +119,3 @@ export async function getEventBySlug(slug: string) {
   }
 }
 
-// Admin data fetching functions (returns all events including unpublished)
-export async function getAllEventsUnfiltered() {
-  try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
-
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
-
-    const { data, error } = await supabase
-      .from("events")
-      .select(
-        "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, ticket_label, tickets_url"
-      )
-      .order("date", { ascending: false });
-
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-    const dataCount = data?.length || 0;
-
-    if (queryTime > 1000) {
-      console.warn(`⚠️ [DB] SLOW QUERY: all events (unfiltered) took ${queryTime.toFixed(0)}ms`);
-    }
-
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error("Error fetching all events:", error);
-    return [];
-  }
-}
-
-export async function getEventById(id: string) {
-  try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
-
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
-
-    const { data, error } = await supabase
-      .from("events")
-      .select(
-        "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, ticket_label, tickets_url"
-      )
-      .eq("id", id)
-      .single();
-
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-
-    if (error) throw error;
-    return data || null;
-  } catch (error) {
-    console.error("Error fetching event by id:", error);
-    return null;
-  }
-}
-
-export async function getEventBySlugAdmin(slug: string) {
-  try {
-    const { getServiceSupabaseClient } = await import("@/lib/supabase/server");
-    const supabase = getServiceSupabaseClient();
-
-    const queryStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
-
-    const { data, error } = await supabase
-      .from("events")
-      .select(
-        "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, ticket_label, tickets_url"
-      )
-      .eq("slug", slug)
-      .single();
-
-    const queryTime =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - queryStartTime;
-
-    if (error) throw error;
-    return data || null;
-  } catch (error) {
-    console.error("Error fetching event by slug (admin):", error);
-    return null;
-  }
-}

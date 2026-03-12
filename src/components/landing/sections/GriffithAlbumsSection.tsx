@@ -38,7 +38,7 @@ export default function GriffithAlbumsSection({
             asChild
           >
             <Link
-              href={`/dev/albums?label=${griffithLabelSlug}`}
+              href={`/albums?label=${griffithLabelSlug}`}
               className="relative"
               onClick={() => {
                 // Store the current section before navigating

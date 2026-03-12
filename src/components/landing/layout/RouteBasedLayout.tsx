@@ -18,8 +18,7 @@ type RouteBasedLayoutProps = {
  */
 export default function RouteBasedLayout({ children, landingPagePreset = 19 }: RouteBasedLayoutProps) {
   const pathname = usePathname();
-  // Check for album smart links pages (e.g., /dev/albums/[slug] or /albums/[slug])
-  // This will work both with /dev/ prefix (current) and without (future)
+  // Check for album smart links pages (e.g., /albums/[slug])
   const isAlbumSlugPage = pathname?.match(/\/albums\/[^/]+$/) !== null;
 
   // For album smart links pages, use minimal layout

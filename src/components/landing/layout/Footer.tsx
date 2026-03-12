@@ -15,10 +15,10 @@ const socialLinks = [
 ];
 
 const sitemapLinks = [
-  { name: "Home", href: "/dev" },
-  { name: "Albums", href: "/dev/albums" },
-  { name: "Events", href: "/dev/events" },
-  { name: "Updates", href: "/dev/updates" },
+  { name: "Home", href: "/" },
+  { name: "Albums", href: "/albums" },
+  { name: "Events", href: "/events" },
+  { name: "Updates", href: "/updates" },
 ];
 
 export default function Footer() {

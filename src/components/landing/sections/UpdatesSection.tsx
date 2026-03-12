@@ -44,7 +44,7 @@ export default function UpdatesSection({
             asChild
           >
             <Link
-              href="/dev/updates"
+              href="/updates"
               className="relative"
               onClick={() => {
                 // Store the current section before navigating

@@ -45,7 +45,7 @@ export default function EventsSection({
             asChild
           >
             <Link
-              href="/dev/events"
+              href="/events"
               className="relative"
               onClick={() => {
                 // Store the current section before navigating
