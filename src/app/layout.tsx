@@ -4,8 +4,18 @@ import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/providers/QueryProvider";
 import ViewportFix from "@/components/ViewportFix";
 import { getActiveFontVariables } from "@/lib/fonts";
+import presetsJson from "@/lib/landing-page-presets-custom.json";
 
 import "./globals.css";
+
+const ACTIVE_PRESET_ID = 11;
+const preset = presetsJson.find(p => p.id === ACTIVE_PRESET_ID);
+
+function getBrandStyle() {
+  if (!preset) return {};
+  const [h, s, l] = preset.primary.trim().split(/\s+/);
+  return { "--brand-h": h, "--brand-s": s, "--brand-l": l } as React.CSSProperties;
+}
 
 export const metadata: Metadata = {
   title: {
@@ -39,7 +49,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased" suppressHydrationWarning>
+      <body className="antialiased preset-balanced" style={getBrandStyle()} suppressHydrationWarning>
         <ViewportFix />
         <QueryProvider>
           {children}

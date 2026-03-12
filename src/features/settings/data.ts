@@ -86,16 +86,6 @@ export async function getHomepageSitePreferences(): Promise<{
   updates_homepage_columns: number;
   featured_album_id: string | null;
   griffith_albums_homepage_columns: number;
-  events_section_show: boolean;
-  albums_section_show: boolean;
-  griffith_section_show: boolean;
-  feature_section_show: boolean;
-  updates_section_show: boolean;
-  events_section_order: number;
-  albums_section_order: number;
-  griffith_section_order: number;
-  feature_section_order: number;
-  updates_section_order: number;
 }> {
   try {
     const keys = [
@@ -104,16 +94,6 @@ export async function getHomepageSitePreferences(): Promise<{
       "updates_homepage_columns",
       "featured_album_id",
       "griffith_albums_homepage_columns",
-      "events_section_show",
-      "albums_section_show",
-      "griffith_section_show",
-      "feature_section_show",
-      "updates_section_show",
-      "events_section_order",
-      "albums_section_order",
-      "griffith_section_order",
-      "feature_section_order",
-      "updates_section_order",
     ];
 
     const supabase = await getSupabaseServer();
@@ -124,27 +104,15 @@ export async function getHomepageSitePreferences(): Promise<{
 
     if (error) {
       console.error("Error fetching homepage site preferences:", error);
-      // Return defaults on error
       return {
         events_show_past_strikethrough: true,
         albums_homepage_columns: 3,
         updates_homepage_columns: 3,
         featured_album_id: null,
         griffith_albums_homepage_columns: 3,
-        events_section_show: true,
-        albums_section_show: true,
-        griffith_section_show: true,
-        feature_section_show: true,
-        updates_section_show: true,
-        events_section_order: 1,
-        albums_section_order: 2,
-        griffith_section_order: 3,
-        feature_section_order: 4,
-        updates_section_order: 5,
       };
     }
 
-    // Create a map for quick lookup
     const preferencesMap = new Map<string, any>();
     if (data) {
       for (const pref of data) {
@@ -152,44 +120,28 @@ export async function getHomepageSitePreferences(): Promise<{
       }
     }
 
-    // Helper function to get value with type conversion and default
-    const getValue = <T>(
-      key: string,
-      defaultValue: T,
-      converter?: (val: any) => T
-    ): T => {
+    const getValue = <T>(key: string, defaultValue: T, converter?: (val: any) => T): T => {
       const value = preferencesMap.get(key);
-      if (value === null || value === undefined) {
-        return defaultValue;
-      }
-      if (converter) {
-        return converter(value);
-      }
+      if (value === null || value === undefined) return defaultValue;
+      if (converter) return converter(value);
       return value as T;
     };
 
-    // Convert boolean strings to booleans
     const boolConverter = (val: any): boolean => {
       if (typeof val === "boolean") return val;
       if (typeof val === "string") return val.toLowerCase() === "true";
       return false;
     };
 
-    // Convert to number
     const numConverter = (val: any): number => {
       const num = typeof val === "number" ? val : Number(val);
       return isNaN(num) ? 0 : num;
     };
 
-    // Convert string, handling empty strings and null
     const stringConverter = (val: any): string | null => {
       if (val === null || val === undefined) return null;
-      if (typeof val === "string") {
-        return val.trim() === "" ? null : val;
-      }
-      if (val === "null" || (typeof val === "object" && val === null)) {
-        return null;
-      }
+      if (typeof val === "string") return val.trim() === "" ? null : val;
+      if (val === "null" || (typeof val === "object" && val === null)) return null;
       return String(val);
     };
 
@@ -199,36 +151,15 @@ export async function getHomepageSitePreferences(): Promise<{
       updates_homepage_columns: getValue("updates_homepage_columns", 3, numConverter),
       featured_album_id: getValue("featured_album_id", null, stringConverter),
       griffith_albums_homepage_columns: getValue("griffith_albums_homepage_columns", 3, numConverter),
-      events_section_show: getValue("events_section_show", true, boolConverter),
-      albums_section_show: getValue("albums_section_show", true, boolConverter),
-      griffith_section_show: getValue("griffith_section_show", true, boolConverter),
-      feature_section_show: getValue("feature_section_show", true, boolConverter),
-      updates_section_show: getValue("updates_section_show", true, boolConverter),
-      events_section_order: getValue("events_section_order", 1, numConverter),
-      albums_section_order: getValue("albums_section_order", 2, numConverter),
-      griffith_section_order: getValue("griffith_section_order", 3, numConverter),
-      feature_section_order: getValue("feature_section_order", 4, numConverter),
-      updates_section_order: getValue("updates_section_order", 5, numConverter),
     };
   } catch (error) {
     console.error("Error fetching homepage site preferences:", error);
-    // Return defaults on error
     return {
       events_show_past_strikethrough: true,
       albums_homepage_columns: 3,
       updates_homepage_columns: 3,
       featured_album_id: null,
       griffith_albums_homepage_columns: 3,
-      events_section_show: true,
-      albums_section_show: true,
-      griffith_section_show: true,
-      feature_section_show: true,
-      updates_section_show: true,
-      events_section_order: 1,
-      albums_section_order: 2,
-      griffith_section_order: 3,
-      feature_section_order: 4,
-      updates_section_order: 5,
     };
   }
 }

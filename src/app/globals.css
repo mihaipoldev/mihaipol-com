@@ -189,12 +189,6 @@ body {
     min-height: 100%;
   }
   
-  /* Prevent body scrolling when preset-balanced class is present (admin pages) */
-  body.preset-balanced {
-    overflow: hidden !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-  }
 }
 
 @layer utilities {

@@ -7,7 +7,7 @@ const config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-josefin-sans)", "var(--font-geist-sans)", "system-ui", "sans-serif"],
+        sans: ["var(--font-nunito-sans)", "var(--font-geist-sans)", "system-ui", "sans-serif"],
       },
       borderRadius: {
         none: "0",

@@ -1,4 +1,12 @@
-import { Raleway, Nunito_Sans, Geist, Geist_Mono } from "next/font/google";
+import { Roboto, Raleway, Nunito_Sans, Geist, Geist_Mono } from "next/font/google";
+
+// Roboto - used by landing page hero/header
+export const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "900"],
+  variable: "--font-roboto",
+  display: "swap",
+});
 
 // Active pairing: Raleway + Nunito Sans
 export const raleway = Raleway({
@@ -55,7 +63,7 @@ export const activeFontPairing = {
 
 // Get only the active font variables (heading + body + mono)
 export const getActiveFontVariables = () => {
-  return `${raleway.variable} ${nunitoSans.variable} ${geistSans.variable} ${geistMono.variable}`;
+  return `${roboto.variable} ${raleway.variable} ${nunitoSans.variable} ${geistSans.variable} ${geistMono.variable}`;
 };
 
 // Alias used by admin pages — returns the same active font variables

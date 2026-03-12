@@ -26,18 +26,6 @@ type PageClientProps = {
   updatesHomepageColumns: number;
   griffithAlbums: LandingAlbum[];
   griffithAlbumsHomepageColumns: number;
-  // Section visibility
-  eventsSectionShow: boolean;
-  albumsSectionShow: boolean;
-  griffithSectionShow: boolean;
-  featureSectionShow: boolean;
-  updatesSectionShow: boolean;
-  // Section order
-  eventsSectionOrder: number;
-  albumsSectionOrder: number;
-  griffithSectionOrder: number;
-  featureSectionOrder: number;
-  updatesSectionOrder: number;
 };
 
 export default function PageClient({
@@ -53,16 +41,6 @@ export default function PageClient({
   updatesHomepageColumns,
   griffithAlbums,
   griffithAlbumsHomepageColumns,
-  eventsSectionShow,
-  albumsSectionShow,
-  griffithSectionShow,
-  featureSectionShow,
-  updatesSectionShow,
-  eventsSectionOrder,
-  albumsSectionOrder,
-  griffithSectionOrder,
-  featureSectionOrder,
-  updatesSectionOrder,
 }: PageClientProps) {
   const featured = featuredAlbum ?? albums[0] ?? null;
   const pathname = usePathname();
@@ -332,80 +310,6 @@ export default function PageClient({
     };
   }, [pathname]);
 
-  // Define sections with their visibility, order, and render functions
-  type SectionConfig = {
-    id: string;
-    order: number;
-    show: boolean;
-    render: () => React.ReactNode;
-  };
-
-  const sections: SectionConfig[] = [
-    {
-      id: "events",
-      order: eventsSectionOrder,
-      show: eventsSectionShow,
-      render: () => (
-      <EventsSection events={events} showPastStrikethrough={showPastStrikethrough} />
-      ),
-    },
-    {
-      id: "albums",
-      order: albumsSectionOrder,
-      show: albumsSectionShow,
-      render: () => (
-      <AlbumsSection
-        albums={albums}
-        fallbackImage={FALLBACK_IMAGE}
-        columns={albumsHomepageColumns as 3 | 4 | 5}
-      />
-      ),
-    },
-    {
-      id: "griffith-albums",
-      order: griffithSectionOrder,
-      show: griffithSectionShow,
-      render: () => (
-        <GriffithAlbumsSection
-          albums={griffithAlbums}
-          fallbackImage={FALLBACK_IMAGE}
-          columns={griffithAlbumsHomepageColumns as 3 | 4 | 5}
-          griffithLabelSlug={griffithLabelSlug}
-        />
-      ),
-    },
-    {
-      id: "feature",
-      order: featureSectionOrder,
-      show: featureSectionShow,
-      render: () => (
-      <FeatureSection
-        featuredAlbum={featuredAlbum}
-        fallbackImage={FALLBACK_IMAGE}
-        griffithLabelSlug={griffithLabelSlug}
-      />
-      ),
-    },
-    {
-      id: "updates",
-      order: updatesSectionOrder,
-      show: updatesSectionShow,
-      render: () => (
-      <UpdatesSection
-        updates={updates}
-        fallbackImage={FALLBACK_IMAGE}
-        variant="compact"
-        columns={updatesHomepageColumns as 3 | 4 | 5}
-      />
-      ),
-    },
-  ];
-
-  // Filter visible sections and sort by order
-  const visibleSections = sections
-    .filter((section) => section.show)
-    .sort((a, b) => a.order - b.order);
-
   return (
     <>
       <HeroSection
@@ -416,9 +320,33 @@ export default function PageClient({
         albums={albums}
       />
 
-      {visibleSections.map((section) => (
-        <React.Fragment key={section.id}>{section.render()}</React.Fragment>
-      ))}
+      <EventsSection events={events} showPastStrikethrough={showPastStrikethrough} />
+
+      <AlbumsSection
+        albums={albums}
+        fallbackImage={FALLBACK_IMAGE}
+        columns={albumsHomepageColumns as 3 | 4 | 5}
+      />
+
+      <GriffithAlbumsSection
+        albums={griffithAlbums}
+        fallbackImage={FALLBACK_IMAGE}
+        columns={griffithAlbumsHomepageColumns as 3 | 4 | 5}
+        griffithLabelSlug={griffithLabelSlug}
+      />
+
+      <FeatureSection
+        featuredAlbum={featuredAlbum}
+        fallbackImage={FALLBACK_IMAGE}
+        griffithLabelSlug={griffithLabelSlug}
+      />
+
+      <UpdatesSection
+        updates={updates}
+        fallbackImage={FALLBACK_IMAGE}
+        variant="compact"
+        columns={updatesHomepageColumns as 3 | 4 | 5}
+      />
     </>
   );
 }

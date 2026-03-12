@@ -51,7 +51,6 @@ export default async function HomePage() {
     griffithAlbum,
     griffithLabel,
     griffithAlbums,
-    heroCarouselImages,
     preferredAlbum,
   ] = await Promise.all([
     getHomepageEvents(),
@@ -60,27 +59,15 @@ export default async function HomePage() {
     getLatestAlbumByLabelId(GRIFFITH_LABEL_ID),
     getLabelById(GRIFFITH_LABEL_ID),
     getHomepageGriffithAlbums(),
-    getHeroCarouselImages(),
     // Include featured album query in parallel if ID exists
     featuredAlbumId ? getPublishedAlbumById(featuredAlbumId) : Promise.resolve(null),
   ]);
 
-  // Extract preferences from batched result
   const {
     events_show_past_strikethrough: showPastStrikethrough,
     albums_homepage_columns: albumsHomepageColumnsRaw,
     updates_homepage_columns: updatesHomepageColumnsRaw,
     griffith_albums_homepage_columns: griffithAlbumsHomepageColumnsRaw,
-    events_section_show: eventsSectionShow,
-    albums_section_show: albumsSectionShow,
-    griffith_section_show: griffithSectionShow,
-    feature_section_show: featureSectionShow,
-    updates_section_show: updatesSectionShow,
-    events_section_order: eventsSectionOrder,
-    albums_section_order: albumsSectionOrder,
-    griffith_section_order: griffithSectionOrder,
-    feature_section_order: featureSectionOrder,
-    updates_section_order: updatesSectionOrder,
   } = homepagePreferences;
 
   // Get featured album: use preference if set and valid, otherwise fallback to griffith album
@@ -103,11 +90,8 @@ export default async function HomePage() {
     | 4
     | 5;
 
-  const heroImage = "/hero images/01_BB_9497.jpg";
+  const heroImages = getHeroCarouselImages();
   const griffithLabelSlug = griffithLabel?.slug || "griffith-records";
-  
-  // Extract image URLs from carousel images
-  const heroImages = heroCarouselImages.map((img) => img.image_url);
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -129,7 +113,7 @@ export default async function HomePage() {
         albums={albums}
         updates={updates}
         featuredAlbum={featuredAlbum}
-        heroImage={heroImage}
+        heroImage={heroImages[0]}
         heroImages={heroImages}
         griffithLabelSlug={griffithLabelSlug}
         showPastStrikethrough={showPastStrikethrough}
@@ -137,18 +121,6 @@ export default async function HomePage() {
         updatesHomepageColumns={updatesHomepageColumns}
         griffithAlbums={griffithAlbums}
         griffithAlbumsHomepageColumns={griffithAlbumsHomepageColumns}
-        // Section visibility
-        eventsSectionShow={eventsSectionShow}
-        albumsSectionShow={albumsSectionShow}
-        griffithSectionShow={griffithSectionShow}
-        featureSectionShow={featureSectionShow}
-        updatesSectionShow={updatesSectionShow}
-        // Section order
-        eventsSectionOrder={eventsSectionOrder}
-        albumsSectionOrder={albumsSectionOrder}
-        griffithSectionOrder={griffithSectionOrder}
-        featureSectionOrder={featureSectionOrder}
-        updatesSectionOrder={updatesSectionOrder}
       />
     </>
   );

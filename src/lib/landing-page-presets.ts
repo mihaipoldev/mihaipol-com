@@ -49,8 +49,7 @@ export function generatePresetCSS(preset: LandingPagePreset): string {
 
   // Light mode CSS
   const lightModeCSS = `
-.preset-landing-page-${preset.id},
-body.preset-landing-page-${preset.id} {
+:root {
   --background: ${primaryHue} 40% 98%;
   --foreground: ${primaryHue} 15% 15%;
   --card: 0 0% 100%;
@@ -86,8 +85,7 @@ body.preset-landing-page-${preset.id} {
 
   // Dark mode CSS
   const darkModeCSS = `
-.dark .preset-landing-page-${preset.id},
-.dark body.preset-landing-page-${preset.id} {
+.dark {
   --background: ${primaryHue} 15% 8%;
   --foreground: ${primaryHue} 15% 95%;
   --card: ${primaryHue} 15% 10%;
