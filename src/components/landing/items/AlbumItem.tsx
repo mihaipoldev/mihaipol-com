@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { LandingAlbum } from "../types";
 
@@ -35,7 +34,6 @@ export default function AlbumItem({
       const textNode = element.firstChild;
 
       if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
-        // Fallback: use element width
         setUnderlineWidth(element.offsetWidth);
         return;
       }
@@ -46,14 +44,11 @@ export default function AlbumItem({
         return;
       }
 
-      // Method 1: Try using Range.getClientRects() which should return one rect per line
-      // Select the text node directly for more accurate line measurements
       const range = document.createRange();
       range.selectNodeContents(textNode);
       const rects = range.getClientRects();
 
       if (rects.length > 0) {
-        // Find the widest line
         let maxWidth = 0;
         for (let i = 0; i < rects.length; i++) {
           const width = rects[i].width;
@@ -62,21 +57,15 @@ export default function AlbumItem({
           }
         }
 
-        // Always use the Range API result if we got valid measurements
-        // For multiple lines, maxWidth is the widest line
-        // For single line, maxWidth is that line's width
         if (maxWidth > 0) {
           setUnderlineWidth(maxWidth);
           return;
         }
       }
 
-      // Method 2: Measure by detecting line breaks manually
-      // Get the actual width the text wraps to (parent width or element's max-content width)
       const parent = element.parentElement;
       const containerWidth = parent ? parent.offsetWidth : element.offsetWidth;
 
-      // Create a temporary element with same styles to measure
       const tempElement = document.createElement("span");
       const computedStyle = window.getComputedStyle(element);
       tempElement.style.position = "absolute";
@@ -100,7 +89,6 @@ export default function AlbumItem({
         tempElement.textContent = testLine;
         const testWidth = tempElement.offsetWidth;
 
-        // If this line would exceed the container width, measure the previous line
         if (testWidth > containerWidth && currentLine) {
           tempElement.textContent = currentLine;
           const lineWidth = tempElement.offsetWidth;
@@ -113,7 +101,6 @@ export default function AlbumItem({
         }
       }
 
-      // Measure the last line
       if (currentLine) {
         tempElement.textContent = currentLine;
         const lineWidth = tempElement.offsetWidth;
@@ -124,22 +111,18 @@ export default function AlbumItem({
 
       document.body.removeChild(tempElement);
 
-      // Use the measured max line width, or fallback to element width if measurement failed
       setUnderlineWidth(maxLineWidth > 0 ? maxLineWidth : element.offsetWidth);
     };
 
-    // Use requestAnimationFrame to ensure layout is complete
     const calculate = () => {
       requestAnimationFrame(() => {
         requestAnimationFrame(calculateUnderlineWidth);
       });
     };
 
-    // Calculate on mount and when window resizes
     calculate();
     window.addEventListener("resize", calculate);
 
-    // Use ResizeObserver to recalculate when the element size changes
     const resizeObserver = new ResizeObserver(() => {
       calculate();
     });
@@ -154,10 +137,8 @@ export default function AlbumItem({
   }, [album.title]);
 
   return (
-    <motion.div
-      className="group"
-      whileHover={{ y: -8, scale: 1.02 }}
-      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+    <div
+      className="group hover:-translate-y-2 transition-transform duration-300"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -173,12 +154,12 @@ export default function AlbumItem({
             src={album.cover_image_url ?? fallbackImage}
             alt={`${album.title} on ${album.labelName || "Independent"}`}
             className={cn(
-              "w-full h-full object-cover opacity-100 group-hover:opacity-100 transition-opacity duration-300",
+              "w-full h-full object-cover",
               "rounded-lg"
             )}
           />
           <div className="absolute bottom-3 right-3">
-            <span className="inline-flex items-center rounded-full bg-background/60 backdrop-blur-md px-3 py-1 text-xs uppercase tracking-wide text-foreground font-semibold transition-all duration-300 group-hover:bg-background/100 group-hover:shadow-sm">
+            <span className="inline-flex items-center rounded-full bg-background/60 backdrop-blur-sm px-3 py-1 text-xs uppercase tracking-wide text-foreground font-semibold transition-colors duration-300 group-hover:bg-background/100 group-hover:shadow-sm">
               {albumType}
             </span>
           </div>
@@ -187,24 +168,19 @@ export default function AlbumItem({
       <div className="text-center space-y-1">
         <h3
           ref={titleRef}
-          className="font-bold text-xl relative inline-block pb-1 group-hover:text-foreground transition-all duration-300"
+          className="font-bold text-xl relative inline-block pb-1 group-hover:text-foreground transition-colors duration-300"
         >
           {album.title}
           {underlineWidth !== null && (
-            <motion.span
-              className="absolute bottom-0 h-[1px] rounded-full bg-muted-foreground"
+            <span
+              className="absolute bottom-0 h-[1px] rounded-full bg-muted-foreground transition-[opacity,transform] duration-300"
               style={{
                 width: `${underlineWidth}px`,
                 left: "50%",
+                transform: `translateX(-50%) translateY(${isHovered ? "0" : "4px"})`,
+                opacity: isHovered ? 1 : 0,
               }}
-              initial={{ opacity: 0, y: 4, x: "-50%" }}
-              animate={{ 
-                opacity: isHovered ? 1 : 0, 
-                y: isHovered ? 0 : 4,
-                x: "-50%"
-              }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            ></motion.span>
+            />
           )}
         </h3>
         <p className="text-sm text-muted-foreground">{releaseInfo}</p>
@@ -212,6 +188,6 @@ export default function AlbumItem({
             <p className="text-xs text-muted-foreground/70 uppercase tracking-wide">{formatType}</p>
           )}
       </div>
-    </motion.div>
+    </div>
   );
 }

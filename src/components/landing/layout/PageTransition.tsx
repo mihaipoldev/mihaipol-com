@@ -1,41 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { usePathname } from "next/navigation";
-import { useRef, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 type PageTransitionProps = {
   children: ReactNode;
 };
 
 export default function PageTransition({ children }: PageTransitionProps) {
-  const pathname = usePathname();
-  const isFirstMount = useRef(true);
-  const previousPathname = useRef(pathname);
-
-  // Track if pathname changed
-  const pathnameChanged = previousPathname.current !== pathname;
-  if (pathnameChanged) {
-    previousPathname.current = pathname;
-  }
-
-  // Mark as mounted after first render
-  if (isFirstMount.current) {
-    isFirstMount.current = false;
-  }
-
   return (
-    <motion.div
-      key={pathname}
-      initial={isFirstMount.current ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{
-        duration: 0.25,
-        ease: [0.4, 0, 0.2, 1], // Custom easing for smooth transition
-      }}
-      className="flex-1"
-    >
+    <div className="flex-1">
       {children}
-    </motion.div>
+    </div>
   );
 }

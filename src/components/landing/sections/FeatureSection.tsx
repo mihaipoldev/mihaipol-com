@@ -31,7 +31,7 @@ export default function FeatureSection({
       <div className="container mx-auto px-0 md:px-8 relative">
         <ScrollReveal>
           <div className="max-w-[1200px] mx-auto">
-          <Card className="overflow-hidden shadow-card-hover border-2 border-primary/20 bg-card/80 backdrop-blur">
+          <Card className="overflow-hidden shadow-card-hover border-2 border-primary/20 bg-card">
             <div className="grid lg:grid-cols-2 gap-0">
               <div className="relative aspect-square lg:aspect-auto p-6 md:p-6 lg:p-10">
                 <img

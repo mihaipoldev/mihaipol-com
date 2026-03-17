@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { formatEventDate } from "../utils";
 import type { LandingEvent } from "../types";
 import TrackedExternalLink from "@/components/features/TrackedExternalLink";
@@ -84,15 +83,11 @@ export default function EventItem({ event, showPastStrikethrough }: EventItemPro
   const Separator = () => <span className="mx-1.5 text-base">·</span>;
 
   return (
-    <motion.div
+    <div
       className={cn(
-        "group border-b border-border/50",
+        "group border-b border-border/50 hover:translate-x-1 transition-transform duration-200",
         isPastYesterday && "opacity-60"
       )}
-      initial={{ opacity: 0, y: 20, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      whileHover={{ x: 4 }}
-      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
     >
       {/* Mobile Layout */}
       <div className="md:hidden py-4 px-4">
@@ -137,7 +132,7 @@ export default function EventItem({ event, showPastStrikethrough }: EventItemPro
                 entityType="event_link"
                 entityId={event.id}
                 metadata={{ url: event.tickets_url, event_slug: event.slug }}
-                className="text-xs text-primary hover:underline transition-all duration-200"
+                className="text-xs text-primary hover:underline transition-colors duration-200"
               >
                 {event.ticket_label || "Tickets"}
               </TrackedExternalLink>
@@ -187,7 +182,7 @@ export default function EventItem({ event, showPastStrikethrough }: EventItemPro
               entityType="event_link"
               entityId={event.id}
               metadata={{ url: event.tickets_url, event_slug: event.slug }}
-              className="text-xs text-primary hover:underline transition-all duration-200"
+              className="text-xs text-primary hover:underline transition-colors duration-200"
             >
               {event.ticket_label || "Tickets"}
             </TrackedExternalLink>
@@ -196,6 +191,6 @@ export default function EventItem({ event, showPastStrikethrough }: EventItemPro
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

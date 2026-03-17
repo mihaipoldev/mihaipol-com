@@ -60,7 +60,7 @@ export default function AlbumsFilterPopover({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-72 bg-secondary/30 backdrop-blur-md border-none shadow-lg relative overflow-hidden p-0 text-card-foreground"
+        className="w-72 bg-secondary border-none shadow-lg relative overflow-hidden p-0 text-card-foreground"
         align="end"
         sideOffset={8}
       >

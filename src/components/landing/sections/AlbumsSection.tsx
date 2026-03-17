@@ -47,7 +47,7 @@ export default function AlbumsSection({
             >
               View all releases
               <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              <span className="absolute left-0 bottom-0 w-0 h-px bg-foreground/50 group-hover:w-full transition-all duration-300 ease-out"></span>
+              <span className="absolute left-0 bottom-0 w-0 h-px bg-foreground/50 group-hover:w-full transition-[width] duration-300 ease-out"></span>
             </Link>
           </Button>
         </div>

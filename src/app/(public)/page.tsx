@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import PageClient from "@/components/landing/PageClient";
-import { getHomepageAlbums, getLatestAlbumByLabelId, getPublishedAlbumById, getHomepageGriffithAlbums } from "@/features/albums/data";
+import { getHomepageAlbums, getLatestAlbumByLabelName, getPublishedAlbumById, getHomepageGriffithAlbums } from "@/features/albums/data";
 import { getHomepageEvents } from "@/features/events/data";
 import { getHomepageUpdates } from "@/features/updates/data";
-import { getLabelById } from "@/features/labels/data";
 import { getHomepageSitePreferences } from "@/features/settings/data";
 import { getHeroCarouselImages } from "@/features/hero-carousel/data";
 
@@ -37,8 +36,6 @@ export const metadata: Metadata = {
   },
 };
 
-const GRIFFITH_LABEL_ID = "689e375f-e5eb-492c-8942-cc4723c9bc91";
-
 export default async function HomePage() {
   // Fetch preferences first to get featuredAlbumId
   const homepagePreferences = await getHomepageSitePreferences();
@@ -49,15 +46,13 @@ export default async function HomePage() {
     albums,
     updates,
     griffithAlbum,
-    griffithLabel,
     griffithAlbums,
     preferredAlbum,
   ] = await Promise.all([
     getHomepageEvents(),
     getHomepageAlbums(),
     getHomepageUpdates(),
-    getLatestAlbumByLabelId(GRIFFITH_LABEL_ID),
-    getLabelById(GRIFFITH_LABEL_ID),
+    getLatestAlbumByLabelName("Griffith Records"),
     getHomepageGriffithAlbums(),
     // Include featured album query in parallel if ID exists
     featuredAlbumId ? getPublishedAlbumById(featuredAlbumId) : Promise.resolve(null),
@@ -91,7 +86,7 @@ export default async function HomePage() {
     | 5;
 
   const heroImages = getHeroCarouselImages();
-  const griffithLabelSlug = griffithLabel?.slug || "griffith-records";
+  const griffithLabelSlug = "griffith-records";
 
   const structuredData = {
     "@context": "https://schema.org",

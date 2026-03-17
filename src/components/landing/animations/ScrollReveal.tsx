@@ -1,7 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
-import { type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 type ScrollRevealProps = {
   children: ReactNode;
@@ -10,62 +9,35 @@ type ScrollRevealProps = {
   className?: string;
 };
 
-export default function ScrollReveal({
-  children,
-  delay = 0,
-  direction = "up",
-  className,
-}: ScrollRevealProps) {
-  const shouldReduceMotion = useReducedMotion();
+export default function ScrollReveal({ children, className = "", delay = 0 }: ScrollRevealProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-  const getInitialPosition = () => {
-    if (shouldReduceMotion) {
-      return { opacity: 0 };
-    }
-    switch (direction) {
-      case "down":
-        return { y: -20, opacity: 0 };
-      case "left":
-        return { x: 20, opacity: 0 };
-      case "right":
-        return { x: -20, opacity: 0 };
-      case "up":
-      default:
-        return { y: 20, opacity: 0 };
-    }
-  };
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
 
-  const getAnimatePosition = () => {
-    if (shouldReduceMotion) {
-      return { opacity: 1 };
-    }
-    switch (direction) {
-      case "down":
-        return { y: 0, opacity: 1 };
-      case "left":
-        return { x: 0, opacity: 1 };
-      case "right":
-        return { x: 0, opacity: 1 };
-      case "up":
-      default:
-        return { y: 0, opacity: 1 };
-    }
-  };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <motion.div
-      initial={getInitialPosition()}
-      whileInView={getAnimatePosition()}
-      viewport={{ once: false, amount: 0.2, margin: "0px 0px -100px 0px" }}
-      transition={{
-        duration: 0.6,
-        delay,
-        ease: [0.4, 0, 0.2, 1],
-      }}
-      className={className}
-      style={{ willChange: "opacity, transform" }}
+    <div
+      ref={ref}
+      className={`${className} ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}
+      style={delay ? { animationDelay: `${delay}s` } : undefined}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

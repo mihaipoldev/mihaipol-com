@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 
@@ -222,33 +221,31 @@ export default function Header() {
 
   // Ease-out curve for a more natural feel
   const eased = 1 - Math.pow(1 - heroScrollProgress, 3);
-  const bgOpacity = eased * 0.92;
-  const blurAmount = eased * 16;
-  const borderOpacity = eased * 0.08;
+  const bgOpacity = eased * 0.95;
   const isCompact = currentScrollY > 60;
 
   return (
     <>
       <header
-        className="fixed top-0 left-0 right-0 z-50 pointer-events-none transition-all duration-300 ease-out"
+        className="fixed top-0 left-0 right-0 z-50 pointer-events-none transition-colors duration-300 ease-out"
         style={{
           backgroundColor: `hsl(var(--background) / ${bgOpacity})`,
-          backdropFilter: blurAmount > 0.5 ? `blur(${blurAmount}px)` : undefined,
-          WebkitBackdropFilter: blurAmount > 0.5 ? `blur(${blurAmount}px)` : undefined,
+          backdropFilter: bgOpacity > 0.1 ? 'blur(12px)' : 'none',
+          WebkitBackdropFilter: bgOpacity > 0.1 ? 'blur(12px)' : 'none',
         }}
       >
         <div
-          className={`max-w-[1200px] mx-auto px-6 md:px-8 flex items-center justify-between pointer-events-auto transition-all duration-300 ease-out ${isCompact ? 'py-3' : 'py-4'}`}
+          className={`max-w-[1200px] mx-auto px-6 md:px-8 flex items-center justify-between pointer-events-auto transition-[padding] duration-300 ease-out ${isCompact ? 'py-3' : 'py-4'}`}
         >
           <Link
             href="/"
-            className={`text-2xl md:text-3xl font-bold uppercase tracking-wider transition-all duration-500 relative group flex items-center gap-3 cursor-pointer bg-transparent ${isOnHero ? 'text-white' : ''}`}
+            className={`text-2xl md:text-3xl font-bold uppercase tracking-wider transition-colors duration-500 relative group flex items-center gap-3 cursor-pointer bg-transparent ${isOnHero ? 'text-white' : ''}`}
             style={{ fontFamily: "var(--font-roboto, var(--font-family-heading, var(--font-geist-sans)))" }}
           >
             <img
               src="/icon.svg"
               alt=""
-              className={`w-8 h-8 flex-shrink-0 transition-all duration-500 ${isOnHero ? 'brightness-0 invert' : ''}`}
+              className={`w-8 h-8 flex-shrink-0 transition-[filter] duration-500 ${isOnHero ? 'brightness-0 invert' : ''}`}
             />
             <span className={`relative z-10 block ${isOnHero ? 'text-white' : ''}`}>
               Mihai Pol
@@ -284,14 +281,12 @@ export default function Header() {
                 >
                   <span className="relative pb-1">
                     {link.label}
-                    <motion.span
-                      className="absolute left-0 right-0 -bottom-0.5 h-0.5 rounded-full bg-white/50"
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{
+                    <span
+                      className="absolute left-0 right-0 -bottom-0.5 h-0.5 rounded-full bg-white/50 transition-[opacity,transform] duration-300"
+                      style={{
                         opacity: isActive ? 1 : 0,
-                        y: isActive ? 0 : 4
+                        transform: isActive ? "translateY(0)" : "translateY(4px)",
                       }}
-                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                     />
                   </span>
                 </Button>

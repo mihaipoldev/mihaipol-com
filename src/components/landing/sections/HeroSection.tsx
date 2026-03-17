@@ -3,8 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import AnimatedBackground from "../AnimatedBackground";
 import type { LandingAlbum, LandingEvent } from "../types";
 
 type HeroSectionProps = {
@@ -69,7 +67,7 @@ export default function HeroSection({
     }
     autoAdvanceIntervalRef.current = setInterval(() => {
       handleNext();
-    }, 10000);
+    }, 20000);
   };
 
   const handleNext = () => {
@@ -83,7 +81,7 @@ export default function HeroSection({
     }
     autoAdvanceIntervalRef.current = setInterval(() => {
       handleNext();
-    }, 10000);
+    }, 20000);
   };
 
   // Save current image index to localStorage whenever it changes
@@ -96,7 +94,7 @@ export default function HeroSection({
     // Start auto-advance
     autoAdvanceIntervalRef.current = setInterval(() => {
       handleNext();
-    }, 10000); // 10 seconds
+    }, 20000); // 10 seconds
 
     // Cleanup on unmount
     return () => {
@@ -113,16 +111,13 @@ export default function HeroSection({
       const rect = sectionRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
 
-      // Calculate opacity based on how much of the hero section is still visible
-      // Start fading earlier and complete faster
       const heroBottom = rect.bottom;
-      const fadeStart = viewportHeight * 1.1; // Start fading when hero bottom is at 110% of viewport (slightly above)
-      const fadeEnd = viewportHeight * 0.7; // Fully faded when hero bottom is at 70% of viewport (smaller range = faster fade)
+      const fadeStart = viewportHeight * 1.1;
+      const fadeEnd = viewportHeight * 0.7;
 
       let opacity = 1;
 
       if (heroBottom < fadeStart) {
-        // Calculate opacity: 1 at fadeStart, 0 when heroBottom reaches fadeEnd
         const fadeRange = fadeStart - fadeEnd;
         const scrolledPast = fadeStart - heroBottom;
         opacity = Math.max(0, 1 - scrolledPast / fadeRange);
@@ -138,6 +133,7 @@ export default function HeroSection({
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
   const releaseTitle = featuredAlbum?.title ?? albums[0]?.title ?? "New Horizons";
   const releaseLabel = featuredAlbum?.labelName ?? "Independent Release";
   const releaseMeta = featuredAlbum?.release_date ?? events[0]?.date ?? new Date().toISOString();
@@ -148,20 +144,14 @@ export default function HeroSection({
 
   return (
     <section ref={sectionRef} className="relative min-h-screen w-full overflow-hidden">
-      {/* Animated background with orbs and particles */}
-      <AnimatedBackground />
-      
       {/* Full width image - glued to top with fade at bottom */}
       <div className="absolute inset-0 w-full h-full">
-        <AnimatePresence>
-          <motion.div
-            key={currentImageIndex}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-            className="absolute inset-0 w-full h-full"
+        {HERO_IMAGES.map((img, index) => (
+          <div
+            key={index}
+            className="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out"
             style={{
+              opacity: index === currentImageIndex ? 1 : 0,
               maskImage:
                 "linear-gradient(to bottom, black 0%, black 30%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0.5) 65%, rgba(0,0,0,0.2) 80%, transparent 95%)",
               WebkitMaskImage:
@@ -169,23 +159,23 @@ export default function HeroSection({
             }}
           >
             <Image
-              src={currentImage}
+              src={img}
               alt={releaseTitle}
               fill
-              priority={currentImageIndex === 0}
+              priority={index === 0}
               quality={90}
               sizes="100vw"
               className="object-cover"
-              unoptimized={currentImage.startsWith("http")}
+              unoptimized={img.startsWith("http")}
             />
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        ))}
         {/* Logo overlay - blended as texture/shadow */}
         <div className="absolute bottom-[30%] left-[10%] pointer-events-none hidden md:block">
           <img
             src="/griffithblack.svg"
             alt="Griffith Logo"
-            className="w-[400px] h-[400px] opacity-[0.08] mix-blend-overlay"
+            className="w-[400px] h-[400px] opacity-[0.08]"
             style={{
               filter: "invert(1) brightness(1.2)",
             }}
@@ -200,46 +190,26 @@ export default function HeroSection({
           {/* Text content overlay - positioned at bottom, aligned with container padding */}
           <div className="absolute bottom-12 left-0 right-0 flex items-end px-6 md:px-6 lg:px-6">
             {/* Release metadata */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            <div
               className="space-y-3 text-white max-w-xl"
               style={{ fontFamily: "var(--font-roboto, var(--font-family-heading, var(--font-geist-sans)))" }}
             >
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                className="text-xs uppercase tracking-[0.4em] text-white/80"
-              >
+              <p className="text-xs uppercase tracking-[0.4em] text-white/80">
                 {releaseLabel}
-              </motion.p>
-              <motion.h1
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4, ease: [0.4, 0, 0.2, 1] }}
-                className="text-3xl md:text-4xl font-semibold text-white"
-              >
+              </p>
+              <h1 className="text-3xl md:text-4xl font-semibold text-white">
                 {releaseTitle}
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.5, ease: [0.4, 0, 0.2, 1] }}
-                className="text-sm tracking-[0.2em] uppercase text-white/70"
-              >
+              </h1>
+              <p className="text-sm tracking-[0.2em] uppercase text-white/70">
                 {formattedMeta}
-              </motion.p>
-            </motion.div>
+              </p>
+            </div>
           </div>
 
           {/* Carousel navigation buttons - bottom right, aligned with container padding */}
-          <motion.div
-            className="absolute bottom-12 right-0 flex items-center gap-4 z-20 pr-6 md:pr-6 lg:pr-6"
-            animate={{ opacity: buttonsOpacity }}
-            transition={{ duration: 0.5 }}
-            style={{ pointerEvents: buttonsOpacity > 0 ? "auto" : "none" }}
+          <div
+            className="absolute bottom-12 right-0 flex items-center gap-4 z-20 pr-6 md:pr-6 lg:pr-6 transition-opacity duration-500"
+            style={{ opacity: buttonsOpacity, pointerEvents: buttonsOpacity > 0 ? "auto" : "none" }}
           >
             <button
               onClick={handlePrevious}
@@ -259,7 +229,7 @@ export default function HeroSection({
               <span className="hidden md:inline">NEXT</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

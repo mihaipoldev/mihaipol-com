@@ -1,6 +1,6 @@
 [
   {
-    "id": 2,
+    "id": 0,
     "name": "Cool Minimal (Slate + Blue)",
     "primary": "210 90% 55%",
     "secondary": "200 75% 50%",
@@ -8,7 +8,7 @@
     "favorite": false
   },
   {
-    "id": 10,
+    "id": 1,
     "name": "Deep Navy & Gold",
     "primary": "45 85% 56%",
     "secondary": "215 25% 32%",
@@ -16,7 +16,7 @@
     "favorite": false
   },
   {
-    "id": 11,
+    "id": 2,
     "name": "Smoke & Coral",
     "primary": "12 70% 54%",
     "secondary": "210 8% 40%",
@@ -24,7 +24,7 @@
     "favorite": true
   },
   {
-    "id": 13,
+    "id": 3,
     "name": "Glacier",
     "primary": "195 65% 50%",
     "secondary": "210 14% 40%",
@@ -32,7 +32,7 @@
     "favorite": false
   },
   {
-    "id": 17,
+    "id": 4,
     "name": "Mono Ice Minimal",
     "primary": "210 40% 35%",
     "secondary": "210 16% 55%",
@@ -40,7 +40,7 @@
     "favorite": false
   },
   {
-    "id": 18,
+    "id": 5,
     "name": "Soft Sunrise Minimal",
     "primary": "30 80% 55%",
     "secondary": "15 60% 52%",
@@ -48,7 +48,7 @@
     "favorite": false
   },
   {
-    "id": 19,
+    "id": 6,
     "name": "Deep Teal Studio",
     "primary": "180 55% 38%",
     "secondary": "200 18% 40%",
@@ -56,7 +56,7 @@
     "favorite": false
   },
   {
-    "id": 21,
+    "id": 7,
     "name": "Griffith Orange ***",
     "primary": "20 85% 56%",
     "secondary": "220 10% 32%",
@@ -64,7 +64,7 @@
     "favorite": true
   },
   {
-    "id": 31,
+    "id": 8,
     "name": "asd",
     "primary": "195 72% 67%",
     "secondary": "210 24% 16%",
@@ -72,7 +72,7 @@
     "favorite": false
   },
   {
-    "id": 33,
+    "id": 9,
     "name": "Copy of asd **",
     "primary": "178 48% 44%",
     "secondary": "215 8% 45%",
@@ -80,7 +80,7 @@
     "favorite": true
   },
   {
-    "id": 34,
+    "id": 10,
     "name": "asd",
     "primary": "178 48% 44%",
     "secondary": "213 14% 12%",
@@ -88,7 +88,7 @@
     "favorite": false
   },
   {
-    "id": 35,
+    "id": 11,
     "name": "Copy of Deep Navy & Gold",
     "primary": "200 55% 50%",
     "secondary": "215 25% 32%",
@@ -96,7 +96,7 @@
     "favorite": false
   },
   {
-    "id": 36,
+    "id": 12,
     "name": "Terracotta Whisper",
     "primary": "7 55% 47%",
     "secondary": "323 15% 22%",
@@ -104,7 +104,7 @@
     "favorite": false
   },
   {
-    "id": 37,
+    "id": 13,
     "name": "Steel Silence",
     "primary": "215 42% 43%",
     "secondary": "263 9% 18%",
@@ -112,7 +112,7 @@
     "favorite": false
   },
   {
-    "id": 38,
+    "id": 14,
     "name": "Arctic Horizon",
     "primary": "235 74% 65%",
     "secondary": "217 23% 27%",
@@ -120,7 +120,7 @@
     "favorite": true
   },
   {
-    "id": 39,
+    "id": 15,
     "name": "Indigo Glacier",
     "primary": "217 45% 49%",
     "secondary": "230 17% 28%",
@@ -128,7 +128,7 @@
     "favorite": true
   },
   {
-    "id": 40,
+    "id": 16,
     "name": "Cobalt Studio",
     "primary": "224 33% 51%",
     "secondary": "224 17% 35%",
@@ -136,7 +136,7 @@
     "favorite": true
   },
   {
-    "id": 41,
+    "id": 17,
     "name": "Aged Ceramic",
     "primary": "27 42% 54%",
     "secondary": "212 15% 22%",
@@ -144,7 +144,7 @@
     "favorite": true
   },
   {
-    "id": 42,
+    "id": 18,
     "name": "Dynamic Sparks",
     "primary": "11 100% 60%",
     "secondary": "247 31% 26%",
@@ -152,7 +152,7 @@
     "favorite": false
   },
   {
-    "id": 43,
+    "id": 19,
     "name": "Dynamic Surf",
     "primary": "198 63% 54%",
     "secondary": "203 30% 26%",
@@ -160,7 +160,7 @@
     "favorite": true
   },
   {
-    "id": 44,
+    "id": 20,
     "name": "Energetic Pulse",
     "primary": "205 100% 50%",
     "secondary": "232 66% 25%",
@@ -168,7 +168,7 @@
     "favorite": false
   },
   {
-    "id": 47,
+    "id": 21,
     "name": "Earthen Sheen",
     "primary": "11 28% 53%",
     "secondary": "36 11% 35%",
@@ -176,7 +176,7 @@
     "favorite": false
   },
   {
-    "id": 48,
+    "id": 22,
     "name": "Dynamic Shadeburst",
     "primary": "217 91% 60%",
     "secondary": "12 36% 30%",
@@ -184,7 +184,7 @@
     "favorite": false
   },
   {
-    "id": 49,
+    "id": 23,
     "name": "Sunset Alloy",
     "primary": "39 100% 45%",
     "secondary": "320 3% 23%",

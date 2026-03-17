@@ -8,7 +8,7 @@ import presetsJson from "@/lib/landing-page-presets-custom.json";
 
 import "./globals.css";
 
-const ACTIVE_PRESET_ID = 11;
+const ACTIVE_PRESET_ID = 24;
 const preset = presetsJson.find(p => p.id === ACTIVE_PRESET_ID);
 
 function getBrandStyle() {

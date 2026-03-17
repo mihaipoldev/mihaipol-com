@@ -1,5 +1,4 @@
 import { getAllAlbums } from "@/features/albums/data";
-import { getLabelBySlug } from "@/features/labels/data";
 import { getSitePreferenceNumber } from "@/features/settings/data";
 import type { LandingAlbum } from "@/components/landing/types";
 import TrackView from "@/features/smart-links/analytics/components/TrackView";
@@ -18,10 +17,13 @@ export default async function AlbumsPage({ searchParams }: AlbumsPageProps) {
   const params = await searchParams;
   const labelSlug = params.label || undefined;
 
-  // Fetch label info if filtering by label and get page columns preference
-  const [label, albums, albumsPageColumnsRaw] = await Promise.all([
-    labelSlug ? getLabelBySlug(labelSlug) : Promise.resolve(null),
-    getAllAlbums(undefined, labelSlug),
+  // Map slug to label name for filtering (griffith-records -> Griffith Records)
+  const labelName = labelSlug
+    ? labelSlug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+    : undefined;
+
+  const [albums, albumsPageColumnsRaw] = await Promise.all([
+    getAllAlbums(labelName),
     getSitePreferenceNumber("albums_page_columns", 4),
   ]);
 
@@ -66,8 +68,8 @@ export default async function AlbumsPage({ searchParams }: AlbumsPageProps) {
   // Combine: no date first, then upcoming, then past
   const sortedAlbums = [...noDateAlbums, ...upcomingAlbums, ...pastAlbums];
 
-  const pageTitle = label ? label.name : "Discography";
-  const pageDescription = label ? `Releases from ${label.name}.` : "All releases and collections.";
+  const pageTitle = labelName ?? "Discography";
+  const pageDescription = labelName ? `Releases from ${labelName}.` : "All releases and collections.";
 
   return (
     <>

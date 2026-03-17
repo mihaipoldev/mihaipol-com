@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { formatUpdateDate } from "../utils";
@@ -14,7 +13,6 @@ const saveScrollPosition = () => {
   if (typeof window !== "undefined") {
     const scrollY = window.scrollY;
     sessionStorage.setItem("updatesPageScrollPosition", scrollY.toString());
-    // Set a flag to indicate this is a navigation (not a refresh)
     sessionStorage.setItem("_isNavigation", "true");
   }
 };
@@ -45,21 +43,16 @@ export default function UpdateItem({
   // Card-badge variant - Original design with badge
   if (variant === "card-badge") {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        whileHover={{ y: -4, scale: 1.01 }}
-        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      >
+      <div className="hover:-translate-y-1 transition-transform duration-200">
         <Card className={cn(
-          "overflow-hidden group bg-card/80 backdrop-blur"
+          "overflow-hidden group bg-card"
         )}>
         <Link href={`/updates/${update.slug}`} onClick={saveScrollPosition}>
           <div className="aspect-video overflow-hidden relative">
             <img
               src={imageUrl}
               alt={update.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover "
             />
             {update.is_featured && (
               <div className="absolute top-2 right-2">
@@ -81,10 +74,10 @@ export default function UpdateItem({
             ))}
           </div>
           <div>
-            <h3 className="font-bold text-lg mb-2 relative inline-block group-hover:text-foreground transition-all duration-300">
+            <h3 className="font-bold text-lg mb-2 relative inline-block group-hover:text-foreground transition-colors duration-300">
               <span className="relative pb-1">
                 {update.title}
-                <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-all duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
+                <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-[opacity,transform] duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
               </span>
             </h3>
             {update.date && (
@@ -98,30 +91,24 @@ export default function UpdateItem({
           </div>
         </div>
       </Card>
-      </motion.div>
+      </div>
     );
   }
 
   // Default variant - Vertical stack
   if (variant === "default") {
     return (
-      <motion.div
-        className="h-full"
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        whileHover={{ y: -8, scale: 1.02 }}
-        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      >
+      <div className="h-full hover:-translate-y-2 transition-transform duration-200">
         <Link href={`/updates/${update.slug}`} className="group h-full block" onClick={saveScrollPosition}>
           <div className={cn(
-            "rounded-lg transition-all duration-200 h-full flex flex-col"
+            "rounded-lg transition-colors duration-200 h-full flex flex-col"
           )}>
             {imageUrl && (
               <div className="aspect-video bg-muted overflow-hidden rounded-lg isolate relative">
                 <img
                   src={imageUrl}
                   alt={update.title}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-cover rounded-lg "
                 />
                 {update.is_featured && (
                   <div className="absolute top-2 right-2">
@@ -143,10 +130,10 @@ export default function UpdateItem({
                   ))}
                 </div>
               )}
-              <h3 className="font-semibold text-lg mb-2 relative inline-block group-hover:text-foreground transition-all duration-300">
+              <h3 className="font-semibold text-lg mb-2 relative inline-block group-hover:text-foreground transition-colors duration-300">
                 <span className="relative pb-1">
                   {update.title}
-                  <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-all duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
+                  <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-[opacity,transform] duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
                 </span>
               </h3>
               {update.date && (
@@ -160,7 +147,7 @@ export default function UpdateItem({
             </div>
           </div>
         </Link>
-      </motion.div>
+      </div>
     );
   }
 
@@ -169,14 +156,14 @@ export default function UpdateItem({
     return (
       <Link href={`/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
         <Card className={cn(
-          "overflow-hidden group transition-all duration-300 h-full flex gap-4 p-4"
+          "overflow-hidden group transition-colors duration-300 h-full flex gap-4 p-4"
         )}>
           {imageUrl && (
             <div className="w-32 h-32 flex-shrink-0 bg-muted overflow-hidden rounded-lg relative">
               <img
                 src={imageUrl}
                 alt={update.title}
-                className="w-full h-full object-cover rounded-lg"
+                className="w-full h-full object-cover rounded-lg "
               />
               {update.is_featured && (
                 <div className="absolute top-1 right-1">
@@ -188,10 +175,10 @@ export default function UpdateItem({
             </div>
           )}
           <div className="flex-1 flex flex-col justify-center min-w-0">
-            <h3 className="font-semibold text-base mb-2 relative inline-block group-hover:text-foreground transition-all duration-300">
+            <h3 className="font-semibold text-base mb-2 relative inline-block group-hover:text-foreground transition-colors duration-300">
               <span className="relative pb-1 block line-clamp-2">
                 {update.title}
-                <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-all duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
+                <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-[opacity,transform] duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
               </span>
             </h3>
             {update.date && (
@@ -211,14 +198,14 @@ export default function UpdateItem({
     return (
       <Link href={`/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
         <div className={cn(
-          "rounded-lg overflow-hidden transition-all duration-200 h-full relative"
+          "rounded-lg overflow-hidden transition-colors duration-200 h-full relative"
         )}>
           {imageUrl ? (
             <div className="aspect-video bg-muted overflow-hidden rounded-lg relative">
               <img
                 src={imageUrl}
                 alt={update.title}
-                className="w-full h-full object-cover rounded-lg"
+                className="w-full h-full object-cover rounded-lg "
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-lg" />
               {update.is_featured && (
@@ -230,10 +217,10 @@ export default function UpdateItem({
                 </div>
               )}
               <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                <h3 className="font-semibold text-lg mb-2 relative inline-block transition-all duration-300">
+                <h3 className="font-semibold text-lg mb-2 relative inline-block transition-colors duration-300">
                   <span className="relative pb-1">
                     {update.title}
-                    <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-white transition-all duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
+                    <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-white transition-[opacity,transform] duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
                   </span>
                 </h3>
                 {update.date && (
@@ -246,10 +233,10 @@ export default function UpdateItem({
             </div>
           ) : (
             <div className="aspect-video bg-muted rounded-lg p-4 flex flex-col justify-end">
-              <h3 className="font-semibold text-lg mb-2 relative inline-block group-hover:text-foreground transition-all duration-300">
+              <h3 className="font-semibold text-lg mb-2 relative inline-block group-hover:text-foreground transition-colors duration-300">
                 <span className="relative pb-1">
                   {update.title}
-                  <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-all duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
+                  <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-[opacity,transform] duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
                 </span>
               </h3>
               {update.date && (
@@ -270,23 +257,17 @@ export default function UpdateItem({
   // Compact variant - Smaller, more condensed (horizontal/rectangular)
   if (variant === "compact") {
     return (
-      <motion.div
-        className="group h-full"
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        whileHover={{ y: -8, scale: 1.02 }}
-        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      >
+      <div className="group h-full hover:-translate-y-2 transition-transform duration-200">
         <Link href={`/updates/${update.slug}`} className="h-full block">
           <div className={cn(
-            "rounded-lg transition-all duration-200 h-full flex flex-col"
+            "rounded-lg transition-colors duration-200 h-full flex flex-col"
           )}>
             {imageUrl && (
               <div className="aspect-video bg-muted overflow-hidden rounded-lg isolate relative">
                 <img
                   src={imageUrl}
                   alt={update.title}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-cover rounded-lg "
                 />
                 {update.is_featured && (
                   <div className="absolute top-1 right-2">
@@ -298,10 +279,10 @@ export default function UpdateItem({
               </div>
             )}
             <div className="py-3 flex-1 flex flex-col px-2">
-              <h3 className="font-semibold text-sm mb-1 relative inline-block group-hover:text-foreground transition-all duration-300">
+              <h3 className="font-semibold text-sm mb-1 relative inline-block group-hover:text-foreground transition-colors duration-300">
                 <span className="relative pb-1 block line-clamp-2">
                   {update.title}
-                  <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-all duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
+                  <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-[opacity,transform] duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
                 </span>
               </h3>
               {update.date && (
@@ -315,30 +296,24 @@ export default function UpdateItem({
             </div>
           </div>
         </Link>
-      </motion.div>
+      </div>
     );
   }
 
   // Compact-square variant - Smaller, more condensed (square image)
   if (variant === "compact-square") {
     return (
-      <motion.div
-        className="group h-full"
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        whileHover={{ y: -8, scale: 1.02 }}
-        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      >
+      <div className="group h-full hover:-translate-y-2 transition-transform duration-200">
         <Link href={`/updates/${update.slug}`} className="h-full block">
           <div className={cn(
-            "rounded-lg transition-all duration-200 h-full flex flex-col"
+            "rounded-lg transition-colors duration-200 h-full flex flex-col"
           )}>
             {imageUrl && (
               <div className="aspect-square bg-muted overflow-hidden rounded-lg isolate relative">
                 <img
                   src={imageUrl}
                   alt={update.title}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-cover rounded-lg "
                 />
                 {update.is_featured && (
                   <div className="absolute top-1 right-1">
@@ -350,10 +325,10 @@ export default function UpdateItem({
               </div>
             )}
             <div className="py-3 flex-1 flex flex-col px-2">
-              <h3 className="font-semibold text-sm mb-1 relative inline-block group-hover:text-foreground transition-all duration-300">
+              <h3 className="font-semibold text-sm mb-1 relative inline-block group-hover:text-foreground transition-colors duration-300">
                 <span className="relative pb-1 block line-clamp-2">
                   {update.title}
-                  <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-all duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
+                  <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-[opacity,transform] duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
                 </span>
               </h3>
               {update.date && (
@@ -367,7 +342,7 @@ export default function UpdateItem({
             </div>
           </div>
         </Link>
-      </motion.div>
+      </div>
     );
   }
 
@@ -376,7 +351,7 @@ export default function UpdateItem({
     return (
       <Link href={`/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
         <div className={cn(
-          "rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col",
+          "rounded-lg overflow-hidden transition-colors duration-200 h-full flex flex-col",
           update.is_featured && "border-2 border-primary/50 shadow-lg"
         )}>
           {imageUrl && (
@@ -384,7 +359,7 @@ export default function UpdateItem({
               <img
                 src={imageUrl}
                 alt={update.title}
-                className="w-full h-full object-cover rounded-lg"
+                className="w-full h-full object-cover rounded-lg "
               />
               {update.is_featured && (
                 <div className="absolute top-2 right-2">
@@ -402,10 +377,10 @@ export default function UpdateItem({
                 {formatUpdateDate(update.date)}
               </p>
             )}
-            <h3 className="font-bold text-xl mb-3 relative inline-block group-hover:text-foreground transition-all duration-300">
+            <h3 className="font-bold text-xl mb-3 relative inline-block group-hover:text-foreground transition-colors duration-300">
               <span className="relative pb-1">
                 {update.title}
-                <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-all duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
+                <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-[opacity,transform] duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
               </span>
             </h3>
             {update.description && (
@@ -424,7 +399,7 @@ export default function UpdateItem({
     return (
       <Link href={`/updates/${update.slug}`} className="group h-full" onClick={saveScrollPosition}>
         <div className={cn(
-          "rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col border border-border"
+          "rounded-lg overflow-hidden transition-colors duration-200 h-full flex flex-col border border-border"
         )}>
           {imageUrl && (
             <div className="aspect-video bg-muted overflow-hidden relative">
@@ -444,10 +419,10 @@ export default function UpdateItem({
             </div>
           )}
           <div className="py-4 flex-1 flex flex-col px-4">
-            <h3 className="font-medium text-base mb-3 leading-tight relative inline-block group-hover:text-foreground transition-all duration-300">
+            <h3 className="font-medium text-base mb-3 leading-tight relative inline-block group-hover:text-foreground transition-colors duration-300">
               <span className="relative pb-1">
                 {update.title}
-                <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-all duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
+                <span className="absolute left-0 right-0 -bottom-[0px] h-[1px] rounded-full bg-muted-foreground transition-[opacity,transform] duration-300 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"></span>
               </span>
             </h3>
             {update.date && (

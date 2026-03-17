@@ -243,32 +243,11 @@ body {
   .sidebar-sparkles::before {
     top: 15%;
     left: 8%;
-    animation: sparkle 12s infinite;
   }
 
   .sidebar-sparkles::after {
     top: 55%;
     left: 12%;
-    animation: sparkle 15s infinite 4s;
-  }
-
-  @keyframes sparkle {
-    0%, 100% {
-      opacity: 0;
-      transform: scale(0) translateY(0) translateX(0);
-    }
-    15% {
-      opacity: 1;
-      transform: scale(1.5) translateY(-15px) translateX(5px);
-    }
-    30% {
-      opacity: 0.9;
-      transform: scale(2) translateY(-30px) translateX(10px);
-    }
-    45% {
-      opacity: 0;
-      transform: scale(0) translateY(-45px) translateX(15px);
-    }
   }
 
   .sparkle {
@@ -279,11 +258,6 @@ body {
     border-radius: 50%;
     pointer-events: none;
     opacity: 0;
-    box-shadow: 
-      0 0 6px hsl(var(--primary) / 0.8),
-      0 0 12px hsl(var(--primary) / 0.5),
-      0 0 18px hsl(var(--primary) / 0.3);
-    animation: sparkle 14s infinite;
   }
 }
 
@@ -695,66 +669,9 @@ body.preset-balanced div[role="menu"] {
    See src/lib/landing-page-presets-server.ts for CSS generation logic. */
 
 /* REMOVED: Hardcoded preset CSS for presets 1-22 - now generated dynamically */
-/* Floating orbs and glow effects */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) translateX(0);
-  }
-  25% {
-    transform: translateY(-20px) translateX(10px);
-  }
-  50% {
-    transform: translateY(-10px) translateX(-10px);
-  }
-  75% {
-    transform: translateY(-15px) translateX(5px);
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
-}
-
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
 
 .orb-glow {
-  filter: blur(40px);
   opacity: 0.6;
-  animation: pulse-glow 6s ease-in-out infinite;
-}
-
-.floating-element {
-  animation: float 8s ease-in-out infinite;
-}
-
-.animate-gradient-shift {
-  animation: gradient-shift 15s ease infinite;
 }
 
 @keyframes glitch-horizontal {
@@ -809,10 +726,60 @@ body.preset-balanced div[role="menu"] {
   }
 }
 
+/* Entry animations */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes hero-crossfade {
+  from { opacity: 0; transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes hero-slow-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.04); }
+}
+
+/* Orb float animations */
+@keyframes float-1 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, -30px); } }
+@keyframes float-2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-20px, 20px); } }
+@keyframes float-3 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(15px, 25px); } }
+
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+
+.animate-hero-crossfade {
+  animation: hero-crossfade 1s ease-out both;
+}
+
+.animate-hero-zoom {
+  animation: hero-slow-zoom 12s ease-out both;
+}
+
+/* Staggered delays for lists */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+.stagger-6 { animation-delay: 0.6s; }
+
 .glitch-text {
   position: relative;
   display: inline-block;
-  animation: glitch-horizontal 15s infinite;
 }
 
 .glitch-text::before,
@@ -830,8 +797,6 @@ body.preset-balanced div[role="menu"] {
   left: 2px;
   color: hsl(var(--foreground));
   clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-  animation: glitch-horizontal-strong 12s infinite;
-  animation-delay: 0.1s;
   opacity: 0.8;
 }
 
@@ -839,7 +804,5 @@ body.preset-balanced div[role="menu"] {
   left: -2px;
   color: hsl(var(--foreground));
   clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
-  animation: glitch-horizontal-strong 12s infinite;
-  animation-delay: 0.2s;
   opacity: 0.8;
 }

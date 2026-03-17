@@ -29,7 +29,7 @@ export default function Footer() {
         <img
           src="/griffithblack.svg"
           alt="Griffith Logo"
-          className="w-[200px] h-[200px] opacity-[0.06] mix-blend-overlay"
+          className="w-[200px] h-[200px] opacity-[0.06]"
           style={{
             filter: "invert(1) brightness(1.2)",
           }}
@@ -40,7 +40,7 @@ export default function Footer() {
         <img
           src="/griffithblack.svg"
           alt="Griffith Logo"
-          className="w-[300px] h-[300px] opacity-[0.06] mix-blend-overlay"
+          className="w-[300px] h-[300px] opacity-[0.06]"
           style={{
             filter: "invert(1) brightness(1.2)",
           }}
@@ -77,7 +77,7 @@ export default function Footer() {
                   className="text-foreground/80 hover:text-foreground transition-colors duration-200 text-sm relative group"
                 >
                   <span className="relative z-10">{link.name}</span>
-                  <span className="absolute bottom-0 left-0 h-px bg-foreground/50 transition-all duration-300 ease-out w-0 group-hover:w-full" />
+                  <span className="absolute bottom-0 left-0 h-px bg-foreground/50 transition-[width] duration-300 ease-out w-0 group-hover:w-full" />
                 </Link>
               ))}
             </nav>
@@ -124,12 +124,12 @@ export default function Footer() {
                     target="_blank"
                     rel="noreferrer"
                     className={cn(
-                      "transition-all duration-300 relative group py-2 text-sm font-normal text-foreground/70 hover:text-foreground",
+                      "transition-colors duration-300 relative group py-2 text-sm font-normal text-foreground/70 hover:text-foreground",
                       "md:w-auto w-full justify-center flex items-center"
                     )}
                   >
                     <span className="relative z-10">{social.name}</span>
-                    <span className="absolute bottom-0 left-0 h-px bg-foreground/50 transition-all duration-300 ease-out w-0 group-hover:w-full" />
+                    <span className="absolute bottom-0 left-0 h-px bg-foreground/50 transition-[width] duration-300 ease-out w-0 group-hover:w-full" />
                   </Link>
                 </div>
               );

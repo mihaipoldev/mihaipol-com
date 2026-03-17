@@ -9,7 +9,6 @@ import Footer from "./Footer";
 import Header from "./Header";
 
 import BackgroundOrbs from "@/components/landing/BackgroundOrbs";
-import FloatingParticles from "@/components/landing/FloatingParticles";
 
 type PageLayoutProps = {
   children: ReactNode;
@@ -139,17 +138,14 @@ export function PageLayout({ children, landingPagePreset = 19 }: PageLayoutProps
           transition: presetReady ? "opacity 0.2s ease-in" : "none",
         }}
       >
-      {/* Background Orbs - Animated glowing orbs */}
+      {/* Background Orbs - Static radial gradients */}
       <BackgroundOrbs />
-      
-      {/* Floating Particles - Small animated particles */}
-      <FloatingParticles />
-      
-      {/* Animated Background Gradient */}
+
+      {/* Static background gradient */}
       <div
         ref={gradientBgRef}
-        className="fixed inset-0 bg-gradient-sunset opacity-10 animate-gradient-shift"
-        style={{ backgroundSize: "200% 200%", zIndex: 0 }}
+        className="fixed inset-0 bg-gradient-sunset opacity-15"
+        style={{ zIndex: 0 }}
       />
 
       <Header />
