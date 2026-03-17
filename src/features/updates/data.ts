@@ -15,7 +15,8 @@ async function fetchUpdates(options: FetchUpdatesOptions = {}) {
     // Select only needed columns
     let query = supabase
       .from("updates")
-      .select("id, title, slug, date, publish_status, image_url, description, tags, is_featured, show_cover_image, embeds, external_links");
+      .select("id, title, slug, date, publish_status, image_url, description, tags, is_featured, show_cover_image, embeds, external_links")
+      .is("deleted_at", null);
 
     // Filter by publish status (matches index column order)
     // Uses: idx_updates_publish_status_date (DESC) for order="desc"
@@ -58,6 +59,7 @@ export async function getUpdateBySlug(slug: string) {
     const { data, error } = await supabase
       .from("updates")
       .select("id, title, slug, date, publish_status, image_url, description, read_more_url, tags, is_featured, show_cover_image, embeds, external_links")
+      .is("deleted_at", null)
       .eq("slug", slug)
       .eq("publish_status", "published")
       .single();

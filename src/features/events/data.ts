@@ -19,7 +19,8 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
       .from("events")
       .select(
         "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, tickets_url, ticket_label"
-      );
+      )
+      .is("deleted_at", null);
 
     // Filter by publish status first (matches index column order)
     // Uses: idx_events_publish_status_date when status="all"
@@ -107,6 +108,7 @@ export async function getEventBySlug(slug: string) {
       .select(
         "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, ticket_label, tickets_url"
       )
+      .is("deleted_at", null)
       .eq("slug", slug)
       .eq("publish_status", "published")
       .single();
