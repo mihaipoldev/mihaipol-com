@@ -24,8 +24,7 @@ export type UpdateCardProps = {
   id: string;
   slug: string;
   title: string;
-  image_url?: string | null;
-  image_media?: { id: string; url: string }[] | null;
+  image_media?: { id: string; url: string } | null;
   date?: string | null;
   description?: string | null;
   className?: string;
@@ -36,14 +35,13 @@ export default function UpdateCard({
   id,
   slug,
   title,
-  image_url,
   image_media,
   date,
   description,
   className,
   variant = "default",
 }: UpdateCardProps) {
-  const resolvedImageUrl = image_media?.[0]?.url || image_url;
+  const resolvedImageUrl = image_media?.url;
   // Default variant - Vertical stack
   if (variant === "default") {
     return (

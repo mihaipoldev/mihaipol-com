@@ -5,8 +5,7 @@ export type AlbumCardProps = {
   id: string;
   slug: string;
   title: string;
-  cover_image_url?: string | null;
-  cover_media?: { id: string; url: string }[] | null;
+  cover_media?: { id: string; url: string } | null;
   labelName?: string | null;
   release_date?: string | null;
   className?: string;
@@ -16,7 +15,6 @@ export default function AlbumCard({
   id,
   slug,
   title,
-  cover_image_url,
   cover_media,
   labelName,
   release_date,
@@ -26,9 +24,9 @@ export default function AlbumCard({
     <Link href={`/albums/${slug}`} className={cn("group", className)} target="_blank" rel="noopener noreferrer">
       <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
         <div className="aspect-square bg-muted overflow-hidden rounded-lg">
-          {(cover_media?.[0]?.url || cover_image_url) ? (
+          {cover_media?.url ? (
             <img
-              src={cover_media?.[0]?.url || cover_image_url!}
+              src={cover_media.url}
               alt={title}
               className="w-full h-full object-cover rounded-lg"
             />

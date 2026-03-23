@@ -55,10 +55,10 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
               {/* Hero Image */}
-              {(event.flyer_media?.[0]?.url || event.flyer_image_url) && (
+              {event.flyer_media?.url && (
                 <div className="relative rounded-3xl overflow-hidden shadow-card-hover">
                   <img
-                    src={event.flyer_media?.[0]?.url || event.flyer_image_url}
+                    src={event.flyer_media.url}
                     alt={event.title}
                     className="w-full h-auto object-cover"
                   />

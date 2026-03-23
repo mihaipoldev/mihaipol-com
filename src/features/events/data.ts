@@ -2,6 +2,22 @@ import { getSupabaseServer } from "@/lib/supabase-ssr";
 import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import { getSitePreferenceNumber } from "@/features/settings/data";
 
+type EventRow = {
+  id: string;
+  title: string;
+  slug: string;
+  date: string;
+  venue: string | null;
+  city: string | null;
+  country: string | null;
+  event_status: "upcoming" | "past" | "cancelled";
+  publish_status: "draft" | "scheduled" | "published" | "archived";
+  description: string | null;
+  ticket_label: string | null;
+  tickets_url: string | null;
+  flyer_media?: { id: string; url: string } | null;
+};
+
 type FetchEventsOptions = {
   status?: "upcoming" | "past" | "all";
   limit?: number;
@@ -19,7 +35,7 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
     let query = supabase
       .from("events")
       .select(
-        "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, flyer_media:media!flyer_media_id(id, url), description, tickets_url, ticket_label"
+        "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_media:media!flyer_media_id(id, url), description, tickets_url, ticket_label"
       )
       .is("deleted_at", null);
 
@@ -56,10 +72,10 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
     const { data, error } = await query;
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as unknown as EventRow[];
   } catch (error) {
     console.error("Error fetching events:", error);
-    return [];
+    return [] as EventRow[];
   }
 }
 
@@ -100,13 +116,13 @@ export async function getAllEvents() {
   return fetchEvents({ status: "all", order: "asc" });
 }
 
-export async function getEventBySlug(slug: string, includeUnpublished = false) {
+export async function getEventBySlug(slug: string, includeUnpublished = false): Promise<EventRow | null> {
   try {
     const supabase = includeUnpublished ? getServiceSupabaseClient() : await getSupabaseServer();
     let query = supabase
       .from("events")
       .select(
-        "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, flyer_media:media!flyer_media_id(id, url), description, ticket_label, tickets_url"
+        "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_media:media!flyer_media_id(id, url), description, ticket_label, tickets_url"
       )
       .is("deleted_at", null)
       .eq("slug", slug);
@@ -118,7 +134,7 @@ export async function getEventBySlug(slug: string, includeUnpublished = false) {
     const { data, error } = await query.single();
 
     if (error) throw error;
-    return data || null;
+    return (data || null) as unknown as EventRow | null;
   } catch (error) {
     console.error("Error fetching event by slug:", error);
     return null;

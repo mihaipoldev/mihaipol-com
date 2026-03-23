@@ -14,8 +14,7 @@ export type LandingAlbum = {
   id: string;
   slug: string;
   title: string;
-  cover_image_url?: string | null;
-  cover_media?: { id: string; url: string }[] | null;
+  cover_media?: { id: string; url: string } | null;
   labelName?: string | null;
   release_date?: string | null;
   catalog_number?: string | null;
@@ -31,8 +30,8 @@ export type LandingUpdate = {
   title: string;
   date?: string | null;
   description?: string | null;
-  image_url?: string | null;
-  image_media?: { id: string; url: string }[] | null;
+  image_media?: { id: string; url: string } | null;
+  read_more_url?: string | null;
   tags?: string[] | null;
   is_featured?: boolean | null;
   show_cover_image?: boolean | null;

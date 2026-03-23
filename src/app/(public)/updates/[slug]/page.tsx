@@ -26,7 +26,7 @@ export default async function UpdateDetailPage({ params, searchParams }: UpdateD
     notFound();
   }
 
-  const resolvedImageUrl = update.image_media?.[0]?.url || update.image_url;
+  const resolvedImageUrl = update.image_media?.url;
   const hasImage = !!resolvedImageUrl;
   const showImage = hasImage && update.show_cover_image !== false;
   const updateDate = update.date ? new Date(update.date) : null;

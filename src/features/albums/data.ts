@@ -13,8 +13,7 @@ type AlbumWithLabel = {
   id: string;
   title: string;
   slug: string;
-  cover_image_url: string | null;
-  cover_media?: { id: string; url: string }[] | null;
+  cover_media?: { id: string; url: string } | null;
   release_date: string | null;
   publish_status: string;
   label_name: string | null;
@@ -33,7 +32,7 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
   try {
     const supabaseClient = await getSupabaseServer();
 
-    const selectColumns = `id, title, slug, cover_image_url, cover_media:media!cover_media_id(id, url), release_date, publish_status, label_name, catalog_number, album_type, format_type, cover_shape`;
+    const selectColumns = `id, title, slug, cover_media:media!cover_media_id(id, url), release_date, publish_status, label_name, catalog_number, album_type, format_type, cover_shape`;
 
     let query = supabaseClient.from("albums").select(selectColumns).is("deleted_at", null);
 
@@ -102,7 +101,7 @@ export async function getLatestAlbumByLabelName(labelName: string) {
     const { data, error } = await supabaseClient
       .from("albums")
       .select(
-        `id, title, slug, cover_image_url, cover_media:media!cover_media_id(id, url), release_date, publish_status, label_name, catalog_number, album_type, format_type, description, cover_shape`
+        `id, title, slug, cover_media:media!cover_media_id(id, url), release_date, publish_status, label_name, catalog_number, album_type, format_type, description, cover_shape`
       )
       .is("deleted_at", null)
       .eq("label_name", labelName)
@@ -123,7 +122,7 @@ export async function getLatestAlbumByLabelName(labelName: string) {
     return {
       ...data,
       labelName: data.label_name || null,
-    } as AlbumWithLabel;
+    } as unknown as AlbumWithLabel;
   } catch (error) {
     console.error("Error fetching latest album by label name:", error);
     return null;
@@ -141,7 +140,7 @@ export async function getAlbumBySlug(slug: string, includeUnpublished = false) {
     let query = supabaseClient
       .from("albums")
       .select(
-        "id, title, slug, catalog_number, cover_image_url, cover_media:media!cover_media_id(id, url), release_date, label_name, publish_status, album_type, format_type, description, cover_shape"
+        "id, title, slug, catalog_number, cover_media:media!cover_media_id(id, url), release_date, label_name, publish_status, album_type, format_type, description, cover_shape"
       )
       .is("deleted_at", null)
       .eq("slug", slug);
@@ -170,7 +169,7 @@ export async function getPublishedAlbumById(id: string) {
     const { data, error } = await supabaseClient
       .from("albums")
       .select(
-        "id, title, slug, catalog_number, cover_image_url, cover_media:media!cover_media_id(id, url), release_date, label_name, publish_status, album_type, format_type, description, cover_shape"
+        "id, title, slug, catalog_number, cover_media:media!cover_media_id(id, url), release_date, label_name, publish_status, album_type, format_type, description, cover_shape"
       )
       .is("deleted_at", null)
       .eq("id", id)
@@ -187,7 +186,7 @@ export async function getPublishedAlbumById(id: string) {
     return {
       ...data,
       labelName: data.label_name || null,
-    } as AlbumWithLabel;
+    } as unknown as AlbumWithLabel;
   } catch (error) {
     console.error("Error fetching published album by id:", error);
     return null;
@@ -206,8 +205,8 @@ export async function getAlbumLinks(albumId: string) {
         platforms (
           id,
           name,
-          icon_url,
-          icon_horizontal_url
+          icon_media:media!icon_media_id(id, url),
+          icon_horizontal_media:media!icon_horizontal_media_id(id, url)
         )
       `
       )
@@ -269,8 +268,8 @@ export async function getAlbumWithLinksBySlug(slug: string, includeUnpublished =
           sort_order,
           platforms (
             name,
-            icon_url,
-            icon_horizontal_url
+            icon_media:media!icon_media_id(id, url),
+            icon_horizontal_media:media!icon_horizontal_media_id(id, url)
           )
         `
         )
@@ -286,8 +285,8 @@ export async function getAlbumWithLinksBySlug(slug: string, includeUnpublished =
           return {
             id: link.id,
             platformName: (platform as { name?: string } | null)?.name || "",
-            platformIconUrl: (platform as { icon_url?: string | null } | null)?.icon_url ?? null,
-            platformIconHorizontalUrl: (platform as { icon_horizontal_url?: string | null } | null)?.icon_horizontal_url ?? null,
+            platformIconUrl: (platform as unknown as { icon_media?: { url: string } | null } | null)?.icon_media?.url ?? null,
+            platformIconHorizontalUrl: (platform as unknown as { icon_horizontal_media?: { url: string } | null } | null)?.icon_horizontal_media?.url ?? null,
             ctaLabel: link.cta_label || "Play",
             url: link.url || "",
           };
@@ -297,14 +296,14 @@ export async function getAlbumWithLinksBySlug(slug: string, includeUnpublished =
       // ignore — album still renders without links
     }
 
-    const coverMedia = album.cover_media as { id: string; url: string }[] | null | undefined;
+    const coverMedia = album.cover_media as unknown as { id: string; url: string } | null | undefined;
     return {
       album: {
         id: album.id,
         title: album.title,
         slug: album.slug,
         catalog_number: album.catalog_number || null,
-        coverImageUrl: coverMedia?.[0]?.url || album.cover_image_url || null,
+        coverImageUrl: coverMedia?.url || null,
         releaseDate: album.release_date || null,
         artistName,
       },

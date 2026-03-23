@@ -1,8 +1,10 @@
 export type Platform = {
   id: string;
   name: string;
-  icon_url: string | null;
-  icon_horizontal_url?: string | null;
+  icon_media?: { id: string; url: string } | null;
+  icon_horizontal_media?: { id: string; url: string } | null;
+  icon_media_id?: string | null;
+  icon_horizontal_media_id?: string | null;
   default_cta_label: string | null;
 };
 
@@ -21,8 +23,7 @@ export type Album = {
   title: string;
   slug: string;
   catalog_number: string | null;
-  cover_image_url: string | null;
-  cover_media?: { id: string; url: string }[] | null;
+  cover_media?: { id: string; url: string } | null;
   release_date: string | null;
   label_name: string | null;
   publish_status: "draft" | "scheduled" | "published" | "archived";

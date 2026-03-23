@@ -1,6 +1,7 @@
 import { getSupabaseServer } from "@/lib/supabase-ssr";
 import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import { getSitePreferenceNumber } from "@/features/settings/data";
+import type { LandingUpdate } from "@/components/landing/types";
 
 type FetchUpdatesOptions = {
   limit?: number;
@@ -16,7 +17,7 @@ async function fetchUpdates(options: FetchUpdatesOptions = {}) {
     // Select only needed columns
     let query = supabase
       .from("updates")
-      .select("id, title, slug, date, publish_status, image_url, image_media:media!image_media_id(id, url), description, tags, is_featured, show_cover_image, embeds, external_links")
+      .select("id, title, slug, date, publish_status, image_media:media!image_media_id(id, url), description, tags, is_featured, show_cover_image, embeds, external_links")
       .is("deleted_at", null);
 
     // Filter by publish status (matches index column order)
@@ -36,10 +37,10 @@ async function fetchUpdates(options: FetchUpdatesOptions = {}) {
     const { data, error } = await query;
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as unknown as LandingUpdate[];
   } catch (error) {
     console.error("Error fetching updates:", error);
-    return [];
+    return [] as LandingUpdate[];
   }
 }
 
@@ -53,12 +54,12 @@ export async function getAllUpdates() {
   return fetchUpdates({ order: "desc" });
 }
 
-export async function getUpdateBySlug(slug: string, includeUnpublished = false) {
+export async function getUpdateBySlug(slug: string, includeUnpublished = false): Promise<LandingUpdate | null> {
   try {
     const supabase = includeUnpublished ? getServiceSupabaseClient() : await getSupabaseServer();
     let query = supabase
       .from("updates")
-      .select("id, title, slug, date, publish_status, image_url, image_media:media!image_media_id(id, url), description, read_more_url, tags, is_featured, show_cover_image, embeds, external_links")
+      .select("id, title, slug, date, publish_status, image_media:media!image_media_id(id, url), description, read_more_url, tags, is_featured, show_cover_image, embeds, external_links")
       .is("deleted_at", null)
       .eq("slug", slug);
 
@@ -69,7 +70,7 @@ export async function getUpdateBySlug(slug: string, includeUnpublished = false) 
     const { data, error } = await query.single();
 
     if (error) throw error;
-    return data || null;
+    return (data || null) as unknown as LandingUpdate | null;
   } catch (error) {
     console.error("Error fetching update by slug:", error);
     return null;
