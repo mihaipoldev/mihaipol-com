@@ -1,4 +1,5 @@
 import { getSupabaseServer } from "@/lib/supabase-ssr";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import { getSitePreferenceNumber } from "@/features/settings/data";
 
 type FetchAlbumsOptions = {
@@ -135,8 +136,7 @@ export async function getAllAlbums(labelName?: string) {
 
 export async function getAlbumBySlug(slug: string, includeUnpublished = false) {
   try {
-    // Use server client for proper RLS handling in server components
-    const supabaseClient = await getSupabaseServer();
+    const supabaseClient = includeUnpublished ? getServiceSupabaseClient() : await getSupabaseServer();
 
     let query = supabaseClient
       .from("albums")

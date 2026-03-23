@@ -1,4 +1,5 @@
 import { getSupabaseServer } from "@/lib/supabase-ssr";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import { getSitePreferenceNumber } from "@/features/settings/data";
 
 type FetchUpdatesOptions = {
@@ -54,7 +55,7 @@ export async function getAllUpdates() {
 
 export async function getUpdateBySlug(slug: string, includeUnpublished = false) {
   try {
-    const supabase = await getSupabaseServer();
+    const supabase = includeUnpublished ? getServiceSupabaseClient() : await getSupabaseServer();
     let query = supabase
       .from("updates")
       .select("id, title, slug, date, publish_status, image_url, image_media:media!image_media_id(id, url), description, read_more_url, tags, is_featured, show_cover_image, embeds, external_links")

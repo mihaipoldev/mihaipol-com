@@ -1,4 +1,5 @@
 import { getSupabaseServer } from "@/lib/supabase-ssr";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import { getSitePreferenceNumber } from "@/features/settings/data";
 
 type FetchEventsOptions = {
@@ -101,7 +102,7 @@ export async function getAllEvents() {
 
 export async function getEventBySlug(slug: string, includeUnpublished = false) {
   try {
-    const supabase = await getSupabaseServer();
+    const supabase = includeUnpublished ? getServiceSupabaseClient() : await getSupabaseServer();
     let query = supabase
       .from("events")
       .select(
