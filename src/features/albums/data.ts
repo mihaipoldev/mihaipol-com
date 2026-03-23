@@ -1,4 +1,3 @@
-import { getSupabaseServer } from "@/lib/supabase-ssr";
 import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import { getSitePreferenceNumber } from "@/features/settings/data";
 
@@ -30,7 +29,7 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
   } = options;
 
   try {
-    const supabaseClient = await getSupabaseServer();
+    const supabaseClient = getServiceSupabaseClient();
 
     const selectColumns = `id, title, slug, cover_media:media!cover_media_id(id, url), release_date, publish_status, label_name, catalog_number, album_type, format_type, cover_shape`;
 
@@ -96,7 +95,7 @@ export async function getHomepageGriffithAlbums(limit?: number) {
 
 export async function getLatestAlbumByLabelName(labelName: string) {
   try {
-    const supabaseClient = await getSupabaseServer();
+    const supabaseClient = getServiceSupabaseClient();
 
     const { data, error } = await supabaseClient
       .from("albums")
@@ -135,7 +134,7 @@ export async function getAllAlbums(labelName?: string) {
 
 export async function getAlbumBySlug(slug: string, includeUnpublished = false) {
   try {
-    const supabaseClient = includeUnpublished ? getServiceSupabaseClient() : await getSupabaseServer();
+    const supabaseClient = getServiceSupabaseClient();
 
     let query = supabaseClient
       .from("albums")
@@ -164,7 +163,7 @@ export async function getAlbumBySlug(slug: string, includeUnpublished = false) {
 
 export async function getPublishedAlbumById(id: string) {
   try {
-    const supabaseClient = await getSupabaseServer();
+    const supabaseClient = getServiceSupabaseClient();
 
     const { data, error } = await supabaseClient
       .from("albums")
@@ -195,7 +194,7 @@ export async function getPublishedAlbumById(id: string) {
 
 export async function getAlbumLinks(albumId: string) {
   try {
-    const supabase = await getSupabaseServer();
+    const supabase = getServiceSupabaseClient();
     // Query optimized for: idx_album_links_album_id_sort_order
     const { data, error } = await supabase
       .from("album_links")
@@ -237,7 +236,7 @@ export async function getAlbumLinks(albumId: string) {
 
 export async function getAlbumWithLinksBySlug(slug: string, includeUnpublished = false) {
   try {
-    const supabaseClient = await getSupabaseServer();
+    const supabaseClient = getServiceSupabaseClient();
 
     // Fetch album
     const album = await getAlbumBySlug(slug, includeUnpublished);

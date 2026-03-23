@@ -1,4 +1,3 @@
-import { getSupabaseServer } from "@/lib/supabase-ssr";
 import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import { getSitePreferenceNumber } from "@/features/settings/data";
 
@@ -30,7 +29,7 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
   const { status = "all", limit, order = "asc", includeUnpublished = false, startDate } = options;
 
   try {
-    const supabase = await getSupabaseServer();
+    const supabase = getServiceSupabaseClient();
     // Select only needed columns
     let query = supabase
       .from("events")
@@ -118,7 +117,7 @@ export async function getAllEvents() {
 
 export async function getEventBySlug(slug: string, includeUnpublished = false): Promise<EventRow | null> {
   try {
-    const supabase = includeUnpublished ? getServiceSupabaseClient() : await getSupabaseServer();
+    const supabase = getServiceSupabaseClient();
     let query = supabase
       .from("events")
       .select(

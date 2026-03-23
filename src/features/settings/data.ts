@@ -1,10 +1,10 @@
-import { getSupabaseServer } from "@/lib/supabase-ssr";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import type { LandingPagePreset } from "@/lib/landing-page-presets";
 import { getPresetById } from "@/lib/landing-page-presets-server";
 
 export async function getSitePreference(key: string): Promise<any> {
   try {
-    const supabase = await getSupabaseServer();
+    const supabase = getServiceSupabaseClient();
     const { data, error } = await supabase
       .from("site_preferences")
       .select("value")
@@ -96,7 +96,7 @@ export async function getHomepageSitePreferences(): Promise<{
       "griffith_albums_homepage_columns",
     ];
 
-    const supabase = await getSupabaseServer();
+    const supabase = getServiceSupabaseClient();
     const { data, error } = await supabase
       .from("site_preferences")
       .select("key, value")

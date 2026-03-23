@@ -1,10 +1,10 @@
 // Example usage of the server-side Supabase client
-import { getSupabaseServer } from "@/lib/supabase-ssr";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const supabase = await getSupabaseServer();
+    const supabase = getServiceSupabaseClient();
     // Simple health check: fetch one album to verify database connection
     const { data, error } = await supabase.from("albums").select("*").limit(1);
 

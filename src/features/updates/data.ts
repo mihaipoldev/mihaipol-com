@@ -1,4 +1,3 @@
-import { getSupabaseServer } from "@/lib/supabase-ssr";
 import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import { getSitePreferenceNumber } from "@/features/settings/data";
 import type { LandingUpdate } from "@/components/landing/types";
@@ -13,7 +12,7 @@ async function fetchUpdates(options: FetchUpdatesOptions = {}) {
   const { limit, order = "desc", includeUnpublished = false } = options;
 
   try {
-    const supabase = await getSupabaseServer();
+    const supabase = getServiceSupabaseClient();
     // Select only needed columns
     let query = supabase
       .from("updates")
@@ -56,7 +55,7 @@ export async function getAllUpdates() {
 
 export async function getUpdateBySlug(slug: string, includeUnpublished = false): Promise<LandingUpdate | null> {
   try {
-    const supabase = includeUnpublished ? getServiceSupabaseClient() : await getSupabaseServer();
+    const supabase = getServiceSupabaseClient();
     let query = supabase
       .from("updates")
       .select("id, title, slug, date, publish_status, image_media:media!image_media_id(id, url), description, read_more_url, tags, is_featured, show_cover_image, embeds, external_links")
