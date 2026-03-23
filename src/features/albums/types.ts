@@ -22,6 +22,7 @@ export type Album = {
   slug: string;
   catalog_number: string | null;
   cover_image_url: string | null;
+  cover_media?: { id: string; url: string }[] | null;
   release_date: string | null;
   label_name: string | null;
   publish_status: "draft" | "scheduled" | "published" | "archived";

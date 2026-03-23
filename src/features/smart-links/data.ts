@@ -23,6 +23,6 @@ export type SmartLinksPayload = {
   links: SmartLink[];
 } | null;
 
-export async function getAlbumSmartLinksBySlug(slug: string): Promise<SmartLinksPayload> {
-  return getAlbumWithLinksBySlug(slug) as Promise<SmartLinksPayload>;
+export async function getAlbumSmartLinksBySlug(slug: string, includeUnpublished = false): Promise<SmartLinksPayload> {
+  return getAlbumWithLinksBySlug(slug, includeUnpublished) as Promise<SmartLinksPayload>;
 }

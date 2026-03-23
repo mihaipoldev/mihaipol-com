@@ -18,7 +18,7 @@ async function fetchEvents(options: FetchEventsOptions = {}) {
     let query = supabase
       .from("events")
       .select(
-        "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, tickets_url, ticket_label"
+        "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, flyer_media:media!flyer_media_id(id, url), description, tickets_url, ticket_label"
       )
       .is("deleted_at", null);
 
@@ -99,19 +99,22 @@ export async function getAllEvents() {
   return fetchEvents({ status: "all", order: "asc" });
 }
 
-export async function getEventBySlug(slug: string) {
+export async function getEventBySlug(slug: string, includeUnpublished = false) {
   try {
     const supabase = await getSupabaseServer();
-    // Query optimized for: idx_events_slug_publish_status (partial index on published)
-    const { data, error } = await supabase
+    let query = supabase
       .from("events")
       .select(
-        "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, description, ticket_label, tickets_url"
+        "id, title, slug, date, venue, city, country, event_status, publish_status, flyer_image_url, flyer_media:media!flyer_media_id(id, url), description, ticket_label, tickets_url"
       )
       .is("deleted_at", null)
-      .eq("slug", slug)
-      .eq("publish_status", "published")
-      .single();
+      .eq("slug", slug);
+
+    if (!includeUnpublished) {
+      query = query.eq("publish_status", "published");
+    }
+
+    const { data, error } = await query.single();
 
     if (error) throw error;
     return data || null;

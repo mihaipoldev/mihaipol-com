@@ -12,20 +12,22 @@ import { EmbedRenderer } from "@/components/features/EmbedRenderer";
 export const dynamic = "force-dynamic";
 
 interface UpdateDetailPageProps {
-  params: Promise<{
-    slug: string;
-  }>;
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ preview?: string }>;
 }
 
-export default async function UpdateDetailPage({ params }: UpdateDetailPageProps) {
+export default async function UpdateDetailPage({ params, searchParams }: UpdateDetailPageProps) {
   const { slug } = await params;
-  const update = await getUpdateBySlug(slug);
+  const { preview } = await searchParams;
+  const isPreview = preview === process.env.PREVIEW_SECRET;
+  const update = await getUpdateBySlug(slug, isPreview);
 
   if (!update) {
     notFound();
   }
 
-  const hasImage = !!update.image_url;
+  const resolvedImageUrl = update.image_media?.[0]?.url || update.image_url;
+  const hasImage = !!resolvedImageUrl;
   const showImage = hasImage && update.show_cover_image !== false;
   const updateDate = update.date ? new Date(update.date) : null;
   const formattedDate = updateDate
@@ -54,7 +56,7 @@ export default async function UpdateDetailPage({ params }: UpdateDetailPageProps
               {showImage && (
                 <div className="relative rounded-3xl overflow-hidden shadow-card-hover aspect-square lg:col-span-1">
                   <img
-                    src={update.image_url!}
+                    src={resolvedImageUrl!}
                     alt={update.title}
                     className="w-full h-full object-cover"
                   />

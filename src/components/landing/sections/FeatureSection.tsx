@@ -35,7 +35,7 @@ export default function FeatureSection({
             <div className="grid lg:grid-cols-2 gap-0">
               <div className="relative aspect-square lg:aspect-auto p-6 md:p-6 lg:p-10">
                 <img
-                  src={featured?.cover_image_url ?? fallbackImage}
+                  src={featured?.cover_media?.[0]?.url ?? featured?.cover_image_url ?? fallbackImage}
                   alt={featured?.title ?? "Featured release"}
                   className="w-full h-full object-cover rounded-lg"
                 />

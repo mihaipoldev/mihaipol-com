@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "mihaipol-com.b-cdn.net",
       },
+      {
+        protocol: "https",
+        hostname: "evergreensystems.b-cdn.net",
+      },
     ],
   },
 };

@@ -11,14 +11,15 @@ import TrackedExternalLink from "@/components/features/TrackedExternalLink";
 export const dynamic = "force-dynamic";
 
 interface EventPageProps {
-  params: Promise<{
-    slug: string;
-  }>;
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ preview?: string }>;
 }
 
-export default async function EventPage({ params }: EventPageProps) {
+export default async function EventPage({ params, searchParams }: EventPageProps) {
   const { slug } = await params;
-  const event = await getEventBySlug(slug);
+  const { preview } = await searchParams;
+  const isPreview = preview === process.env.PREVIEW_SECRET;
+  const event = await getEventBySlug(slug, isPreview);
 
   if (!event) {
     notFound();
@@ -54,10 +55,10 @@ export default async function EventPage({ params }: EventPageProps) {
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
               {/* Hero Image */}
-              {event.flyer_image_url && (
+              {(event.flyer_media?.[0]?.url || event.flyer_image_url) && (
                 <div className="relative rounded-3xl overflow-hidden shadow-card-hover">
                   <img
-                    src={event.flyer_image_url}
+                    src={event.flyer_media?.[0]?.url || event.flyer_image_url}
                     alt={event.title}
                     className="w-full h-auto object-cover"
                   />

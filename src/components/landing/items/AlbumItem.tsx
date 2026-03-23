@@ -151,7 +151,7 @@ export default function AlbumItem({
           )}
         >
           <img
-            src={album.cover_image_url ?? fallbackImage}
+            src={album.cover_media?.[0]?.url ?? album.cover_image_url ?? fallbackImage}
             alt={`${album.title} on ${album.labelName || "Independent"}`}
             className={cn(
               "w-full h-full object-cover",

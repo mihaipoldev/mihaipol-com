@@ -38,7 +38,7 @@ export default function UpdateItem({
   fallbackImage,
   variant = "card-badge",
 }: UpdateItemProps) {
-  const imageUrl = update.image_url ?? fallbackImage;
+  const imageUrl = update.image_media?.[0]?.url ?? update.image_url ?? fallbackImage;
 
   // Card-badge variant - Original design with badge
   if (variant === "card-badge") {

@@ -9,14 +9,15 @@ import AlbumFooterWithColors from "./AlbumFooterWithColors";
 export const dynamic = "force-dynamic";
 
 interface AlbumDetailPageProps {
-  params: Promise<{
-    slug: string;
-  }>;
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ preview?: string }>;
 }
 
-export default async function AlbumDetailPage({ params }: AlbumDetailPageProps) {
+export default async function AlbumDetailPage({ params, searchParams }: AlbumDetailPageProps) {
   const { slug } = await params;
-  const data = await getAlbumSmartLinksBySlug(slug);
+  const { preview } = await searchParams;
+  const isPreview = preview === process.env.PREVIEW_SECRET;
+  const data = await getAlbumSmartLinksBySlug(slug, isPreview);
 
   if (!data) {
     notFound();

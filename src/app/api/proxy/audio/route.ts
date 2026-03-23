@@ -13,7 +13,8 @@ export async function GET(request: NextRequest) {
   }
 
   // Validate that the URL is from Bunny CDN for security
-  if (!url.startsWith("https://mihaipol-com.b-cdn.net/")) {
+  const allowedCdnDomains = ["https://mihaipol-com.b-cdn.net/", "https://evergreensystems.b-cdn.net/"];
+  if (!allowedCdnDomains.some((d) => url.startsWith(d))) {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
   }
 

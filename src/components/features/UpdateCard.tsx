@@ -25,6 +25,7 @@ export type UpdateCardProps = {
   slug: string;
   title: string;
   image_url?: string | null;
+  image_media?: { id: string; url: string }[] | null;
   date?: string | null;
   description?: string | null;
   className?: string;
@@ -36,20 +37,22 @@ export default function UpdateCard({
   slug,
   title,
   image_url,
+  image_media,
   date,
   description,
   className,
   variant = "default",
 }: UpdateCardProps) {
+  const resolvedImageUrl = image_media?.[0]?.url || image_url;
   // Default variant - Vertical stack
   if (variant === "default") {
     return (
       <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
-          {image_url && (
+          {resolvedImageUrl && (
             <div className="aspect-video bg-muted overflow-hidden rounded-lg">
               <img
-                src={image_url}
+                src={resolvedImageUrl}
                 alt={title}
                 className="w-full h-full object-cover rounded-lg"
               />
@@ -75,10 +78,10 @@ export default function UpdateCard({
     return (
       <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex gap-4">
-          {image_url && (
+          {resolvedImageUrl && (
             <div className="w-32 h-32 flex-shrink-0 bg-muted overflow-hidden rounded-lg">
               <img
-                src={image_url}
+                src={resolvedImageUrl}
                 alt={title}
                 className="w-full h-full object-cover rounded-lg"
               />
@@ -104,10 +107,10 @@ export default function UpdateCard({
     return (
       <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full relative">
-          {image_url ? (
+          {resolvedImageUrl ? (
             <div className="aspect-video bg-muted overflow-hidden rounded-lg relative">
               <img
-                src={image_url}
+                src={resolvedImageUrl}
                 alt={title}
                 className="w-full h-full object-cover rounded-lg"
               />
@@ -143,10 +146,10 @@ export default function UpdateCard({
     return (
       <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-64 group", className)}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
-          {image_url && (
+          {resolvedImageUrl && (
             <div className="aspect-video bg-muted overflow-hidden rounded-lg">
               <img
-                src={image_url}
+                src={resolvedImageUrl}
                 alt={title}
                 className="w-full h-full object-cover rounded-lg"
               />
@@ -172,10 +175,10 @@ export default function UpdateCard({
     return (
       <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-64 group", className)}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
-          {image_url && (
+          {resolvedImageUrl && (
             <div className="aspect-square bg-muted overflow-hidden rounded-lg">
               <img
-                src={image_url}
+                src={resolvedImageUrl}
                 alt={title}
                 className="w-full h-full object-cover rounded-lg"
               />
@@ -201,10 +204,10 @@ export default function UpdateCard({
     return (
       <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-96 group", className)}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col">
-          {image_url && (
+          {resolvedImageUrl && (
             <div className="aspect-[4/3] bg-muted overflow-hidden rounded-lg">
               <img
-                src={image_url}
+                src={resolvedImageUrl}
                 alt={title}
                 className="w-full h-full object-cover rounded-lg"
               />
@@ -234,10 +237,10 @@ export default function UpdateCard({
     return (
       <Link href={`/updates/${slug}`} className={cn("flex-shrink-0 w-80 group", className)} onClick={saveScrollPosition}>
         <div className="rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col border border-border">
-          {image_url && (
+          {resolvedImageUrl && (
             <div className="aspect-video bg-muted overflow-hidden">
               <img
-                src={image_url}
+                src={resolvedImageUrl}
                 alt={title}
                 className="w-full h-full object-cover group-hover:opacity-90 transition-opacity duration-300"
               />

@@ -13,6 +13,7 @@ type AlbumWithLabel = {
   title: string;
   slug: string;
   cover_image_url: string | null;
+  cover_media?: { id: string; url: string }[] | null;
   release_date: string | null;
   publish_status: string;
   label_name: string | null;
@@ -31,7 +32,7 @@ async function fetchAlbums(options: FetchAlbumsOptions = {}): Promise<AlbumWithL
   try {
     const supabaseClient = await getSupabaseServer();
 
-    const selectColumns = `id, title, slug, cover_image_url, release_date, publish_status, label_name, catalog_number, album_type, format_type, cover_shape`;
+    const selectColumns = `id, title, slug, cover_image_url, cover_media:media!cover_media_id(id, url), release_date, publish_status, label_name, catalog_number, album_type, format_type, cover_shape`;
 
     let query = supabaseClient.from("albums").select(selectColumns).is("deleted_at", null);
 
@@ -100,7 +101,7 @@ export async function getLatestAlbumByLabelName(labelName: string) {
     const { data, error } = await supabaseClient
       .from("albums")
       .select(
-        `id, title, slug, cover_image_url, release_date, publish_status, label_name, catalog_number, album_type, format_type, description, cover_shape`
+        `id, title, slug, cover_image_url, cover_media:media!cover_media_id(id, url), release_date, publish_status, label_name, catalog_number, album_type, format_type, description, cover_shape`
       )
       .is("deleted_at", null)
       .eq("label_name", labelName)
@@ -132,20 +133,24 @@ export async function getAllAlbums(labelName?: string) {
   return fetchAlbums({ order: "desc", labelName });
 }
 
-export async function getAlbumBySlug(slug: string) {
+export async function getAlbumBySlug(slug: string, includeUnpublished = false) {
   try {
     // Use server client for proper RLS handling in server components
     const supabaseClient = await getSupabaseServer();
 
-    const { data, error } = await supabaseClient
+    let query = supabaseClient
       .from("albums")
       .select(
-        "id, title, slug, catalog_number, cover_image_url, release_date, label_name, publish_status, album_type, format_type, description, cover_shape"
+        "id, title, slug, catalog_number, cover_image_url, cover_media:media!cover_media_id(id, url), release_date, label_name, publish_status, album_type, format_type, description, cover_shape"
       )
       .is("deleted_at", null)
-      .eq("slug", slug)
-      .eq("publish_status", "published")
-      .single();
+      .eq("slug", slug);
+
+    if (!includeUnpublished) {
+      query = query.eq("publish_status", "published");
+    }
+
+    const { data, error } = await query.single();
 
     if (error) {
       console.error("Error fetching album by slug:", error);
@@ -165,7 +170,7 @@ export async function getPublishedAlbumById(id: string) {
     const { data, error } = await supabaseClient
       .from("albums")
       .select(
-        "id, title, slug, catalog_number, cover_image_url, release_date, label_name, publish_status, album_type, format_type, description, cover_shape"
+        "id, title, slug, catalog_number, cover_image_url, cover_media:media!cover_media_id(id, url), release_date, label_name, publish_status, album_type, format_type, description, cover_shape"
       )
       .is("deleted_at", null)
       .eq("id", id)
@@ -231,12 +236,12 @@ export async function getAlbumLinks(albumId: string) {
   }
 }
 
-export async function getAlbumWithLinksBySlug(slug: string) {
+export async function getAlbumWithLinksBySlug(slug: string, includeUnpublished = false) {
   try {
     const supabaseClient = await getSupabaseServer();
 
     // Fetch album
-    const album = await getAlbumBySlug(slug);
+    const album = await getAlbumBySlug(slug, includeUnpublished);
     if (!album) return null;
 
     // Parse artist name from title format: "Artist - Title"
@@ -292,13 +297,14 @@ export async function getAlbumWithLinksBySlug(slug: string) {
       // ignore — album still renders without links
     }
 
+    const coverMedia = album.cover_media as { id: string; url: string }[] | null | undefined;
     return {
       album: {
         id: album.id,
         title: album.title,
         slug: album.slug,
         catalog_number: album.catalog_number || null,
-        coverImageUrl: album.cover_image_url || null,
+        coverImageUrl: coverMedia?.[0]?.url || album.cover_image_url || null,
         releaseDate: album.release_date || null,
         artistName,
       },
